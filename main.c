@@ -19,8 +19,6 @@
 
 #define PIN_BKLIGHT	(32*3+31)	/* Port 3 pin 31: Backlight PWM  */
 
-#define LD_ADDR 0x80600000
-
 void c_main(void)
 {
 	gpio_init();
