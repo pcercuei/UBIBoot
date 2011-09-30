@@ -41,7 +41,8 @@ void c_main(void)
 
 	__gpio_set_pin(PIN_BKLIGHT);
 
-	if (load_kernel(5, 127, (unsigned char*)LD_ADDR))
+	if (load_kernel(UBI_MTD_EB_START, UBI_MTD_NB_EB,
+					(unsigned char*)LD_ADDR))
 		return;
 
 	jz_flush_dcache();

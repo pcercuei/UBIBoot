@@ -53,5 +53,9 @@
 #define PAR_SIZE	9
 #define PAR_SIZE2	12
 
+/* kernel loading parameters */
+#define UBI_MTD_EB_START	5
+#define UBI_MTD_NB_EB		127
+
 #endif
 
