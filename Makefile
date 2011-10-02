@@ -1,10 +1,10 @@
 
-CROSS = mipsel-linux-
-CC = $(CROSS)gcc
-LD = $(CROSS)ld
-OBJCOPY = $(CROSS)objcopy
-OBJDUMP = $(CROSS)objdump
-NM = $(CROSS)nm
+CROSS_COMPILE ?= mipsel-linux-
+CC = $(CROSS_COMPILE)gcc
+LD = $(CROSS_COMPILE)ld
+OBJCOPY = $(CROSS_COMPILE)objcopy
+OBJDUMP = $(CROSS_COMPILE)objdump
+NM = $(CROSS_COMPILE)nm
 
 CFLAGS	:= -Wall -mips32 -O2 -fno-pic -mno-abicalls
 LDFLAGS	:= -nostdlib -EL -T target.ld
