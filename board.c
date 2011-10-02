@@ -21,6 +21,12 @@ void gpio_init(void)
 
 int nf, pllout2;
 
+#define CDIV 1
+#define HDIV 3
+#define PDIV 3
+#define MDIV 3
+#define LDIV 3
+
 /* PLL output clock = EXTAL * NF / (NR * NO)
  *
  * NF = FD + 2, NR = RD + 2
@@ -34,15 +40,14 @@ void pll_init(void)
 		7, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0,
 		9
 	};
-	int div[5] = {1, 3, 3, 3, 3}; /* divisors of I:S:P:L:M */
 
 	cfcr = CPM_CPCCR_CLKOEN |
 		CPM_CPCCR_PCS |
-		(n2FR[div[0]] << CPM_CPCCR_CDIV_BIT) | 
-		(n2FR[div[1]] << CPM_CPCCR_HDIV_BIT) | 
-		(n2FR[div[2]] << CPM_CPCCR_PDIV_BIT) |
-		(n2FR[div[3]] << CPM_CPCCR_MDIV_BIT) |
-		(n2FR[div[4]] << CPM_CPCCR_LDIV_BIT);
+		(n2FR[CDIV] << CPM_CPCCR_CDIV_BIT) |
+		(n2FR[HDIV] << CPM_CPCCR_HDIV_BIT) |
+		(n2FR[PDIV] << CPM_CPCCR_PDIV_BIT) |
+		(n2FR[MDIV] << CPM_CPCCR_MDIV_BIT) |
+		(n2FR[LDIV] << CPM_CPCCR_LDIV_BIT);
 
 	pllout2 = (cfcr & CPM_CPCCR_PCS) ? CFG_CPU_SPEED : (CFG_CPU_SPEED / 2);
 
@@ -75,10 +80,8 @@ void sdram_init(void)
 		2 << EMC_DMCR_TCL_BIT	/* CAS latency is 3 */
 	};
 
-	int div[] = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32};
-
 	cpu_clk = CFG_CPU_SPEED;
-	mem_clk = cpu_clk * div[__cpm_get_cdiv()] / div[__cpm_get_mdiv()];
+	mem_clk = cpu_clk * CDIV / MDIV;
 
 	REG_EMC_BCR = 0;	/* Disable bus release */
 	REG_EMC_RTCSR = 0;	/* Disable clock for counting */
