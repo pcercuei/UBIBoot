@@ -30,7 +30,9 @@ _start:
 	// setup stack, jump to C code
 	//----------------------------------------------------
 
-	.word 0x0
+	// This does nothing, but the JZ won't load the program
+	// if the first byte is not 0xff.
+	addiu zero,zero,0xffff
 
 	la	sp, 0x80004000
 
