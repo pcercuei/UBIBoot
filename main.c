@@ -19,6 +19,15 @@
 
 #define PIN_BKLIGHT	(32*3+31)	/* Port 3 pin 31: Backlight PWM  */
 
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+
+
+/* Kernel parameters list */
+static char *kernel_params [] = {
+	"linux",
+};
+
+
 void c_main(void)
 {
 	gpio_init();
@@ -47,6 +56,7 @@ void c_main(void)
 	jz_flush_icache();
 
 	SERIAL_PUTS("Kernel loaded. Executing...\n");
-	((void (*)(int, char**, char**, int*))LD_ADDR)(0, NULL, NULL, NULL);
+	((void (*)(int, char**, char**, int*)) LD_ADDR) (
+			ARRAY_SIZE(kernel_params), kernel_params, NULL, NULL );
 }
 
