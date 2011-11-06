@@ -10,7 +10,6 @@ CFLAGS	:= -Wall -mips32 -O2 -fno-pic -mno-abicalls
 LDFLAGS	:= -nostdlib -EL -T target.ld
 
 OBJS	= head.o board.o main.o nand.o ubi.o
-TARGET = ubiboot
 
 GC_FUNCTIONS = True
 ifdef GC_FUNCTIONS
@@ -23,6 +22,13 @@ ifdef USE_SERIAL
 	CFLAGS += -DUSE_SERIAL
 	OBJS += serial.o
 endif
+
+JZ_SLCD_PANEL ?= ili9331
+ifdef JZ_SLCD_PANEL
+	CFLAGS += -DJZ_SLCD_PANEL="\"$(JZ_SLCD_PANEL)\""
+endif
+
+TARGET = ubiboot-$(JZ_SLCD_PANEL)
 
 all: $(TARGET).bin
 
