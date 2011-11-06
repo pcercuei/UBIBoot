@@ -16,7 +16,9 @@ void gpio_init(void)
 {
 	__gpio_as_nand();
 	__gpio_as_sdram_32bit();
+#ifdef USE_SERIAL
 	__gpio_as_uart0();
+#endif
 }
 
 int nf, pllout2;
@@ -163,6 +165,7 @@ void sdram_init(void)
 	/* everything is ok now */
 }
 
+#ifdef USE_SERIAL
 void serial_setbrg(void)
 {
 	volatile u8 *uart_lcr = (volatile u8 *)(UART_BASE + OFF_LCR);
@@ -181,4 +184,5 @@ void serial_setbrg(void)
 	tmp &= ~UART_LCR_DLAB;
 	*uart_lcr = tmp;
 }
+#endif
 
