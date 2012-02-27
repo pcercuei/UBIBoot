@@ -21,7 +21,7 @@ void gpio_init(void)
 #endif
 }
 
-int nf, pllout2;
+int pllout2;
 
 #define CDIV 1
 #define HDIV 3
@@ -56,8 +56,8 @@ void pll_init(void)
 	/* Init USB Host clock, pllout2 must be n*48MHz */
 	REG_CPM_UHCCDR = pllout2 / 48000000 - 1;
 
-	nf = CFG_CPU_SPEED * 2 / CFG_EXTAL;
-	plcr1 = ((nf - 2) << CPM_CPPCR_PLLM_BIT) | /* FD */
+#define NF (CFG_CPU_SPEED * 2 / CFG_EXTAL)
+	plcr1 = ((NF - 2) << CPM_CPPCR_PLLM_BIT) | /* FD */
 		(0 << CPM_CPPCR_PLLN_BIT) |	/* RD=0, NR=2 */
 		(0 << CPM_CPPCR_PLLOD_BIT) |    /* OD=0, NO=1 */
 		(0x20 << CPM_CPPCR_PLLST_BIT) | /* PLL stable time */
@@ -70,7 +70,7 @@ void pll_init(void)
 
 void sdram_init(void)
 {
-	register unsigned int dmcr0, dmcr, sdmode, tmp, cpu_clk, mem_clk, ns;
+	register unsigned int dmcr0, dmcr, sdmode, tmp;
 
 	unsigned int cas_latency_sdmr[2] = {
 		EMC_SDMR_CAS_2,
@@ -81,9 +81,6 @@ void sdram_init(void)
 		1 << EMC_DMCR_TCL_BIT,	/* CAS latency is 2 */
 		2 << EMC_DMCR_TCL_BIT	/* CAS latency is 3 */
 	};
-
-	cpu_clk = CFG_CPU_SPEED;
-	mem_clk = cpu_clk * CDIV / MDIV;
 
 	REG_EMC_BCR = 0;	/* Disable bus release */
 	REG_EMC_RTCSR = 0;	/* Disable clock for counting */
@@ -109,21 +106,21 @@ void sdram_init(void)
 		cas_latency_dmcr[((SDRAM_CASL == 3) ? 1 : 0)];
 
 	/* SDRAM timimg */
-	ns = 1000000000 / mem_clk;
-	tmp = SDRAM_TRAS/ns;
+#define NS (1000000000 / (CFG_CPU_SPEED * CDIV / MDIV))
+	tmp = SDRAM_TRAS/NS;
 	if (tmp < 4) tmp = 4;
 	if (tmp > 11) tmp = 11;
 	dmcr |= ((tmp-4) << EMC_DMCR_TRAS_BIT);
-	tmp = SDRAM_RCD/ns;
+	tmp = SDRAM_RCD/NS;
 	if (tmp > 3) tmp = 3;
 	dmcr |= (tmp << EMC_DMCR_RCD_BIT);
-	tmp = SDRAM_TPC/ns;
+	tmp = SDRAM_TPC/NS;
 	if (tmp > 7) tmp = 7;
 	dmcr |= (tmp << EMC_DMCR_TPC_BIT);
-	tmp = SDRAM_TRWL/ns;
+	tmp = SDRAM_TRWL/NS;
 	if (tmp > 3) tmp = 3;
 	dmcr |= (tmp << EMC_DMCR_TRWL_BIT);
-	tmp = (SDRAM_TRAS + SDRAM_TPC)/ns;
+	tmp = (SDRAM_TRAS + SDRAM_TPC)/NS;
 	if (tmp > 14) tmp = 14;
 	dmcr |= (((tmp + 1) >> 1) << EMC_DMCR_TRC_BIT);
 
@@ -138,13 +135,13 @@ void sdram_init(void)
 	REG8(EMC_SDMR0|sdmode) = 0;
 
 	/* Wait for precharge, > 200us */
-	tmp = (cpu_clk / 1000000) * 1000;
+	tmp = (CFG_CPU_SPEED / 1000000) * 1000;
 	while (tmp--);
 
 	/* Stage 2. Enable auto-refresh */
 	REG_EMC_DMCR = dmcr | EMC_DMCR_RFSH;
 
-	tmp = SDRAM_TREF/ns;
+	tmp = SDRAM_TREF/NS;
 	tmp = tmp/64 + 1;
 	if (tmp > 0xff) tmp = 0xff;
 	REG_EMC_RTCOR = tmp;
@@ -152,7 +149,7 @@ void sdram_init(void)
 	REG_EMC_RTCSR = EMC_RTCSR_CKS_64;	/* Divisor is 64, CKO/64 */
 
 	/* Wait for number of auto-refresh cycles */
-	tmp = (cpu_clk / 1000000) * 1000;
+	tmp = (CFG_CPU_SPEED / 1000000) * 1000;
 	while (tmp--);
 
  	/* Stage 3. Mode Register Set */
