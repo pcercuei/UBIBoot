@@ -21,8 +21,6 @@ void gpio_init(void)
 #endif
 }
 
-int pllout2;
-
 #define CDIV 1
 #define HDIV 3
 #define PDIV 3
@@ -36,7 +34,7 @@ int pllout2;
  */
 void pll_init(void)
 {
-	register unsigned int cfcr, plcr1;
+	register unsigned int cfcr, plcr1, pllout2;
 	int n2FR[33] = {
 		0, 0, 1, 2, 3, 0, 4, 0, 5, 0, 0, 0, 6, 0, 0, 0,
 		7, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0,
