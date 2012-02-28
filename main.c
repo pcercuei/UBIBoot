@@ -33,6 +33,8 @@ static char *kernel_params [] = {
 
 void c_main(void)
 {
+	register uint32_t reg;
+
 	gpio_init();
 
 	__gpio_clear_pin(PIN_BKLIGHT);
@@ -59,6 +61,14 @@ void c_main(void)
 	jz_flush_icache();
 
 	SERIAL_PUTS("Kernel loaded. Executing...\n");
+
+	/* WP bit clear in CP0_CAUSE ($13), needed to boot dingux zImage
+	 * (original fix by BouKiCHi) */
+	 asm volatile("mfc0 %0, $13\n\t"
+				"and %0, ~(0x00400000)\n\t"
+				"mtc0 %0, $13\n\t" : "=r"(reg) :);
+
+	/* Boot the kernel */
 	((void (*)(int, char**, char**, int*)) LD_ADDR) (
 			ARRAY_SIZE(kernel_params), kernel_params, NULL, NULL );
 }
