@@ -238,7 +238,7 @@ static void __nand_read_page(uint32_t page_addr, uint8_t *dst, uint8_t *oobbuf)
 
 void nand_read_page(uint32_t page_addr, uint8_t *dst)
 {
-	uint8_t oob_buf[128];
+	uint8_t oob_buf[OOB_SIZE];
 
 	__nand_enable();
 	__nand_read_page(page_addr / PAGE_SIZE, dst, oob_buf);
@@ -247,7 +247,7 @@ void nand_read_page(uint32_t page_addr, uint8_t *dst)
 
 void nand_load(uint32_t page_addr, size_t nb, uint8_t *dst)
 {
-	uint8_t oob_buf[128];
+	uint8_t oob_buf[OOB_SIZE];
 	uint32_t page_nb = page_addr / PAGE_SIZE;
 
 	__nand_enable();
