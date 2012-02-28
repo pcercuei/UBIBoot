@@ -136,7 +136,6 @@ static void nand_read_oob(uint32_t page_addr, uint8_t *buf, size_t size)
 
 static void __nand_read_page(uint32_t page_addr, uint8_t *dst, uint8_t *oobbuf)
 {
-	uint8_t *databuf = dst, *tmpbuf;
 	size_t i, j;
 
 	/* Read oob data */
@@ -166,9 +165,6 @@ static void __nand_read_page(uint32_t page_addr, uint8_t *dst, uint8_t *oobbuf)
 	/* Wait for device ready */
 	__nand_dev_ready();
 
-	/* Read page data */
-	tmpbuf = databuf;
-
 	for (i = 0; i < PAGE_SIZE / ECC_BLOCK; i++) {
 		volatile unsigned char *paraddr = (volatile unsigned char *)EMC_NFPAR0;
 		unsigned int stat;
@@ -178,7 +174,7 @@ static void __nand_read_page(uint32_t page_addr, uint8_t *dst, uint8_t *oobbuf)
 		__nand_ecc_rs_decoding();
 
 		/* Read data */
-		nand_read_buf((void *)tmpbuf, ECC_BLOCK);
+		nand_read_buf((void *)dst, ECC_BLOCK);
 
 		/* Set PAR values */
 		for (j = 0; j < PAR_SIZE; j++) {
@@ -213,22 +209,22 @@ static void __nand_read_page(uint32_t page_addr, uint8_t *dst, uint8_t *oobbuf)
 				case 4:
 					index = (REG_EMC_NFERR3 & EMC_NFERR_INDEX_MASK) >> EMC_NFERR_INDEX_BIT;
 					mask = (REG_EMC_NFERR3 & EMC_NFERR_MASK_MASK) >> EMC_NFERR_MASK_BIT;
-					rs_correct(tmpbuf, index, mask);
+					rs_correct(dst, index, mask);
 					/* FALL-THROUGH */
 				case 3:
 					index = (REG_EMC_NFERR2 & EMC_NFERR_INDEX_MASK) >> EMC_NFERR_INDEX_BIT;
 					mask = (REG_EMC_NFERR2 & EMC_NFERR_MASK_MASK) >> EMC_NFERR_MASK_BIT;
-					rs_correct(tmpbuf, index, mask);
+					rs_correct(dst, index, mask);
 					/* FALL-THROUGH */
 				case 2:
 					index = (REG_EMC_NFERR1 & EMC_NFERR_INDEX_MASK) >> EMC_NFERR_INDEX_BIT;
 					mask = (REG_EMC_NFERR1 & EMC_NFERR_MASK_MASK) >> EMC_NFERR_MASK_BIT;
-					rs_correct(tmpbuf, index, mask);
+					rs_correct(dst, index, mask);
 					/* FALL-THROUGH */
 				case 1:
 					index = (REG_EMC_NFERR0 & EMC_NFERR_INDEX_MASK) >> EMC_NFERR_INDEX_BIT;
 					mask = (REG_EMC_NFERR0 & EMC_NFERR_MASK_MASK) >> EMC_NFERR_MASK_BIT;
-					rs_correct(tmpbuf, index, mask);
+					rs_correct(dst, index, mask);
 					break;
 				default:
 					break;
@@ -236,7 +232,7 @@ static void __nand_read_page(uint32_t page_addr, uint8_t *dst, uint8_t *oobbuf)
 			}
 		}
 
-		tmpbuf += ECC_BLOCK;
+		dst += ECC_BLOCK;
 	}
 }
 
