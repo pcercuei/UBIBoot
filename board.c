@@ -66,9 +66,15 @@ void pll_init(void)
 	REG_CPM_CPPCR = plcr1;
 }
 
+static void sdram_delay(unsigned int i)
+{
+	while (--i)
+		 __asm__ __volatile__("");
+}
+
 void sdram_init(void)
 {
-	register unsigned int dmcr0, dmcr, sdmode, tmp;
+	unsigned int dmcr0, dmcr, sdmode, tmp;
 
 	unsigned int cas_latency_sdmr[2] = {
 		EMC_SDMR_CAS_2,
@@ -134,7 +140,7 @@ void sdram_init(void)
 
 	/* Wait for precharge, > 200us */
 	tmp = (CFG_CPU_SPEED / 1000000) * 1000;
-	while (tmp--);
+	sdram_delay(tmp);
 
 	/* Stage 2. Enable auto-refresh */
 	REG_EMC_DMCR = dmcr | EMC_DMCR_RFSH;
@@ -148,7 +154,7 @@ void sdram_init(void)
 
 	/* Wait for number of auto-refresh cycles */
 	tmp = (CFG_CPU_SPEED / 1000000) * 1000;
-	while (tmp--);
+	sdram_delay(tmp);
 
  	/* Stage 3. Mode Register Set */
 	REG_EMC_DMCR = dmcr0 | EMC_DMCR_RFSH | EMC_DMCR_MRSET;
