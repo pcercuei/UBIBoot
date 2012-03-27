@@ -16,8 +16,11 @@
 #include "nand.h"
 #include "serial.h"
 #include "ubi.h"
+#include "mmc.h"
+#include "fat.h"
 
 #define PIN_BKLIGHT	(32*3+31)	/* Port 3 pin 31: Backlight PWM  */
+#define PIN_X (32*3 + 19)	/* Port 3 pin 19: X button */
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
@@ -34,11 +37,13 @@ static char *kernel_params [] = {
 void c_main(void)
 {
 	register uint32_t reg;
+	int boot_from_sd = 0;
 
 	gpio_init();
 
 	__gpio_clear_pin(PIN_BKLIGHT);
 	__gpio_as_output(PIN_BKLIGHT);
+	__gpio_as_input(PIN_X);
 
 
 #ifdef USE_SERIAL
@@ -47,14 +52,24 @@ void c_main(void)
 
 	pll_init();
 	sdram_init();
-	nand_init();
 
 	SERIAL_PUTS("UBIBoot by Paul Cercueil <paul@crapouillou.net>\n");
-
 	__gpio_set_pin(PIN_BKLIGHT);
 
-	if (ubi_load_kernel((unsigned char *) LD_ADDR))
-		return;
+	if (!__gpio_get_pin(PIN_X)) {
+		if (mmc_init() || mmc_load_kernel((unsigned char *) LD_ADDR))
+			SERIAL_PUTS("Unable to boot from SD. Falling back to NAND.\n");
+		else
+			boot_from_sd = 1;
+	}
+
+	if (!boot_from_sd) {
+		nand_init();
+		if (ubi_load_kernel((unsigned char *) LD_ADDR)) {
+			SERIAL_PUTS("Unable to boot from NAND.\n");
+			return;
+		}
+	}
 
 	jz_flush_dcache();
 	jz_flush_icache();
