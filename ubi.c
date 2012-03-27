@@ -16,7 +16,8 @@
 
 #define UBI_VOL_TABLE_ID 0x7fffefff
 
-int load_kernel(uint32_t eb_start, uint32_t count, unsigned char *ld_addr)
+static int load_kernel(uint32_t eb_start, uint32_t count,
+			unsigned char *ld_addr)
 {
 	struct ubi_ec_hdr ec_hdr;
 	struct ubi_vid_hdr vid_hdr;
@@ -96,4 +97,9 @@ int load_kernel(uint32_t eb_start, uint32_t count, unsigned char *ld_addr)
 	}
 
 	return 0;
+}
+
+int ubi_load_kernel(unsigned char *ld_addr)
+{
+	return load_kernel(UBI_MTD_EB_START, UBI_MTD_NB_EB, ld_addr);
 }

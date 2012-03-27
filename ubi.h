@@ -62,7 +62,7 @@ struct EraseBlock {
 	SLIST_ENTRY(EraseBlock) next;
 };
 
-int load_kernel(uint32_t eb_start, uint32_t count, unsigned char *ld_addr);
+int ubi_load_kernel(unsigned char *ld_addr);
 
 #endif /* UBI_H */
 

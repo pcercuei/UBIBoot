@@ -53,8 +53,7 @@ void c_main(void)
 
 	__gpio_set_pin(PIN_BKLIGHT);
 
-	if (load_kernel(UBI_MTD_EB_START, UBI_MTD_NB_EB,
-					(unsigned char*)LD_ADDR))
+	if (ubi_load_kernel((unsigned char *) LD_ADDR))
 		return;
 
 	jz_flush_dcache();
