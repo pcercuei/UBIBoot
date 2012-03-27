@@ -50,5 +50,5 @@ map: $(TARGET).elf
 	$(NM) -n $< > System.map
 
 clean:
-	rm -fr *.o *.elf *.bin *.dump *.map
+	rm -f $(OBJS) $(TARGET).elf $(TARGET).bin map.dump map.map System.map
 
