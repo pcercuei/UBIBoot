@@ -57,6 +57,7 @@
 #define UBI_MTD_EB_START	5
 #define UBI_MTD_NB_EB		127
 #define UBI_NB_VOLUMES		8
+#define UBI_KERNEL_VOLUME	"kernel"
 
 #define LD_ADDR				0x80600000
 

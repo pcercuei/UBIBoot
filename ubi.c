@@ -15,7 +15,6 @@
 #include "config.h"
 
 #define UBI_VOL_TABLE_ID 0x7fffefff
-#define KERNEL_PARTITION "kernel"
 
 int load_kernel(uint32_t eb_start, uint32_t count, unsigned char *ld_addr)
 {
@@ -66,8 +65,8 @@ int load_kernel(uint32_t eb_start, uint32_t count, unsigned char *ld_addr)
 					SERIAL_PUTS((const char*)records[nb].name);
 					SERIAL_PUTC('\n');
 
-					if (!strncmp((const char*)records[nb].name, KERNEL_PARTITION,
-									sizeof(KERNEL_PARTITION))) {
+					if (!strncmp((const char*)records[nb].name, UBI_KERNEL_VOLUME,
+									sizeof(UBI_KERNEL_VOLUME))) {
 						kernel_vol_id = nb;
 					}
 				}
