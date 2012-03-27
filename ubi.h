@@ -7,12 +7,6 @@
 #include <byteswap.h>
 #include <sys/queue.h>
 
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-#define be32toh(x) bswap_32(x)
-#else
-#define be32toh(x) (x)
-#endif
-
 #define UBI_EC_HDR_MAGIC be32toh(0x55424923)
 #define UBI_VID_HDR_MAGIC be32toh(0x55424921)
 
