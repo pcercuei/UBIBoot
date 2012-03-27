@@ -53,9 +53,11 @@
 #define PAR_SIZE	9
 #define PAR_SIZE2	12
 
-/* kernel loading parameters */
+/* UBI parameters */
 #define UBI_MTD_EB_START	5
 #define UBI_MTD_NB_EB		127
+#define UBI_NB_VOLUMES		8
+
 #define LD_ADDR				0x80600000
 
 #endif

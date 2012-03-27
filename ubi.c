@@ -15,9 +15,6 @@
 #include "config.h"
 
 #define UBI_VOL_TABLE_ID 0x7fffefff
-
-#define NB_VOLUMES 8
-
 #define KERNEL_PARTITION "kernel"
 
 int load_kernel(uint32_t eb_start, uint32_t count, unsigned char *ld_addr)
@@ -27,9 +24,9 @@ int load_kernel(uint32_t eb_start, uint32_t count, unsigned char *ld_addr)
 	unsigned char eb_copy[PAGE_SIZE];
 	uint32_t i, vid_hdr_offset, kernel_vol_id = 0xffffffff;
 
-	SLIST_HEAD(EraseBlockList, EraseBlock) eb_list[NB_VOLUMES];
+	SLIST_HEAD(EraseBlockList, EraseBlock) eb_list[UBI_NB_VOLUMES];
 
-	for (i=0; i<NB_VOLUMES; i++) SLIST_INIT(&eb_list[i]);
+	for (i=0; i<UBI_NB_VOLUMES; i++) SLIST_INIT(&eb_list[i]);
 
 	nand_read_page(eb_start * BLOCK_SIZE, eb_copy);
 	memcpy(&ec_hdr, eb_copy, sizeof(struct ubi_ec_hdr));
@@ -58,11 +55,11 @@ int load_kernel(uint32_t eb_start, uint32_t count, unsigned char *ld_addr)
 				/* Skip if we have already read the volume table */
 				if (kernel_vol_id < UBI_VOL_TABLE_ID) continue;
 
-				struct ubi_vol_tbl_record records[NB_VOLUMES + PAGE_SIZE/sizeof(struct ubi_vol_tbl_record)];
+				struct ubi_vol_tbl_record records[UBI_NB_VOLUMES + PAGE_SIZE/sizeof(struct ubi_vol_tbl_record)];
 				uint32_t nb;
-				nand_load(eb->data_addr, 1+(NB_VOLUMES*sizeof(struct ubi_vol_tbl_record))/PAGE_SIZE, (uint8_t*) &records);
+				nand_load(eb->data_addr, 1+(UBI_NB_VOLUMES*sizeof(struct ubi_vol_tbl_record))/PAGE_SIZE, (uint8_t*) &records);
 
-				for (nb=0; nb<NB_VOLUMES; nb++) {
+				for (nb=0; nb<UBI_NB_VOLUMES; nb++) {
 					if (!records[nb].name[0]) continue;
 
 					SERIAL_PUTS("Found volume: ");
