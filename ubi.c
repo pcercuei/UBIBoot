@@ -20,14 +20,6 @@
 
 #define KERNEL_PARTITION "kernel"
 
-static int __strcmp(const char *s1, const char *s2)
-{
-	while (*s1 && (*s1++ == *s2++));
-	if (!*s1 && !*s2) return 0;
-	return 1;
-}
-
-
 int load_kernel(uint32_t eb_start, uint32_t count, unsigned char *ld_addr)
 {
 	struct ubi_ec_hdr ec_hdr;
@@ -77,7 +69,8 @@ int load_kernel(uint32_t eb_start, uint32_t count, unsigned char *ld_addr)
 					SERIAL_PUTS((const char*)records[nb].name);
 					SERIAL_PUTC('\n');
 
-					if (!__strcmp((const char*)records[nb].name, KERNEL_PARTITION)) {
+					if (!strncmp((const char*)records[nb].name, KERNEL_PARTITION,
+									sizeof(KERNEL_PARTITION))) {
 						kernel_vol_id = nb;
 					}
 				}
