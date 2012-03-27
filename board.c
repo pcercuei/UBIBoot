@@ -19,6 +19,7 @@ void gpio_init(void)
 #ifdef USE_SERIAL
 	__gpio_as_uart0();
 #endif
+	__gpio_as_msc();
 }
 
 #define CDIV 1
