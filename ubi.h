@@ -9,6 +9,7 @@
 
 #define UBI_EC_HDR_MAGIC be32toh(0x55424923)
 #define UBI_VID_HDR_MAGIC be32toh(0x55424921)
+#define UBI_VOL_TABLE_ID 0x7fffefff
 
 /* The maximum volume name length */
 #define UBI_VOL_NAME_MAX 127

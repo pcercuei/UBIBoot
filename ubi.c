@@ -14,8 +14,6 @@
 #include "serial.h"
 #include "config.h"
 
-#define UBI_VOL_TABLE_ID 0x7fffefff
-
 static int load_kernel(uint32_t eb_start, uint32_t count,
 			unsigned char *ld_addr)
 {
