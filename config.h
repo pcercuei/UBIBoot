@@ -59,6 +59,10 @@
 #define UBI_NB_VOLUMES		8
 #define UBI_KERNEL_VOLUME	"kernel"
 
+/* FAT parameters */
+#define FAT_BOOTFILE_NAME	"ZIMAGE"
+#define FAT_BOOTFILE_EXT	""
+
 #define LD_ADDR				0x80600000
 
 #endif
