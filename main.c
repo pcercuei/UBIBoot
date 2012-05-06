@@ -29,7 +29,7 @@
 static char *kernel_params [] = {
 	"linux",
 #ifdef JZ_SLCD_PANEL
-	"jz_slcd=panel:" JZ_SLCD_PANEL,
+	"jz4740_slcd_panels.panel=" JZ_SLCD_PANEL,
 #endif
 };
 
