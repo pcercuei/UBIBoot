@@ -6,7 +6,7 @@ OBJCOPY = $(CROSS_COMPILE)objcopy
 OBJDUMP = $(CROSS_COMPILE)objdump
 NM = $(CROSS_COMPILE)nm
 
-CFLAGS	:= -Wall -mips32 -O2 -fno-pic -mno-abicalls
+CFLAGS	:= -Wall -mips32 -Os -fno-pic -mno-abicalls
 LDFLAGS	:= -nostdlib -EL -T target.ld
 
 OBJS	= head.o board.o main.o nand.o ubi.o utils.o mmc.o fat.o
