@@ -30,7 +30,8 @@ static int load_kernel(uint32_t eb_start, uint32_t count,
 	memcpy(&ec_hdr, eb_copy, sizeof(struct ubi_ec_hdr));
 
 	if (ec_hdr.magic != UBI_EC_HDR_MAGIC) {
-		SERIAL_PUTS("No UBI partition detected!\n");
+		/* Partition is not a UBI drive. */
+		SERIAL_PUTI(0x30);
 		return -1;
 	}
 
@@ -60,10 +61,6 @@ static int load_kernel(uint32_t eb_start, uint32_t count,
 				for (nb=0; nb<UBI_NB_VOLUMES; nb++) {
 					if (!records[nb].name[0]) continue;
 
-					SERIAL_PUTS("Found volume: ");
-					SERIAL_PUTS((const char*)records[nb].name);
-					SERIAL_PUTC('\n');
-
 					if (!strncmp((const char*)records[nb].name, UBI_KERNEL_VOLUME,
 									sizeof(UBI_KERNEL_VOLUME))) {
 						kernel_vol_id = nb;
@@ -76,7 +73,8 @@ static int load_kernel(uint32_t eb_start, uint32_t count,
 	}
 
 	if (kernel_vol_id >= UBI_VOL_TABLE_ID) {
-		SERIAL_PUTS("ERROR: Unable to locate kernel partition.\n");
+		/* Unable to locate kernel partition. */
+		SERIAL_PUTI(0x31);
 		return -1;
 	}
 

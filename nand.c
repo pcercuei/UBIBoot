@@ -198,11 +198,16 @@ static void __nand_read_page(uint32_t page_addr, uint8_t *dst, uint8_t *oobbuf)
 		stat = REG_EMC_NFINTS;
 		if (stat & EMC_NFINTS_ERR) {
 			if (stat & EMC_NFINTS_UNCOR) {
-				SERIAL_PUTS("\nUncorrectable error occurred\n");
+				/* XXX: Why is that appearing all the time, and the
+				 * kernel still boots fine? */
+
+				/* Uncorrectable read error. */
+				SERIAL_PUTI(0x20);
 			}
 			else {
 				unsigned int errcnt, index, mask;
-				SERIAL_PUTS("\n Error occurred\n");
+				/* Read error. */
+				SERIAL_PUTI(0x21);
 
 				errcnt = (stat & EMC_NFINTS_ERRCNT_MASK) >> EMC_NFINTS_ERRCNT_BIT;
 				switch (errcnt) {

@@ -88,11 +88,13 @@ int mmc_block_read(uint8_t *dst, uint32_t src, size_t nb)
 					 stat = __msc_get_stat();
 
 			if (stat & MSC_STAT_TIME_OUT_READ) {
-				SERIAL_PUTS("MMC: Time out!\n");
+				/* Time out. */
+				SERIAL_PUTI(0x11);
 				return -1;
 			}
 			else if (stat & MSC_STAT_CRC_READ_ERROR) {
-				SERIAL_PUTS("MMC: Read error!\n");
+				/* Read error. */
+				SERIAL_PUTI(0x12);
 				return -1;
 			}
 			else if (!(stat & MSC_STAT_DATA_FIFO_EMPTY)) {
@@ -104,7 +106,8 @@ int mmc_block_read(uint8_t *dst, uint32_t src, size_t nb)
 		}
 
 		if (!timeout) {
-			SERIAL_PUTS("MMC: Time out!\n");
+			/* Time out. */
+			SERIAL_PUTI(0x11);
 			return -1;
 		}
 
@@ -153,7 +156,8 @@ int mmc_init(void)
 	}
 
 	if (!(resp[4] & 0x80)) {
-		SERIAL_PUTS("MMC: initialization failed.\n");
+		/* Initialization failed. */
+		SERIAL_PUTI(0x10);
 		return -1;
 	}
 

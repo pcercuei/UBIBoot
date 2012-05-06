@@ -14,18 +14,21 @@ static int get_first_partition(uint32_t *lba)
 	struct mbr mbr;
 
 	if (mmc_block_read((uint8_t *) &mbr, 0, 1)) {
-		SERIAL_PUTS("MMC: Unable to read bootsector.\n");
+		/* Unable to read bootsector. */
+		SERIAL_PUTI(0x00);
 		return -1;
 	}
 
 	if (mbr.signature != 0xAA55) {
-		SERIAL_PUTS("MMC: No MBR detected.\n");
+		/* No MBR detected. */
+		SERIAL_PUTI(0x01);
 		return -1;
 	}
 
 	if (mbr.partitions[0].status
 				&& mbr.partitions[0].status != 0x80) {
-		SERIAL_PUTS("MMC: Unable to detect first physical partition.\n");
+		/* Unable to detect first physical partition. */
+		SERIAL_PUTI(0x02);
 		return -1;
 	}
 
@@ -44,7 +47,8 @@ static int load_from_cluster(uint32_t lba, uint32_t cluster, unsigned char *ld_a
 		/* Read file data */
 		if (mmc_block_read(ld_addr, lba + bs.reserved + bs.fat32_length * bs.fats
 						+ (cluster-2) * bs.cluster_size, bs.cluster_size)) {
-			SERIAL_PUTS("MMC: Unable to read from first partition.\n");
+			/* Unable to read from first partition. */
+			SERIAL_PUTI(0x03);
 			return -1;
 		}
 		ld_addr += bs.cluster_size * FAT_BLOCK_SIZE;
@@ -52,7 +56,8 @@ static int load_from_cluster(uint32_t lba, uint32_t cluster, unsigned char *ld_a
 		/* Read FAT */
 		if (fat_sector != old_fat_sector) {
 			if (mmc_block_read(sector, fat_sector, 1)) {
-				SERIAL_PUTS("MMC: Unable to read the FAT table.\n");
+				/* Unable to read the FAT table. */
+				SERIAL_PUTI(0x04);
 				return -1;
 			}
 			old_fat_sector = fat_sector;
@@ -74,7 +79,8 @@ static int load_kernel_lba(uint32_t lba, unsigned char *ld_addr)
 	struct volume_info vinfo;
 
 	if (mmc_block_read(sector, lba, 1)) {
-		SERIAL_PUTS("MMC: Unable to read from first partition.\n");
+		/* Unable to read from first partition. */
+		SERIAL_PUTI(0x03);
 		return -1;
 	}
 
@@ -83,7 +89,8 @@ static int load_kernel_lba(uint32_t lba, unsigned char *ld_addr)
 				sizeof(struct volume_info));
 
 	if (strncmp(vinfo.fs_type, "FAT32", 5)) {
-		SERIAL_PUTS("MMC: No FAT32 filesystem detected!\n");
+		/* No FAT32 filesystem detected. */
+		SERIAL_PUTI(0x05);
 		return -1;
 	}
 
@@ -95,7 +102,8 @@ static int load_kernel_lba(uint32_t lba, unsigned char *ld_addr)
 
 		/* Read one sector */
 		if (mmc_block_read(sector, cur_sect, 1)) {
-			SERIAL_PUTS("MMC: Unable to read rootdir sector.\n");
+			/* Unable to read rootdir sector. */
+			SERIAL_PUTI(0x06);
 			return -1;
 		}
 
@@ -112,7 +120,8 @@ static int load_kernel_lba(uint32_t lba, unsigned char *ld_addr)
 				continue;
 
 			if (!entry->name[0]) {
-				SERIAL_PUTS("MMC: Kernel file not found...\n");
+				/* Kernel file not found. */
+				SERIAL_PUTI(0x07);
 				return -1;
 			}
 
@@ -133,7 +142,8 @@ static int load_kernel_lba(uint32_t lba, unsigned char *ld_addr)
 		}
 	}
 
-	SERIAL_PUTS("MMC: Kernel file not found...\n");
+	/* Kernel file not found. */
+	SERIAL_PUTI(0x07);
 	return -1;
 }
 
@@ -141,10 +151,6 @@ int mmc_load_kernel(unsigned char *ld_addr)
 {
 	uint32_t lba = 0;
 	get_first_partition(&lba);
-
-	SERIAL_PUTS("MMC: First partition starts at LBA ");
-	SERIAL_PUTI(lba);
-	SERIAL_PUTC('\n');
 
 	return load_kernel_lba(lba, ld_addr);
 }
