@@ -51,7 +51,7 @@
 #define NAND_MFR_MICRON		0x2c
 
 void nand_init(void);
-void nand_read_page(uint32_t page_addr, uint8_t *dst);
-void nand_load(uint32_t page_addr, size_t nb, uint8_t *dst);
+void nand_read_page(uint32_t page, uint8_t *dst);
+void nand_load(uint32_t page_start, size_t nb, uint8_t *dst);
 
 #endif /* __NAND_H__ */

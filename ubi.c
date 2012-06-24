@@ -26,7 +26,7 @@ static int load_kernel(uint32_t eb_start, uint32_t count,
 
 	for (i=0; i<UBI_NB_VOLUMES; i++) SLIST_INIT(&eb_list[i]);
 
-	nand_read_page(eb_start * BLOCK_SIZE, eb_copy);
+	nand_read_page(eb_start * PAGE_PER_BLOCK, eb_copy);
 	memcpy(&ec_hdr, eb_copy, sizeof(struct ubi_ec_hdr));
 
 	if (ec_hdr.magic != UBI_EC_HDR_MAGIC) {
@@ -40,7 +40,7 @@ static int load_kernel(uint32_t eb_start, uint32_t count,
 	vid_hdr_offset = be32toh(ec_hdr.vid_hdr_offset);
 
 	for (i=eb_start; i<(eb_start+count); i++) {
-		nand_read_page(i * BLOCK_SIZE + vid_hdr_offset, eb_copy);
+		nand_read_page(i * PAGE_PER_BLOCK + vid_hdr_offset / PAGE_SIZE, eb_copy);
 		memcpy(&vid_hdr, eb_copy + (vid_hdr_offset % PAGE_SIZE), sizeof(struct ubi_vid_hdr));
 
 		if (vid_hdr.magic == UBI_VID_HDR_MAGIC) {
@@ -56,7 +56,7 @@ static int load_kernel(uint32_t eb_start, uint32_t count,
 
 				struct ubi_vol_tbl_record records[UBI_NB_VOLUMES + PAGE_SIZE/sizeof(struct ubi_vol_tbl_record)];
 				uint32_t nb;
-				nand_load(eb->data_addr, 1+(UBI_NB_VOLUMES*sizeof(struct ubi_vol_tbl_record))/PAGE_SIZE, (uint8_t*) &records);
+				nand_load(eb->data_addr / PAGE_SIZE, 1+(UBI_NB_VOLUMES*sizeof(struct ubi_vol_tbl_record))/PAGE_SIZE, (uint8_t*) &records);
 
 				for (nb=0; nb<UBI_NB_VOLUMES; nb++) {
 					if (!records[nb].name[0]) continue;
@@ -83,7 +83,7 @@ static int load_kernel(uint32_t eb_start, uint32_t count,
 		int found=0;
 		SLIST_FOREACH(eb, &eb_list[kernel_vol_id], next) {
 			if (be32toh(eb->vid_hdr.lnum) == i) {
-				nand_load(eb->data_addr, 1 + (be32toh(eb->vid_hdr.data_size) / PAGE_SIZE), ld_addr);
+				nand_load(eb->data_addr / PAGE_SIZE, 1 + (be32toh(eb->vid_hdr.data_size) / PAGE_SIZE), ld_addr);
 				ld_addr += be32toh(eb->vid_hdr.data_size);
 				found = 1;
 				break;

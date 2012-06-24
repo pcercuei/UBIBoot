@@ -241,23 +241,22 @@ static void __nand_read_page(uint32_t page_addr, uint8_t *dst, uint8_t *oobbuf)
 	}
 }
 
-void nand_read_page(uint32_t page_addr, uint8_t *dst)
+void nand_read_page(uint32_t page, uint8_t *dst)
 {
 	uint8_t oob_buf[OOB_SIZE];
 
 	__nand_enable();
-	__nand_read_page(page_addr / PAGE_SIZE, dst, oob_buf);
+	__nand_read_page(page, dst, oob_buf);
 	__nand_disable();
 }
 
-void nand_load(uint32_t page_addr, size_t nb, uint8_t *dst)
+void nand_load(uint32_t page_start, size_t nb, uint8_t *dst)
 {
 	uint8_t oob_buf[OOB_SIZE];
-	uint32_t page_nb = page_addr / PAGE_SIZE;
 
 	__nand_enable();
 	while (nb--) {
-		__nand_read_page(page_nb++, dst, oob_buf);
+		__nand_read_page(page_start++, dst, oob_buf);
 		dst += PAGE_SIZE;
 	}
 	__nand_disable();
