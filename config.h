@@ -13,10 +13,10 @@
  *   
  */
 
-#define SDRAM_CASL		2	/* CAS latency: 2 or 3 */
-#define SDRAM_TRAS		45	/* RAS# Active Time (ns) */
-#define SDRAM_RCD		20	/* RAS# to CAS# Delay (ns) */
-#define SDRAM_TPC		20	/* RAS# Precharge Time (ns) */
+#define SDRAM_CASL		3	/* CAS latency: 2 or 3 */
+#define SDRAM_TRAS		42	/* RAS# Active Time (ns) */
+#define SDRAM_RCD		18	/* RAS# to CAS# Delay (ns) */
+#define SDRAM_TPC		18	/* RAS# Precharge Time (ns) */
 #define SDRAM_TRWL		7	/* Write Latency Time (ns) */
 #define SDRAM_TREF	        15625	/* Refresh period (ns): 4096 refresh cycles/64ms */
 
