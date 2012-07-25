@@ -65,6 +65,8 @@ void pll_init(void)
 	/* init PLL */
 	REG_CPM_CPCCR = cfcr;
 	REG_CPM_CPPCR = plcr1;
+
+	__cpm_enable_pll_change();
 }
 
 static void sdram_delay(unsigned int i)
