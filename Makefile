@@ -23,6 +23,11 @@ ifdef USE_SERIAL
 	OBJS += serial.o
 endif
 
+# BKLIGHT_ON = True
+ifdef BKLIGHT_ON
+	CFLAGS += -DBKLIGHT_ON
+endif
+
 JZ_SLCD_PANEL ?= ili9331
 ifdef JZ_SLCD_PANEL
 	CFLAGS += -DJZ_SLCD_PANEL="\"$(JZ_SLCD_PANEL)\""

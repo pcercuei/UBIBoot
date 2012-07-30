@@ -41,8 +41,10 @@ void c_main(void)
 
 	gpio_init();
 
+#ifdef BKLIGHT_ON
 	__gpio_clear_pin(PIN_BKLIGHT);
 	__gpio_as_output(PIN_BKLIGHT);
+#endif
 	__gpio_as_input(PIN_X);
 
 
@@ -54,7 +56,9 @@ void c_main(void)
 	sdram_init();
 
 	SERIAL_PUTS("UBIBoot by Paul Cercueil <paul@crapouillou.net>\n");
+#ifdef BKLIGHT_ON
 	__gpio_set_pin(PIN_BKLIGHT);
+#endif
 
 	if (__gpio_get_pin(PIN_X)) {
 		if (mmc_init() || mmc_load_kernel((unsigned char *) LD_ADDR))
