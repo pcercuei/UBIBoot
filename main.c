@@ -56,7 +56,7 @@ void c_main(void)
 	SERIAL_PUTS("UBIBoot by Paul Cercueil <paul@crapouillou.net>\n");
 	__gpio_set_pin(PIN_BKLIGHT);
 
-	if (!__gpio_get_pin(PIN_X)) {
+	if (__gpio_get_pin(PIN_X)) {
 		if (mmc_init() || mmc_load_kernel((unsigned char *) LD_ADDR))
 			SERIAL_PUTS("Unable to boot from SD. Falling back to NAND.\n");
 		else
