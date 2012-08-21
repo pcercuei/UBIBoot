@@ -9,7 +9,7 @@ NM = $(CROSS_COMPILE)nm
 CFLAGS	:= -Wall -mips32 -Os -fno-pic -mno-abicalls
 LDFLAGS	:= -nostdlib -EL -T target.ld
 
-OBJS	= head.o board.o main.o nand.o ubi.o utils.o mmc.o fat.o
+OBJS	= head.o board.o nand.o ubi.o utils.o mmc.o fat.o
 
 GC_FUNCTIONS = True
 ifdef GC_FUNCTIONS
@@ -28,16 +28,17 @@ ifdef BKLIGHT_ON
 	CFLAGS += -DBKLIGHT_ON
 endif
 
-JZ_SLCD_PANEL ?= ili9331
-ifdef JZ_SLCD_PANEL
-	CFLAGS += -DJZ_SLCD_PANEL="\"$(JZ_SLCD_PANEL)\""
-endif
-
 TARGET = ubiboot-$(JZ_SLCD_PANEL)
 
-all: $(TARGET).bin
+all: ubiboot-ili9325.bin ubiboot-ili9331.bin ubiboot-ili9338.bin
 
-$(TARGET).elf: $(OBJS)
+ubiboot-ili9325.elf: $(OBJS) main_ili9325.o
+	$(LD) $(LDFLAGS) $^ -o $@
+
+ubiboot-ili9331.elf: $(OBJS) main_ili9331.o
+	$(LD) $(LDFLAGS) $^ -o $@
+
+ubiboot-ili9338.elf: $(OBJS) main_ili9338.o
 	$(LD) $(LDFLAGS) $^ -o $@
 
 %.bin: %.elf
@@ -49,11 +50,20 @@ $(TARGET).elf: $(OBJS)
 %.o: %.S
 	$(CC) $(CFLAGS) -c $< -o $@
 
+main_ili9325.o: main.c
+	$(CC) $(CFLAGS) -DJZ_SLCD_PANEL="\"ili9325\"" -c $< -o $@
+
+main_ili9331.o: main.c
+	$(CC) $(CFLAGS) -DJZ_SLCD_PANEL="\"ili9331\"" -c $< -o $@
+
+main_ili9338.o: main.c
+	$(CC) $(CFLAGS) -DJZ_SLCD_PANEL="\"ili9338\"" -c $< -o $@
+
 map: $(TARGET).elf
 	$(OBJDUMP) -D $< > $(basename $@).dump
 	$(OBJDUMP) -h $< > $(basename $@).map
 	$(NM) -n $< > System.map
 
 clean:
-	rm -f $(OBJS) $(TARGET).elf $(TARGET).bin map.dump map.map System.map
+	rm -f $(OBJS) ubiboot-ili*.elf ubiboot-ili*.bin main_ili*.o map.dump map.map System.map
 
