@@ -1,3 +1,4 @@
+CONFIG=a320
 
 CROSS_COMPILE ?= mipsel-linux-
 CC = $(CROSS_COMPILE)gcc
@@ -8,6 +9,8 @@ NM = $(CROSS_COMPILE)nm
 
 CFLAGS	:= -Wall -mips32 -Os -fno-pic -mno-abicalls
 LDFLAGS	:= -nostdlib -EL -T target.ld
+
+OUTDIR := output/$(CONFIG)
 
 OBJS	= head.o board.o nand.o ubi.o utils.o mmc.o fat.o
 
@@ -28,42 +31,52 @@ ifdef BKLIGHT_ON
 	CFLAGS += -DBKLIGHT_ON
 endif
 
-TARGET = ubiboot-$(JZ_SLCD_PANEL)
+.PHONY: all clean map
 
-all: ubiboot-ili9325.bin ubiboot-ili9331.bin ubiboot-ili9338.bin
+all: $(OUTDIR)/ubiboot-ili9325.bin $(OUTDIR)/ubiboot-ili9331.bin $(OUTDIR)/ubiboot-ili9338.bin
 
-ubiboot-ili9325.elf: $(OBJS) main_ili9325.o
+$(OUTDIR)/ubiboot-ili9325.elf: $(addprefix $(OUTDIR)/,$(OBJS)) $(OUTDIR)/main_ili9325.o
+	@mkdir -p $(@D)
 	$(LD) $(LDFLAGS) $^ -o $@
 
-ubiboot-ili9331.elf: $(OBJS) main_ili9331.o
+$(OUTDIR)/ubiboot-ili9331.elf: $(addprefix $(OUTDIR)/,$(OBJS)) $(OUTDIR)/main_ili9331.o
+	@mkdir -p $(@D)
 	$(LD) $(LDFLAGS) $^ -o $@
 
-ubiboot-ili9338.elf: $(OBJS) main_ili9338.o
+$(OUTDIR)/ubiboot-ili9338.elf: $(addprefix $(OUTDIR)/,$(OBJS)) $(OUTDIR)/main_ili9338.o
+	@mkdir -p $(@D)
 	$(LD) $(LDFLAGS) $^ -o $@
 
-%.bin: %.elf
+$(OUTDIR)/%.bin: $(OUTDIR)/%.elf
+	@mkdir -p $(@D)
 	$(OBJCOPY) -O binary $< $@
 
-%.o: src/%.c
+$(OUTDIR)/%.o: src/%.c
+	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-%.o: src/%.S
+$(OUTDIR)/%.o: src/%.S
+	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-main_ili9325.o: src/main.c
+$(OUTDIR)/main_ili9325.o: src/main.c
+	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -DJZ_SLCD_PANEL="\"ili9325\"" -c $< -o $@
 
-main_ili9331.o: src/main.c
+$(OUTDIR)/main_ili9331.o: src/main.c
+	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -DJZ_SLCD_PANEL="\"ili9331\"" -c $< -o $@
 
-main_ili9338.o: src/main.c
+$(OUTDIR)/main_ili9338.o: src/main.c
+	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -DJZ_SLCD_PANEL="\"ili9338\"" -c $< -o $@
 
-map: $(TARGET).elf
-	$(OBJDUMP) -D $< > $(basename $@).dump
-	$(OBJDUMP) -h $< > $(basename $@).map
-	$(NM) -n $< > System.map
+map: $(OUTDIR)/System-ili9325.map $(OUTDIR)/System-ili9331.map $(OUTDIR)/System-ili9338.map
+
+$(OUTDIR)/System-%.map: $(OUTDIR)/ubiboot-%.elf
+	$(OBJDUMP) -D $< > $(basename $@).disasm
+	$(OBJDUMP) -h $< > $(basename $@).headers
+	$(NM) -n $< > $@
 
 clean:
-	rm -f $(OBJS) ubiboot-ili*.elf ubiboot-ili*.bin main_ili*.o map.dump map.map System.map
-
+	rm -rf $(OUTDIR)
