@@ -44,19 +44,19 @@ ubiboot-ili9338.elf: $(OBJS) main_ili9338.o
 %.bin: %.elf
 	$(OBJCOPY) -O binary $< $@
 
-%.o: %.c
+%.o: src/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-%.o: %.S
+%.o: src/%.S
 	$(CC) $(CFLAGS) -c $< -o $@
 
-main_ili9325.o: main.c
+main_ili9325.o: src/main.c
 	$(CC) $(CFLAGS) -DJZ_SLCD_PANEL="\"ili9325\"" -c $< -o $@
 
-main_ili9331.o: main.c
+main_ili9331.o: src/main.c
 	$(CC) $(CFLAGS) -DJZ_SLCD_PANEL="\"ili9331\"" -c $< -o $@
 
-main_ili9338.o: main.c
+main_ili9338.o: src/main.c
 	$(CC) $(CFLAGS) -DJZ_SLCD_PANEL="\"ili9338\"" -c $< -o $@
 
 map: $(TARGET).elf
