@@ -1,3 +1,10 @@
+ifeq ($(CONFIG),)
+CONFIGS:=$(foreach CFG,$(wildcard config-*.mk),$(CFG:config-%.mk=%))
+$(error Please specify CONFIG, possible values: $(CONFIGS))
+endif
+
+include config-$(CONFIG).mk
+
 ifdef V
 	CMD:=
 	SUM:=@\#
@@ -5,8 +12,6 @@ else
 	CMD:=@
 	SUM:=@echo
 endif
-
-CONFIG=a320
 
 CROSS_COMPILE ?= mipsel-linux-
 CC = $(CROSS_COMPILE)gcc
@@ -18,32 +23,24 @@ NM = $(CROSS_COMPILE)nm
 CFLAGS	:= -Wall -mips32 -Os -fno-pic -mno-abicalls
 LDFLAGS	:= -nostdlib -EL -T target.ld
 
-OUTDIR := output/$(CONFIG)
+OUTDIR	:= output/$(CONFIG)
 
-OBJS	= head.o board.o nand.o ubi.o utils.o mmc.o fat.o
+OBJS	:= head.o nand.o ubi.o utils.o mmc.o fat.o
+OBJS	+= board-$(BOARD).o
 
-GC_FUNCTIONS = True
 ifdef GC_FUNCTIONS
 	CFLAGS += -ffunction-sections
 	LDFLAGS += --gc-sections
 endif
 
-USE_SERIAL = True
 ifdef USE_SERIAL
 	CFLAGS += -DUSE_SERIAL
 	OBJS += serial.o
 endif
 
-# BKLIGHT_ON = True
 ifdef BKLIGHT_ON
 	CFLAGS += -DBKLIGHT_ON
 endif
-
-VARIANTS := ili9325 ili9331 ili9338
-
-CFLAGS_ili9325 := -DJZ_SLCD_PANEL="\"ili9325\""
-CFLAGS_ili9331 := -DJZ_SLCD_PANEL="\"ili9331\""
-CFLAGS_ili9338 := -DJZ_SLCD_PANEL="\"ili9338\""
 
 .PHONY: all clean map
 
