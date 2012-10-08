@@ -1,3 +1,11 @@
+ifdef V
+	CMD:=
+	SUM:=@\#
+else
+	CMD:=@
+	SUM:=@echo
+endif
+
 CONFIG=a320
 
 CROSS_COMPILE ?= mipsel-linux-
@@ -47,23 +55,28 @@ all: $(BINFILES)
 
 $(ELFFILES): $(OUTDIR)/ubiboot-%.elf: $(OUTDIR)/main_%.o $(OBJFILES)
 	@mkdir -p $(@D)
-	$(LD) $(LDFLAGS) $^ -o $@
+	$(SUM) "  LD      $@"
+	$(CMD)$(LD) $(LDFLAGS) $^ -o $@
 
 $(BINFILES): $(OUTDIR)/%.bin: $(OUTDIR)/%.elf
 	@mkdir -p $(@D)
-	$(OBJCOPY) -O binary $< $@
+	$(SUM) "  BIN     $@"
+	$(CMD)$(OBJCOPY) -O binary $< $@
 
 $(OUTDIR)/%.o: src/%.c
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(SUM) "  CC      $@"
+	$(CMD)$(CC) $(CFLAGS) -c $< -o $@
 
 $(OUTDIR)/%.o: src/%.S
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(SUM) "  CC      $@"
+	$(CMD)$(CC) $(CFLAGS) -c $< -o $@
 
 $(OUTDIR)/main_%.o: src/main.c
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) $(CFLAGS_$(@:$(OUTDIR)/main_%.o=%)) -c $< -o $@
+	$(SUM) "  CC      $@"
+	$(CMD)$(CC) $(CFLAGS) $(CFLAGS_$(@:$(OUTDIR)/main_%.o=%)) -c $< -o $@
 
 MAPFILES := $(foreach VARIANT,$(VARIANTS),$(OUTDIR)/System-$(VARIANT).map)
 DISFILES := $(foreach VARIANT,$(VARIANTS),$(OUTDIR)/System-$(VARIANT).disasm)
@@ -83,4 +96,5 @@ $(SECFILES): $(OUTDIR)/System-%.sections: $(OUTDIR)/ubiboot-%.elf
 	$(OBJDUMP) -h $< > $@
 
 clean:
-	rm -rf $(OUTDIR)
+	$(SUM) "  RM      $(OUTDIR)"
+	$(CMD)rm -rf $(OUTDIR)
