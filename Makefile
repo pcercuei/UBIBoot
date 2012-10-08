@@ -25,7 +25,7 @@ LDFLAGS	:= -nostdlib -EL -T target.ld
 
 OUTDIR	:= output/$(CONFIG)
 
-OBJS	:= head.o nand.o ubi.o utils.o mmc.o fat.o
+OBJS	:= head.o utils.o mmc.o fat.o
 OBJS	+= board-$(BOARD).o
 
 ifdef GC_FUNCTIONS
@@ -40,6 +40,16 @@ endif
 
 ifdef BKLIGHT_ON
 	CFLAGS += -DBKLIGHT_ON
+endif
+
+ifdef USE_NAND
+	CFLAGS += -DUSE_NAND
+	OBJS += nand.o
+endif
+
+ifdef USE_UBI
+	CFLAGS += -DUSE_UBI
+	OBJS += ubi.o
 endif
 
 .PHONY: all clean map

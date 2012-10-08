@@ -62,17 +62,27 @@ void c_main(void)
 
 	if (__gpio_get_pin(PIN_X)) {
 		if (mmc_init() || mmc_load_kernel((unsigned char *) LD_ADDR))
-			SERIAL_PUTS("Unable to boot from SD. Falling back to NAND.\n");
+			SERIAL_PUTS("Unable to boot from SD."
+#ifdef USE_NAND
+				" Falling back to NAND."
+#endif
+				"\n");
 		else
 			boot_from_sd = 1;
 	}
 
 	if (!boot_from_sd) {
+#ifdef USE_NAND
 		nand_init();
+#ifdef USE_UBI
 		if (ubi_load_kernel((unsigned char *) LD_ADDR)) {
 			SERIAL_PUTS("Unable to boot from NAND.\n");
 			return;
 		}
+#else /* USE_UBI */
+#warning UBI is currently the only supported NAND file system and it was not selected.
+#endif /* USE_UBI */
+#endif /* USE_NAND */
 	}
 
 	jz_flush_dcache();
