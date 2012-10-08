@@ -31,23 +31,25 @@ ifdef BKLIGHT_ON
 	CFLAGS += -DBKLIGHT_ON
 endif
 
+VARIANTS := ili9325 ili9331 ili9338
+
+CFLAGS_ili9325 := -DJZ_SLCD_PANEL="\"ili9325\""
+CFLAGS_ili9331 := -DJZ_SLCD_PANEL="\"ili9331\""
+CFLAGS_ili9338 := -DJZ_SLCD_PANEL="\"ili9338\""
+
 .PHONY: all clean map
 
-all: $(OUTDIR)/ubiboot-ili9325.bin $(OUTDIR)/ubiboot-ili9331.bin $(OUTDIR)/ubiboot-ili9338.bin
+BINFILES := $(foreach VARIANT,$(VARIANTS),$(OUTDIR)/ubiboot-$(VARIANT).bin)
+ELFFILES := $(foreach VARIANT,$(VARIANTS),$(OUTDIR)/ubiboot-$(VARIANT).elf)
+OBJFILES := $(addprefix $(OUTDIR)/,$(OBJS))
 
-$(OUTDIR)/ubiboot-ili9325.elf: $(addprefix $(OUTDIR)/,$(OBJS)) $(OUTDIR)/main_ili9325.o
+all: $(BINFILES)
+
+$(ELFFILES): $(OUTDIR)/ubiboot-%.elf: $(OUTDIR)/main_%.o $(OBJFILES)
 	@mkdir -p $(@D)
 	$(LD) $(LDFLAGS) $^ -o $@
 
-$(OUTDIR)/ubiboot-ili9331.elf: $(addprefix $(OUTDIR)/,$(OBJS)) $(OUTDIR)/main_ili9331.o
-	@mkdir -p $(@D)
-	$(LD) $(LDFLAGS) $^ -o $@
-
-$(OUTDIR)/ubiboot-ili9338.elf: $(addprefix $(OUTDIR)/,$(OBJS)) $(OUTDIR)/main_ili9338.o
-	@mkdir -p $(@D)
-	$(LD) $(LDFLAGS) $^ -o $@
-
-$(OUTDIR)/%.bin: $(OUTDIR)/%.elf
+$(BINFILES): $(OUTDIR)/%.bin: $(OUTDIR)/%.elf
 	@mkdir -p $(@D)
 	$(OBJCOPY) -O binary $< $@
 
@@ -59,24 +61,26 @@ $(OUTDIR)/%.o: src/%.S
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(OUTDIR)/main_ili9325.o: src/main.c
+$(OUTDIR)/main_%.o: src/main.c
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -DJZ_SLCD_PANEL="\"ili9325\"" -c $< -o $@
+	$(CC) $(CFLAGS) $(CFLAGS_$(@:$(OUTDIR)/main_%.o=%)) -c $< -o $@
 
-$(OUTDIR)/main_ili9331.o: src/main.c
+MAPFILES := $(foreach VARIANT,$(VARIANTS),$(OUTDIR)/System-$(VARIANT).map)
+DISFILES := $(foreach VARIANT,$(VARIANTS),$(OUTDIR)/System-$(VARIANT).disasm)
+SECFILES := $(foreach VARIANT,$(VARIANTS),$(OUTDIR)/System-$(VARIANT).sections)
+
+map: $(MAPFILES) $(DISFILES) $(SECFILES)
+
+$(MAPFILES): $(OUTDIR)/System-%.map: $(OUTDIR)/ubiboot-%.elf
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -DJZ_SLCD_PANEL="\"ili9331\"" -c $< -o $@
-
-$(OUTDIR)/main_ili9338.o: src/main.c
-	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -DJZ_SLCD_PANEL="\"ili9338\"" -c $< -o $@
-
-map: $(OUTDIR)/System-ili9325.map $(OUTDIR)/System-ili9331.map $(OUTDIR)/System-ili9338.map
-
-$(OUTDIR)/System-%.map: $(OUTDIR)/ubiboot-%.elf
-	$(OBJDUMP) -D $< > $(basename $@).disasm
-	$(OBJDUMP) -h $< > $(basename $@).headers
 	$(NM) -n $< > $@
+
+$(DISFILES): $(OUTDIR)/System-%.disasm: $(OUTDIR)/ubiboot-%.elf
+	@mkdir -p $(@D)
+	$(OBJDUMP) -D $< > $@
+
+$(SECFILES): $(OUTDIR)/System-%.sections: $(OUTDIR)/ubiboot-%.elf
+	$(OBJDUMP) -h $< > $@
 
 clean:
 	rm -rf $(OUTDIR)
