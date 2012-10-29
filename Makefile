@@ -21,12 +21,12 @@ OBJDUMP = $(CROSS_COMPILE)objdump
 NM = $(CROSS_COMPILE)nm
 
 CFLAGS	:= -Wall -mips32 -Os -fno-pic -mno-abicalls
-LDFLAGS	:= -nostdlib -EL -T target.ld
+LDFLAGS	:= -nostdlib -EL -T target-$(BOARD).ld
 
 OUTDIR	:= output/$(CONFIG)
 
-OBJS	:= head.o utils.o mmc.o fat.o
-OBJS	+= board-$(BOARD).o
+OBJS	:= utils.o mmc.o fat.o
+OBJS	+= board-$(BOARD).o head-$(BOARD).o
 
 ifdef GC_FUNCTIONS
 	CFLAGS += -ffunction-sections
