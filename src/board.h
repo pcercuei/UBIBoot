@@ -7,5 +7,7 @@ extern void serial_init (void);
 extern void pll_init (void);
 extern void serial_setbrg (void);
 
+void udelay(unsigned int us);
+
 #endif
 

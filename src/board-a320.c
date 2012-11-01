@@ -69,10 +69,10 @@ void pll_init(void)
 	__cpm_enable_pll_change();
 }
 
-static void sdram_delay(unsigned int i)
+void udelay(unsigned int us)
 {
-	while (--i)
-		 __asm__ __volatile__("");
+	volatile unsigned int tmp = (CFG_CPU_SPEED / 1000000) * us;
+	while (tmp--);
 }
 
 void sdram_init(void)
@@ -142,8 +142,7 @@ void sdram_init(void)
 	REG8(EMC_SDMR0|sdmode) = 0;
 
 	/* Wait for precharge, > 200us */
-	tmp = (CFG_CPU_SPEED / 1000000) * 1000;
-	sdram_delay(tmp);
+	udelay(1000);
 
 	/* Stage 2. Enable auto-refresh */
 	REG_EMC_DMCR = dmcr | EMC_DMCR_RFSH;
@@ -156,8 +155,7 @@ void sdram_init(void)
 	REG_EMC_RTCSR = EMC_RTCSR_CKS_64;	/* Divisor is 64, CKO/64 */
 
 	/* Wait for number of auto-refresh cycles */
-	tmp = (CFG_CPU_SPEED / 1000000) * 1000;
-	sdram_delay(tmp);
+	udelay(1000);
 
  	/* Stage 3. Mode Register Set */
 	REG_EMC_DMCR = dmcr0 | EMC_DMCR_RFSH | EMC_DMCR_MRSET;
