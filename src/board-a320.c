@@ -11,16 +11,7 @@
 #include "jz4740.h"
 
 #include "board.h"
-
-void gpio_init(void)
-{
-	__gpio_as_nand();
-	__gpio_as_sdram_32bit();
-#ifdef USE_SERIAL
-	__gpio_as_uart0();
-#endif
-	__gpio_as_msc();
-}
+#include "serial.h"
 
 #define CDIV 1
 #define HDIV 3
@@ -33,7 +24,7 @@ void gpio_init(void)
  * NF = FD + 2, NR = RD + 2
  * NO = 1 (if OD = 0), NO = 2 (if OD = 1 or 2), NO = 4 (if OD = 3)
  */
-void pll_init(void)
+static void pll_init(void)
 {
 	register unsigned int cfcr, plcr1, pllout2;
 	int n2FR[33] = {
@@ -75,7 +66,7 @@ void udelay(unsigned int us)
 	while (tmp--);
 }
 
-void sdram_init(void)
+static void sdram_init(void)
 {
 	unsigned int dmcr0, dmcr, sdmode, tmp;
 
@@ -188,3 +179,23 @@ void serial_setbrg(void)
 }
 #endif
 
+void board_init(void)
+{
+#ifdef USE_NAND
+	__gpio_as_nand();
+#endif
+	__gpio_as_sdram_32bit();
+	__gpio_as_msc();
+#ifdef USE_SERIAL
+	__gpio_as_uart0();
+	serial_init();
+#endif
+
+	pll_init();
+	sdram_init();
+
+#ifdef BKLIGHT_ON
+	__gpio_clear_pin(PIN_BKLIGHT);
+	__gpio_as_output(PIN_BKLIGHT);
+#endif
+}

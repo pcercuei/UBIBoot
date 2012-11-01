@@ -39,21 +39,13 @@ void c_main(void)
 	register uint32_t reg;
 	int boot_from_sd = 0;
 
-	gpio_init();
+	board_init();
 
 #ifdef BKLIGHT_ON
 	__gpio_clear_pin(PIN_BKLIGHT);
 	__gpio_as_output(PIN_BKLIGHT);
 #endif
 	__gpio_as_input(PIN_X);
-
-
-#ifdef USE_SERIAL
-	serial_init();
-#endif
-
-	pll_init();
-	sdram_init();
 
 	SERIAL_PUTS("UBIBoot by Paul Cercueil <paul@crapouillou.net>\n");
 #ifdef BKLIGHT_ON
