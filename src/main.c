@@ -19,8 +19,6 @@
 #include "mmc.h"
 #include "fat.h"
 
-#define PIN_X (32*3 + 19)	/* Port 3 pin 19: X button */
-
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
 
@@ -40,14 +38,12 @@ void c_main(void)
 
 	board_init();
 
-	__gpio_as_input(PIN_X);
-
 	SERIAL_PUTS("UBIBoot by Paul Cercueil <paul@crapouillou.net>\n");
 #ifdef BKLIGHT_ON
 	light(1);
 #endif
 
-	if (__gpio_get_pin(PIN_X)) {
+	if (!alt_key_pressed()) {
 		if (mmc_init() || mmc_load_kernel((unsigned char *) LD_ADDR))
 			SERIAL_PUTS("Unable to boot from SD."
 #ifdef USE_NAND
