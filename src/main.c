@@ -19,7 +19,6 @@
 #include "mmc.h"
 #include "fat.h"
 
-#define PIN_BKLIGHT	(32*3+31)	/* Port 3 pin 31: Backlight PWM  */
 #define PIN_X (32*3 + 19)	/* Port 3 pin 19: X button */
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
@@ -41,15 +40,11 @@ void c_main(void)
 
 	board_init();
 
-#ifdef BKLIGHT_ON
-	__gpio_clear_pin(PIN_BKLIGHT);
-	__gpio_as_output(PIN_BKLIGHT);
-#endif
 	__gpio_as_input(PIN_X);
 
 	SERIAL_PUTS("UBIBoot by Paul Cercueil <paul@crapouillou.net>\n");
 #ifdef BKLIGHT_ON
-	__gpio_set_pin(PIN_BKLIGHT);
+	light(1);
 #endif
 
 	if (__gpio_get_pin(PIN_X)) {

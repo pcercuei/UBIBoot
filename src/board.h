@@ -5,6 +5,7 @@ extern void board_init (void);
 extern void serial_setbrg (void);
 
 void udelay(unsigned int us);
+void light(int set);
 
 #endif
 

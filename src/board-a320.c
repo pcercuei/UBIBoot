@@ -13,6 +13,8 @@
 #include "board.h"
 #include "serial.h"
 
+#define PIN_BKLIGHT	(32*3+31)	/* Port 3 pin 31: Backlight PWM  */
+
 #define CDIV 1
 #define HDIV 3
 #define PDIV 3
@@ -176,6 +178,16 @@ void serial_setbrg(void)
 
 	tmp &= ~UART_LCR_DLAB;
 	*uart_lcr = tmp;
+}
+#endif
+
+#ifdef BKLIGHT_ON
+void light(int set)
+{
+	if (set)
+		__gpio_set_pin(PIN_BKLIGHT);
+	else
+		__gpio_clear_pin(PIN_BKLIGHT);
 }
 #endif
 
