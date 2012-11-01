@@ -83,7 +83,7 @@ int mmc_block_read(uint8_t *dst, uint32_t src, size_t nb)
 	for (; nob >= 1; nob--) {
 		uint32_t cnt = 128, timeout = 0x3ffffff;
 
-		while (timeout--) {
+		while (--timeout) {
 			uint32_t wait = 12,
 					 stat = __msc_get_stat();
 
