@@ -153,10 +153,7 @@ static unsigned int constrain(unsigned int x,
 static void sdram_init(void)
 {
 	unsigned int mem_mask, mem_base, mem_clk, ps, timing, tmp, ns_int;
-	unsigned int mem_size = (1 << (DDR_ROW + DDR_COL)) *
-	  ((DDR_DW32 + 1) * 2) *
-	  ((DDR_BANK8 + 1) * 4) *
-	  (DDR_CS1EN + DDR_CS0EN);
+	unsigned int mem_size = get_memory_size();
 
 	mem_clk = __cpm_get_mclk();
 	ps = 1000000000 / (mem_clk / 1000); /* ns per tck ns <= real value */
@@ -318,6 +315,12 @@ int alt_key_pressed(void)
 {
 	__gpio_as_input(PIN_X);
 	return !__gpio_get_pin(PIN_X);
+}
+
+unsigned int get_memory_size(void)
+{
+	return 1 << (DDR_ROW + DDR_COL + DDR_DW32 + DDR_BANK8 + 3) *
+				(DDR_CS1EN + DDR_CS0EN);
 }
 
 #ifdef USE_SERIAL

@@ -197,6 +197,12 @@ void light(int set)
 }
 #endif
 
+unsigned int get_memory_size(void)
+{
+	return 1 << (SDRAM_ROW + SDRAM_COL + (2 - SDRAM_BW16) +
+				(2 - SDRAM_BANK4) + 1);
+}
+
 void board_init(void)
 {
 #ifdef USE_NAND
