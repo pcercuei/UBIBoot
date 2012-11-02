@@ -21,15 +21,30 @@
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
-
 /* Kernel parameters list */
 static char *kernel_params [] = {
-	"linux",
+	[0] = "linux",
+	[1] = "mem=0x0000M",
 #ifdef JZ_SLCD_PANEL
 	"jz4740_slcd_panels.panel=" JZ_SLCD_PANEL,
 #endif
 };
 
+
+static void set_mem_param(void)
+{
+	unsigned int mem_size = get_memory_size() >> 20;
+	char *ptr = &kernel_params[1][9];
+
+	do {
+		char nb = (char) (mem_size & 0xf);
+		if (nb >= 10)
+			*ptr-- = 'a' + nb - 10;
+		else
+			*ptr-- = '0' + nb;
+		mem_size >>= 4;
+	} while(mem_size && (*ptr != 'x'));
+}
 
 void c_main(void)
 {
@@ -67,6 +82,8 @@ void c_main(void)
 #endif /* USE_UBI */
 #endif /* USE_NAND */
 	}
+
+	set_mem_param();
 
 	jz_flush_dcache();
 	jz_flush_icache();
