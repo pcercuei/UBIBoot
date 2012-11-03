@@ -15,6 +15,7 @@
 
 #include "serial.h"
 #include "mmc.h"
+#include "board.h"
 
 #define MSC_RESPONSE_R1 3
 #define MSC_RESPONSE_R2 8
@@ -27,10 +28,8 @@ static inline void jz_mmc_stop_clock(void)
 	uint32_t timeout = 1000;
 
 	__msc_stop_clk();
-	while (timeout-- && (__msc_get_stat() & MSC_STAT_CLK_EN)) {
-		uint32_t wait = 12; /* 1us */
-		while (wait--);
-	}
+	while (timeout-- && (__msc_get_stat() & MSC_STAT_CLK_EN))
+		udelay(1);
 }
 
 static inline void jz_mmc_start_clock(void)
@@ -84,8 +83,7 @@ int mmc_block_read(uint8_t *dst, uint32_t src, size_t nb)
 		uint32_t cnt = 128, timeout = 0x3ffffff;
 
 		while (--timeout) {
-			uint32_t wait = 12,
-					 stat = __msc_get_stat();
+			uint32_t stat = __msc_get_stat();
 
 			if (stat & MSC_STAT_TIME_OUT_READ) {
 				/* Time out. */
@@ -102,7 +100,7 @@ int mmc_block_read(uint8_t *dst, uint32_t src, size_t nb)
 				break;
 			}
 
-			while (wait--);
+			udelay(1);
 		}
 
 		if (!timeout) {
@@ -148,11 +146,9 @@ int mmc_init(void)
 	mmc_cmd(41, 0x40ff8000, 0x3, MSC_RESPONSE_R3, resp);
 
 	while (retries-- && !(resp[4] & 0x80)) {
-		uint32_t wait = 33600000;
-
 		mmc_cmd(55, 0, 0x1, MSC_RESPONSE_R1, resp);
 		mmc_cmd(41, 0x40ff8000, 0x3, MSC_RESPONSE_R3, resp);
-		while (wait--);
+		udelay(100000);
 	}
 
 	if (!(resp[4] & 0x80)) {
