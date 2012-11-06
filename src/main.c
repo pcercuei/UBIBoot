@@ -25,11 +25,16 @@
 static char *kernel_params [] = {
 	[0] = "linux",
 	[1] = "mem=0x0000M",
+	[2] = "",
 #ifdef JZ_SLCD_PANEL
 	"jz4740_slcd_panels.panel=" JZ_SLCD_PANEL,
 #endif
 };
 
+static void set_alt_param(void)
+{
+	kernel_params[2] = "alt";
+}
 
 static void set_mem_param(void)
 {
@@ -102,6 +107,9 @@ void c_main(void)
 #endif /* USE_UBI */
 	}
 #endif /* USE_NAND */
+
+	if (alt2_key_pressed())
+		set_alt_param();
 
 	set_mem_param();
 

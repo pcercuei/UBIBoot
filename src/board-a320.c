@@ -14,6 +14,7 @@
 #include "serial.h"
 
 #define PIN_X (32*3 + 19)		/* Port 3 pin 19: X button */
+#define PIN_Y (32*3 + 2)		/* Port 3 pin 2:  Y button */
 #define PIN_BKLIGHT	(32*3+31)	/* Port 3 pin 31: Backlight PWM  */
 
 #define CDIV 1
@@ -187,6 +188,11 @@ int alt_key_pressed(void)
 	return !__gpio_get_pin(PIN_X);
 }
 
+int alt2_key_pressed(void)
+{
+	return !__gpio_get_pin(PIN_Y);
+}
+
 #ifdef BKLIGHT_ON
 void light(int set)
 {
@@ -224,4 +230,5 @@ void board_init(void)
 #endif
 
 	__gpio_as_input(PIN_X);
+	__gpio_as_input(PIN_Y);
 }

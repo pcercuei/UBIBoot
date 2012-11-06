@@ -6,6 +6,7 @@
 #include "DDR2_H5PS1G63EFR-S6C.h"
 
 #define PIN_X (32*4 + 28)		/* Port 4 pin 28: X button */
+#define PIN_Y (32*4 + 27)		/* Port 4 pin 27: Y button */
 #define PIN_BKLIGHT	(32*4+1)	/* Port 4 pin 1: Backlight PWM  */
 
 #define CFG_EXTAL 12000000
@@ -315,6 +316,12 @@ int alt_key_pressed(void)
 {
 	__gpio_as_input(PIN_X);
 	return !__gpio_get_pin(PIN_X);
+}
+
+int alt2_key_pressed(void)
+{
+	__gpio_as_input(PIN_Y);
+	return !__gpio_get_pin(PIN_Y);
 }
 
 unsigned int get_memory_size(void)
