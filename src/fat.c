@@ -5,7 +5,6 @@
 #include "serial.h"
 #include "mmc.h"
 #include "fat.h"
-#include "config.h"
 
 static struct boot_sector bs;
 
@@ -71,12 +70,15 @@ static int load_from_cluster(uint32_t lba, uint32_t cluster, unsigned char *ld_a
 	return 0;
 }
 
-static int load_kernel_lba(uint32_t lba, unsigned char *ld_addr)
+static int load_kernel_lba(uint32_t lba,
+			unsigned char *ld_addr, const char *name, const char *ext)
 {
 	uint8_t sector[FAT_BLOCK_SIZE];
 	uint32_t cur_sect;
 	size_t i, j;
 	struct volume_info vinfo;
+	size_t name_len = strlen(name) - 1;
+	size_t ext_len = strlen(ext) - 1;
 
 	if (mmc_block_read(sector, lba, 1)) {
 		/* Unable to read from first partition. */
@@ -125,13 +127,11 @@ static int load_kernel_lba(uint32_t lba, unsigned char *ld_addr)
 				return -1;
 			}
 
-			if (strncmp(entry->name, FAT_BOOTFILE_NAME,
-							sizeof(FAT_BOOTFILE_NAME) - 1)
-						|| strncmp(entry->ext, FAT_BOOTFILE_EXT,
-							sizeof(FAT_BOOTFILE_EXT) - 1))
+			if (strncmp(entry->name, name, name_len) ||
+						strncmp(entry->ext, ext, ext_len))
 				continue;
 
-			c = entry->name[sizeof(FAT_BOOTFILE_NAME) - 1];
+			c = entry->name[name_len];
 			if (c && c != ' ')
 				continue;
 
@@ -147,11 +147,12 @@ static int load_kernel_lba(uint32_t lba, unsigned char *ld_addr)
 	return -1;
 }
 
-int mmc_load_kernel(unsigned char *ld_addr)
+int mmc_load_kernel(unsigned char *ld_addr,
+			const char *name, const char *ext)
 {
 	uint32_t lba = 0;
 	get_first_partition(&lba);
 
-	return load_kernel_lba(lba, ld_addr);
+	return load_kernel_lba(lba, ld_addr, name, ext);
 }
 

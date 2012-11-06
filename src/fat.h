@@ -82,6 +82,7 @@ struct dir_entry {
 	uint32_t	size;				/* File size in bytes */
 };
 
-int mmc_load_kernel(unsigned char *ld_addr);
+int mmc_load_kernel(unsigned char *ld_addr,
+			const char *name, const char *ext);
 
 #endif

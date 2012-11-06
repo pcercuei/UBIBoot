@@ -11,6 +11,15 @@ int strncmp(const char *s1, const char *s2, size_t n)
 	return 0;
 }
 
+size_t strlen(const char *s)
+{
+	size_t i = 0;
+
+	while(*s++)
+		i++;
+	return i + 1;
+}
+
 void * memcpy(void *dest, const void *src, size_t n)
 {
 	unsigned char *d = dest;

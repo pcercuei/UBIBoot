@@ -59,7 +59,8 @@ void c_main(void)
 #endif
 
 	if (!alt_key_pressed()) {
-		if (mmc_init() || mmc_load_kernel((unsigned char *) LD_ADDR))
+		if (mmc_init() || mmc_load_kernel((unsigned char *) LD_ADDR,
+						FAT_BOOTFILE_NAME, FAT_BOOTFILE_EXT))
 			SERIAL_PUTS("Unable to boot from SD."
 #ifdef USE_NAND
 				" Falling back to NAND."
