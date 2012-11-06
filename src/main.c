@@ -49,7 +49,8 @@ static void set_mem_param(void)
 void c_main(void)
 {
 	register uint32_t reg;
-	int boot_from_sd = 0;
+	int boot = 0;
+	int mmc_inited;
 
 	board_init();
 
@@ -58,20 +59,38 @@ void c_main(void)
 	light(1);
 #endif
 
-	if (!alt_key_pressed()) {
-		if (mmc_init() || mmc_load_kernel((unsigned char *) LD_ADDR,
-						FAT_BOOTFILE_NAME, FAT_BOOTFILE_EXT))
-			SERIAL_PUTS("Unable to boot from SD."
-#ifdef USE_NAND
-				" Falling back to NAND."
-#endif
-				"\n");
-		else
-			boot_from_sd = 1;
+	mmc_inited = !mmc_init();
+	if (mmc_inited) {
+		/* Alt key not pressed: try to boot the regular kernel;
+		 * if it fails, try to boot the alt kernel */
+		if (!alt_key_pressed()) {
+			boot = !mmc_load_kernel((unsigned char *) LD_ADDR,
+						FAT_BOOTFILE_NAME, FAT_BOOTFILE_EXT);
+			if (!boot)
+				boot = !mmc_load_kernel((unsigned char *) LD_ADDR,
+							FAT_BOOTFILE_ALT_NAME, FAT_BOOTFILE_ALT_EXT);
+		}
+
+		/* Alt key is pressed: try to boot the alt kernel;
+		 * if it fails, try to boot the regular kernel */
+		else {
+			boot = !mmc_load_kernel((unsigned char *) LD_ADDR,
+						FAT_BOOTFILE_ALT_NAME, FAT_BOOTFILE_ALT_EXT);
+			if (!boot)
+				boot = !mmc_load_kernel((unsigned char *) LD_ADDR,
+							FAT_BOOTFILE_NAME, FAT_BOOTFILE_EXT);
+		}
 	}
 
-	if (!boot_from_sd) {
+	if (!mmc_inited || !boot)
+		SERIAL_PUTS("Unable to boot from SD."
 #ifdef USE_NAND
+					" Falling back to NAND."
+#endif
+					"\n");
+
+#ifdef USE_NAND
+	if (!boot) {
 		nand_init();
 #ifdef USE_UBI
 		if (ubi_load_kernel((unsigned char *) LD_ADDR)) {
@@ -81,8 +100,8 @@ void c_main(void)
 #else /* USE_UBI */
 #warning UBI is currently the only supported NAND file system and it was not selected.
 #endif /* USE_UBI */
-#endif /* USE_NAND */
 	}
+#endif /* USE_NAND */
 
 	set_mem_param();
 
