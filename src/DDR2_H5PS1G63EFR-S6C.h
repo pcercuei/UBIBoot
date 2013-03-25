@@ -16,24 +16,24 @@
 #define DDR_CL     5 /* CAS latency: 1 to 5 */
 
 /*
- * DDR2 controller timing1 register
+ * DDR2 controller timing1 register, unit: ps
  */
-#define DDR_tRAS  60  /* tRAS: ACTIVE to PRECHARGE command period to the same bank. */
-#define DDR_tRTP  20  /* 7.5ns READ to PRECHARGE command period. */
-#define DDR_tRP   20  /* tRP: PRECHARGE command period to the same bank */
-#define DDR_tRCD  20  /* ACTIVE to READ or WRITE command period to the same bank. */
-#define DDR_tRC   80  /* ACTIVE to ACTIVE command period to the same bank.*/
-#define DDR_tRRD  18  /* ACTIVE bank A to ACTIVE bank B command period. */
-#define DDR_tWR   25  /* WRITE Recovery Time defined by register MR of DDR2 memory */
-#define DDR_tWTR  12  /* WRITE to READ command delay. */
+#define DDR_tRAS  60000  /* ACTIVE to PRECHARGE command period to the same bank. */
+#define DDR_tRTP  20000  /* READ to PRECHARGE command period. */
+#define DDR_tRP   20000  /* PRECHARGE command period to the same bank */
+#define DDR_tRCD  20000  /* ACTIVE to READ or WRITE command period to the same bank. */
+#define DDR_tRC   80000  /* ACTIVE to ACTIVE command period to the same bank.*/
+#define DDR_tRRD  18000  /* ACTIVE bank A to ACTIVE bank B command period. */
+#define DDR_tWR   25000  /* WRITE Recovery Time defined by register MR of DDR2 memory */
+#define DDR_tWTR  12000  /* WRITE to READ command delay. */
 
 /*
  * DDR2 controller timing2 register
  */
-#define DDR_tRFC   128 /* ns,  AUTO-REFRESH command period. */
-#define DDR_tMINSR 140 /* Minimum Self-Refresh / Deep-Power-Down */
-#define DDR_tXP      2 /* tCK EXIT-POWER-DOWN to next valid command period: 1 to 8 tCK. */
-#define DDR_tMRD     4 /* unit: tCK. Load-Mode-Register to next valid command period: 1 to 4 tCK */
+#define DDR_tRFC   128000 /* ps,  AUTO-REFRESH command period. */
+#define DDR_tMINSR    140 /* tCK, Minimum Self-Refresh / Deep-Power-Down */
+#define DDR_tXP         2 /* tCK, EXIT-POWER-DOWN to next valid command period: 1 to 8 tCK. */
+#define DDR_tMRD        4 /* tCK, Load-Mode-Register to next valid command period: 1 to 4 tCK */
 
 /* 
  * DDR2 controller mdelay register

@@ -2597,13 +2597,7 @@ do {							\
 
 #define DDRC_MDELAY_MAUTO_BIT (6)
 #define DDRC_MDELAY_MAUTO  (1 << DDRC_MDELAY_MAUTO_BIT)
-#define DDR_GET_VALUE(x, y)			      \
-({						      \
-	unsigned long value, tmp;	              \
-	tmp = x * 1000;				      \
-	value = (tmp % y == 0) ? (tmp / y) : (tmp / y + 1); \
-		value;                                \
-})
+#define DDR_GET_VALUE(x, y) ((x) / (y) + ((x) % (y) != 0))
   
 /*************************************************************************
  * CIM
