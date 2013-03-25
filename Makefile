@@ -26,7 +26,7 @@ LDFLAGS	:= -nostdlib -EL -T target-$(BOARD).ld
 OUTDIR	:= output/$(CONFIG)
 
 OBJS	:= utils.o mmc.o fat.o
-OBJS	+= board-$(BOARD).o head-$(BOARD).o
+OBJS	+= head-$(BOARD).o
 
 ifdef GC_FUNCTIONS
 	CFLAGS += -ffunction-sections
@@ -60,7 +60,8 @@ OBJFILES := $(addprefix $(OUTDIR)/,$(OBJS))
 
 all: $(BINFILES)
 
-$(ELFFILES): $(OUTDIR)/ubiboot-%.elf: $(OUTDIR)/main_%.o $(OBJFILES)
+$(ELFFILES): $(OUTDIR)/ubiboot-%.elf: \
+		$(OUTDIR)/main_%.o $(OUTDIR)/board-$(BOARD)_%.o $(OBJFILES)
 	@mkdir -p $(@D)
 	$(SUM) "  LD      $@"
 	$(CMD)$(LD) $(LDFLAGS) $^ -o $@
@@ -79,6 +80,11 @@ $(OUTDIR)/%.o: src/%.S
 	@mkdir -p $(@D)
 	$(SUM) "  CC      $@"
 	$(CMD)$(CC) $(CFLAGS) -c $< -o $@
+
+$(OUTDIR)/board-$(BOARD)_%.o: src/board-$(BOARD).c
+	@mkdir -p $(@D)
+	$(SUM) "  CC      $@"
+	$(CMD)$(CC) $(CFLAGS) $(CFLAGS_$(@:$(OUTDIR)/board-$(BOARD)_%.o=%)) -c $< -o $@
 
 $(OUTDIR)/main_%.o: src/main.c
 	@mkdir -p $(@D)
