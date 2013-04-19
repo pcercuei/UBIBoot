@@ -1,5 +1,4 @@
-#include "config.h"	/* Always first, defines CFG_EXTAL for jz4740.h */
-#include "jz4740.h"
+#include "config.h"
 #include "board.h"
 
 #include "serial.h"

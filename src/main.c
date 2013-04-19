@@ -9,7 +9,7 @@
 
 #include <stdlib.h>
 
-#include "config.h"	/* Always first, defines CFG_EXTAL for jz4740.h */
+#include "config.h"
 
 #include "board.h"
 #include "nand.h"
@@ -24,12 +24,6 @@
  * Uses the JZ4770 OST, so won't work on JZ4740.
  */
 #define BENCHMARK 0
-
-#if BENCHMARK
-#include "jz4770.h"
-#else
-#include "jz4740.h"
-#endif
 
 /* Kernel parameters list */
 static char *kernel_params [] = {

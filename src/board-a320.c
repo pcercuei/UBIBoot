@@ -7,8 +7,7 @@
  *
  */
 
-#include "config.h"	/* Always first, defines CFG_EXTAL for jz4740.h */
-#include "jz4740.h"
+#include "config.h"
 
 #include "board.h"
 #include "serial.h"
@@ -70,6 +69,31 @@ void udelay(unsigned int us)
 	while (tmp--);
 }
 
+/*
+ * Failsafe SDRAM configuration values
+ *
+ * If you want to live on the edge, the Dingoo Hynix HY57V281620FTP-6
+ * chips should work with these accoring to the datasheet:
+ *
+ *   TRAS 42
+ *   RCD  18
+ *   TPC  18
+ *
+ */
+#define SDRAM_CASL		3		/* CAS latency: 2 or 3 */
+#define SDRAM_TRAS		42		/* RAS# Active Time (ns) */
+#define SDRAM_RCD		18		/* RAS# to CAS# Delay (ns) */
+#define SDRAM_TPC		18		/* RAS# Precharge Time (ns) */
+#define SDRAM_TRWL		7		/* Write Latency Time (ns) */
+#define SDRAM_TREF		15625	/* Refresh period (ns): 4096 refresh cycles/64ms */
+#define SDRAM_BW16		0
+#define SDRAM_BANK40	0
+#define SDRAM_BANK4		1
+#define SDRAM_ROW0		11
+#define SDRAM_ROW		12
+#define SDRAM_COL0		8
+#define SDRAM_COL		9
+
 static void sdram_init(void)
 {
 	unsigned int dmcr0, dmcr, sdmode, tmp;
@@ -88,10 +112,6 @@ static void sdram_init(void)
 	REG_EMC_RTCSR = 0;	/* Disable clock for counting */
 
 	/* Fault DMCR value for mode register setting*/
-#define SDRAM_ROW0    11
-#define SDRAM_COL0     8
-#define SDRAM_BANK40   0
-
 	dmcr0 = ((SDRAM_ROW0-11)<<EMC_DMCR_RA_BIT) |
 		((SDRAM_COL0-8)<<EMC_DMCR_CA_BIT) |
 		(SDRAM_BANK40<<EMC_DMCR_BA_BIT) |

@@ -20,7 +20,7 @@ OBJCOPY = $(CROSS_COMPILE)objcopy
 OBJDUMP = $(CROSS_COMPILE)objdump
 NM = $(CROSS_COMPILE)nm
 
-CFLAGS	:= -Wall -mips32 -Os -fno-pic -mno-abicalls
+CFLAGS	:= -Wall -mips32 -Os -fno-pic -mno-abicalls -DBOARD_$(BOARD)
 LDFLAGS	:= -nostdlib -EL -T target-$(BOARD).ld
 
 OUTDIR	:= output/$(CONFIG)

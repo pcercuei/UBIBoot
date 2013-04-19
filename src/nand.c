@@ -9,7 +9,6 @@
  * published by the Free Software Foundation.
  */
 
-#include "jz4740.h"
 #include "serial.h"
 #include "nand.h"
 #include "config.h"

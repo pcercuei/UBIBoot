@@ -2,15 +2,12 @@
 #include <string.h>
 
 #include "board.h"
-#include "jz4770.h"
+#include "config.h"
 #include "sdram.h"
 
 #define PIN_X (32*4 + 28)		/* Port 4 pin 28: X button */
 #define PIN_Y (32*4 + 27)		/* Port 4 pin 27: Y button */
 #define PIN_BKLIGHT	(32*4+1)	/* Port 4 pin 1: Backlight PWM  */
-
-#define CFG_EXTAL 12000000
-#define CFG_CPU_SPEED 1020000000
 
 /* Authorized values: 1 2 3 4 6 8 12 */
 #define CFG_CDIV  1

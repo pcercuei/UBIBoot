@@ -15,6 +15,11 @@ typedef unsigned int u32;
 #include "asm/cacheops.h"
 #include "asm/addrspace.h"
 
+/* cache parameters */
+#define CFG_ICACHE_SIZE		0x4000
+#define CFG_DCACHE_SIZE		0x4000
+#define CFG_CACHELINE_SIZE	0x20
+
 #define cache_unroll(base,op)	        	\
 	__asm__ __volatile__("	         	\
 		.set noreorder;		        \
