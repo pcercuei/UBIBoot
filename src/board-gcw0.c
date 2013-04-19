@@ -4,6 +4,7 @@
 #include "board.h"
 #include "config.h"
 #include "sdram.h"
+#include "serial.h"
 
 #define PIN_X (32*4 + 28)		/* Port 4 pin 28: X button */
 #define PIN_Y (32*4 + 27)		/* Port 4 pin 27: Y button */
@@ -64,7 +65,7 @@ static void pll_init(void)
 	if (BS(CFG_CPU_SPEED))
 		reg |= CPM_CPPCR_PLL_BS_BIT;
 	REG_CPM_CPPCR = reg;
-	
+
 	/* Wait for a stable output */
 	while (!__cpm_pll_is_on());
 	while (!(REG_CPM_CPPCR & CPM_CPPCR_PLLS));
@@ -304,6 +305,11 @@ void board_init(void)
 	pll_init();
 	sdram_init();
 
+#ifdef USE_SERIAL
+	__gpio_as_uart2();
+	__cpm_start_uart2();
+	serial_init();
+#endif
 	__cpm_start_msc0();
 	__cpm_select_msc_clk(0, 1);
 	__msc_set_rdto(0xffff);
@@ -342,8 +348,22 @@ unsigned int get_memory_size(void)
 }
 
 #ifdef USE_SERIAL
-/* TODO: fill that function */
 void serial_setbrg(void)
 {
+	volatile u8 *uart_lcr = (u8 *)(UART_BASE + OFF_LCR);
+	volatile u8 *uart_dlhr = (u8 *)(UART_BASE + OFF_DLHR);
+	volatile u8 *uart_dllr = (u8 *)(UART_BASE + OFF_DLLR);
+	u32 baud_div, tmp;
+
+	baud_div = CFG_EXTAL / 16 / CONFIG_BAUDRATE;
+	tmp = *uart_lcr;
+	tmp |= UART_LCR_DLAB;
+	*uart_lcr = tmp;
+
+	*uart_dlhr = (baud_div >> 8) & 0xff;
+	*uart_dllr = baud_div & 0xff;
+
+	tmp &= ~UART_LCR_DLAB;
+	*uart_lcr = tmp;
 }
 #endif
