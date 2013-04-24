@@ -4767,7 +4767,7 @@ static __inline__ unsigned int __cpm_get_pllout(void)
 }
 
 /* PLL output frequency */
-static  unsigned int __cpm_get_pll1out(void)
+static __inline__ unsigned int __cpm_get_pll1out(void)
 {
 	unsigned long m, n, no, pllout;
 	unsigned long cppcr1 = REG_CPM_CPPCR1;
