@@ -25,7 +25,8 @@
 static char *kernel_params [] = {
 	[0] = "linux",
 	[1] = "mem=0x0000M",
-	[2] = "",
+	[2] = "mem=0x0000M@0x30000000",
+	[3] = "",
 	"hwvariant=" VARIANT,
 #ifdef JZ_SLCD_PANEL
 	"jz4740_slcd_panels.panel=" JZ_SLCD_PANEL,
@@ -34,22 +35,30 @@ static char *kernel_params [] = {
 
 static void set_alt_param(void)
 {
-	kernel_params[2] = "alt";
+	kernel_params[3] = "alt";
+}
+
+static void write_hex_digits(unsigned int value, char *last_digit)
+{
+	char *ptr = last_digit;
+	do {
+		char nb = (char) (value & 0xf);
+		if (nb >= 10)
+			*ptr-- = 'a' + nb - 10;
+		else
+			*ptr-- = '0' + nb;
+		value >>= 4;
+	} while(value && (*ptr != 'x'));
 }
 
 static void set_mem_param(void)
 {
 	unsigned int mem_size = get_memory_size() >> 20;
-	char *ptr = &kernel_params[1][9];
+	unsigned int low_mem_size = mem_size > 256 ? 256 : mem_size;
+	unsigned int high_mem_size = mem_size > 256 ? mem_size - 256 : 0;
 
-	do {
-		char nb = (char) (mem_size & 0xf);
-		if (nb >= 10)
-			*ptr-- = 'a' + nb - 10;
-		else
-			*ptr-- = '0' + nb;
-		mem_size >>= 4;
-	} while(mem_size && (*ptr != 'x'));
+	write_hex_digits(low_mem_size, &kernel_params[1][9]);
+	write_hex_digits(high_mem_size, &kernel_params[2][9]);
 }
 
 void c_main(void)
