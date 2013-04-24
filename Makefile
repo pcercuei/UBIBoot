@@ -81,15 +81,21 @@ $(OUTDIR)/%.o: src/%.S
 	$(SUM) "  CC      $@"
 	$(CMD)$(CC) $(CFLAGS) -c $< -o $@
 
+CFLAGS_FOR_VARIANT=$(CFLAGS) -DVARIANT="\"$(1)\"" $(CFLAGS_$(1))
+
 $(OUTDIR)/board-$(BOARD)_%.o: src/board-$(BOARD).c
 	@mkdir -p $(@D)
 	$(SUM) "  CC      $@"
-	$(CMD)$(CC) $(CFLAGS) $(CFLAGS_$(@:$(OUTDIR)/board-$(BOARD)_%.o=%)) -c $< -o $@
+	$(CMD)$(CC) \
+		$(call CFLAGS_FOR_VARIANT,$(@:$(OUTDIR)/board-$(BOARD)_%.o=%)) \
+		-c $< -o $@
 
 $(OUTDIR)/main_%.o: src/main.c
 	@mkdir -p $(@D)
 	$(SUM) "  CC      $@"
-	$(CMD)$(CC) $(CFLAGS) $(CFLAGS_$(@:$(OUTDIR)/main_%.o=%)) -c $< -o $@
+	$(CMD)$(CC) \
+		$(call CFLAGS_FOR_VARIANT,$(@:$(OUTDIR)/main_%.o=%)) \
+		-c $< -o $@
 
 MAPFILES := $(foreach VARIANT,$(VARIANTS),$(OUTDIR)/System-$(VARIANT).map)
 DISFILES := $(foreach VARIANT,$(VARIANTS),$(OUTDIR)/System-$(VARIANT).disasm)

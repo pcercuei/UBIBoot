@@ -26,6 +26,7 @@ static char *kernel_params [] = {
 	[0] = "linux",
 	[1] = "mem=0x0000M",
 	[2] = "",
+	"hwvariant=" VARIANT,
 #ifdef JZ_SLCD_PANEL
 	"jz4740_slcd_panels.panel=" JZ_SLCD_PANEL,
 #endif
