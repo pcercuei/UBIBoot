@@ -326,8 +326,8 @@ int alt2_key_pressed(void)
 
 unsigned int get_memory_size(void)
 {
-	return 1 << (DDR_ROW + DDR_COL + DDR_DW32 + DDR_BANK8 + 3) *
-				(DDR_CS1EN + DDR_CS0EN);
+	return (1 << (DDR_ROW + DDR_COL + DDR_DW32 + DDR_BANK8 + 3))
+			* (DDR_CS1EN + DDR_CS0EN);
 }
 
 #ifdef USE_SERIAL
