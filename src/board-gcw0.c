@@ -3,7 +3,7 @@
 
 #include "board.h"
 #include "jz4770.h"
-#include "DDR2_H5PS1G63EFR-S6C.h"
+#include "sdram.h"
 
 #define PIN_X (32*4 + 28)		/* Port 4 pin 28: X button */
 #define PIN_Y (32*4 + 27)		/* Port 4 pin 27: Y button */

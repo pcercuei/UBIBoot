@@ -1,5 +1,6 @@
-#ifndef __DDR2_CONFIG_H
-#define __DDR2_CONFIG_H
+#ifndef __SDRAM_CONFIG_H
+#error Include "sdram.h" instead
+#endif
 
 #define CONFIG_SDRAM_DDR2
 #define CONFIG_DDR2_DIFFERENTIAL
@@ -55,5 +56,3 @@
 #define DDR_CLK_DIV 1    /* Clock Divider. auto refresh
 						  *	cnt_clk = memclk/(16*(2^DDR_CLK_DIV))
 						  */
-
-#endif /* __DDR2_CONFIG_H */
