@@ -150,8 +150,12 @@ static int load_kernel_lba(uint32_t lba,
 int mmc_load_kernel(unsigned char *ld_addr,
 			const char *name, const char *ext)
 {
-	uint32_t lba = 0;
-	get_first_partition(&lba);
+	uint32_t lba;
+	int err;
+
+	err = get_first_partition(&lba);
+	if (err)
+		return err;
 
 	return load_kernel_lba(lba, ld_addr, name, ext);
 }
