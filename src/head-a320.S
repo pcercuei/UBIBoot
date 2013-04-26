@@ -30,6 +30,7 @@ _start:
 
 	la	sp, 0x80004000
 	j	c_main
+	nop
 
 	.set reorder
 
