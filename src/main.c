@@ -56,6 +56,7 @@ void c_main(void)
 	register uint32_t reg;
 	int boot = 0;
 	int mmc_inited;
+	long offset;
 
 	board_init();
 
@@ -63,6 +64,21 @@ void c_main(void)
 #ifdef BKLIGHT_ON
 	light(1);
 #endif
+
+	/* Tests on JZ4770 show that the data cache lines that contain the boot
+	 * loader are not marked as dirty initially. Therefore, if those cache
+	 * lines are evicted, the data is lost. To avoid that, we copy the data
+	 * into SDRAM, by copying from kseg0 (cached) to the same area in kseg1
+	 * (uncached).
+	 */
+	for (offset = 0; offset < CFG_DCACHE_SIZE; offset += 16) {
+		volatile uint32_t *p0 = (volatile uint32_t *)(KSEG0 + offset);
+		volatile uint32_t *p1 = (volatile uint32_t *)(KSEG1 + offset);
+		p1[0] = p0[0];
+		p1[1] = p0[1];
+		p1[2] = p0[2];
+		p1[3] = p0[3];
+	}
 
 	mmc_inited = !mmc_init();
 	if (mmc_inited) {
