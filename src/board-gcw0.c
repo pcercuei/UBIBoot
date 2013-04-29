@@ -80,10 +80,23 @@ static void ddr_mem_init(void)
 		0, 9, 10, 11, 12,
 	};
 
-	unsigned int ddr_twr = ((REG_DDRC_TIMING1 & DDRC_TIMING1_TWR_MASK)
-				>> DDRC_TIMING1_TWR_BIT) + 1;
+	unsigned int ddr_twr =
+#if defined(CONFIG_SDRAM_DDR2)
+	  ((REG_DDRC_TIMING1 & DDRC_TIMING1_TWR_MASK) >> DDRC_TIMING1_TWR_BIT) + 1;
+#else
+	  1;
+#endif
 
-	REG_DDRC_CFG = DDRC_CFG_TYPE_DDR2 |
+	REG_DDRC_CFG =
+#if defined(CONFIG_SDRAM_DDR1)
+	  DDRC_CFG_TYPE_DDR1 | DDRC_CFG_BTRUN |
+#elif defined(CONFIG_SDRAM_MDDR)
+	  DDRC_CFG_TYPE_MDDR | DDRC_CFG_BTRUN |
+#elif defined(CONFIG_SDRAM_DDR2)
+	  DDRC_CFG_TYPE_DDR2 |
+#else
+#error No supported SDRAM type defined
+#endif
 	  DDRC_CFG_MPRT |
 	  ((DDR_ROW - 12) << DDRC_CFG_ROW_BIT) |
 	  ((DDR_COL - 8) << DDRC_CFG_COL_BIT) |
@@ -99,6 +112,7 @@ static void ddr_mem_init(void)
 	  (DDR_HL << 15) | (DDR_QUAR << 14);
 	udelay(10);
 
+#if defined(CONFIG_SDRAM_DDR2)
 	/* PREA */
 	REG_DDRC_LMR =  DDRC_LMR_CMD_PREC | DDRC_LMR_START;
 	udelay(1);
@@ -117,6 +131,7 @@ static void ddr_mem_init(void)
 	REG_DDRC_LMR = ((ddr_twr - 1) << 9 | DDR2_MRS_DLL_RST | DDR_CL << 4 | DDR_MRS_BL_4) << 16
 		| DDRC_LMR_BA_MRS | DDRC_LMR_CMD_LMR | DDRC_LMR_START;
 	udelay(1);
+#endif
 
 	/* PREA */
 	REG_DDRC_LMR =  DDRC_LMR_CMD_PREC | DDRC_LMR_START; //0x1;
@@ -133,11 +148,17 @@ static void ddr_mem_init(void)
 		| DDRC_LMR_BA_MRS | DDRC_LMR_CMD_LMR | DDRC_LMR_START;
 	udelay(2);
 
+#if defined(CONFIG_SDRAM_DDR2)
 	/* EMR1 - OCD Default */
 	REG_DDRC_LMR = (DDR_EMRS1_DIC_HALF | DDR_EMRS1_OCD_DFLT) << 16 | DDRC_LMR_BA_EMRS1 | DDRC_LMR_CMD_LMR | DDRC_LMR_START;
 
 	/* EMR1 - OCD Exit */
 	REG_DDRC_LMR = ((DDR_EMRS1_DIC_HALF) << 16) | DDRC_LMR_BA_EMRS1 | DDRC_LMR_CMD_LMR | DDRC_LMR_START;
+#else
+	/* EMR: extend mode register */
+	REG_DDRC_LMR = (DDR_EMRS_DS_FULL | DDR_EMRS_PRSR_ALL) << 16
+		| DDRC_LMR_BA_M_EMRS | DDRC_LMR_CMD_LMR | DDRC_LMR_START;
+#endif
 	udelay(1);
 }
 
@@ -278,7 +299,8 @@ static void sdram_init(void)
 
 	/* Enable DLL Detect */
 	REG_DDRC_DQS = DDRC_DQS_AUTO | DDRC_DQS_DET | DDRC_DQS_SRDET;
-	
+	while (!(REG_DDRC_DQS & DDRC_DQS_READY));
+
 	/* Auto Refresh */
 	REG_DDRC_LMR = DDRC_LMR_CMD_AUREF | DDRC_LMR_START;
 	udelay(500);
