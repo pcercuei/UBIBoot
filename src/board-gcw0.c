@@ -242,20 +242,12 @@ static void sdram_init(void)
 	tmp = constrain(tmp, 2, 6);
 	timing |= ((tmp - 1) << DDRC_TIMING1_TWR_BIT);
 
-	// Unit is ns
-	if(tmp > 5) {
-		/* WRITE to READ command delay. */
-		tmp = DDR_GET_VALUE(DDR_tWTR, ps);
-		tmp = constrain(tmp, 0, 4);
-		timing |= ((tmp - 1) << DDRC_TIMING1_TWTR_BIT);
-
-	// Unit is tCK
-	} else {
-		/* WRITE to READ command delay. */
-		tmp = DDR_tWTR;
-		tmp = constrain(tmp, 0, 4);
-		timing |= ((tmp - 1) << DDRC_TIMING1_TWTR_BIT);
-	}
+	/* WRITE to READ command delay. */
+	tmp = DDR_tWTR < 5
+		? DDR_tWTR /* unit is tCK */
+		: DDR_GET_VALUE(DDR_tWTR, ps); /* unit is ps */
+	tmp = constrain(tmp, 1, 4);
+	timing |= ((tmp - 1) << DDRC_TIMING1_TWTR_BIT);
 
 	REG_DDRC_TIMING1 = timing;
 
