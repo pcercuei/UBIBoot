@@ -10,7 +10,6 @@
 #include <stdlib.h>
 
 #include "config.h"	/* Always first, defines CFG_EXTAL for jz4740.h */
-#include "jz4740.h"
 
 #include "board.h"
 #include "nand.h"
@@ -21,12 +20,26 @@
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
+/* Time how long UBIBoot takes to do its job.
+ * Uses the JZ4770 OST, so won't work on JZ4740.
+ */
+#define BENCHMARK 0
+
+#if BENCHMARK
+#include "jz4770.h"
+#else
+#include "jz4740.h"
+#endif
+
 /* Kernel parameters list */
 static char *kernel_params [] = {
 	[0] = "linux",
 	[1] = "mem=0x0000M",
 	[2] = "mem=0x0000M@0x30000000",
 	[3] = "",
+#if BENCHMARK
+	[4] = "bootbench=0x0000000000000000",
+#endif
 	"hwvariant=" VARIANT,
 #ifdef JZ_SLCD_PANEL
 	"jz4740_slcd_panels.panel=" JZ_SLCD_PANEL,
@@ -61,12 +74,23 @@ static void set_mem_param(void)
 	write_hex_digits(high_mem_size, &kernel_params[2][9]);
 }
 
+
 void c_main(void)
 {
 	register uint32_t reg;
 	int boot = 0;
 	int mmc_inited;
 	long offset;
+
+#if BENCHMARK
+	/* Setup 3 MHz timer, 64-bit wrap, abrupt stop. */
+	REG_OST_OSTCSR = OSTCSR_CNT_MD | OSTCSR_SD
+				   | OSTCSR_EXT_EN | OSTCSR_PRESCALE4;
+	__tcu_stop_counter(15);
+	REG_OST_OSTCNTL = 0;
+	REG_OST_OSTCNTH = 0;
+	__tcu_start_counter(15);
+#endif
 
 	board_init();
 
@@ -133,6 +157,14 @@ void c_main(void)
 #endif /* USE_UBI */
 	}
 #endif /* USE_NAND */
+
+#if BENCHMARK
+	/* Stop timer. */
+	__tcu_stop_counter(15);
+	/* Store timer count in kernel command line. */
+	write_hex_digits(REG_OST_OSTCNTL, &kernel_params[4][27]);
+	write_hex_digits(REG_OST_OSTCNTH_BUF, &kernel_params[4][27 - 8]);
+#endif
 
 	if (alt2_key_pressed())
 		set_alt_param();
