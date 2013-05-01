@@ -77,8 +77,8 @@ static int load_kernel_lba(uint32_t lba,
 	uint32_t cur_sect;
 	size_t i, j;
 	struct volume_info vinfo;
-	size_t name_len = strlen(name) - 1;
-	size_t ext_len = strlen(ext) - 1;
+	size_t name_len = strlen(name);
+	size_t ext_len = strlen(ext);
 
 	if (mmc_block_read(sector, lba, 1)) {
 		/* Unable to read from first partition. */

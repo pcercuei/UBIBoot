@@ -1,12 +1,15 @@
+#include "utils.h"
 
-#include <string.h>
-
-/* strncmp of the poor */
 int strncmp(const char *s1, const char *s2, size_t n)
 {
 	while (n--) {
-		if (*s1++ != *s2++)
-			return (*s1 < *s2) ? -1 : 1;
+		unsigned char c1 = *s1, c2 = *s2;
+		if (c1 != c2)
+			return (int)c1 - (int)c2;
+		if (c1 == '\0')
+			return 0;
+		s1++;
+		s2++;
 	}
 	return 0;
 }
@@ -15,19 +18,17 @@ size_t strlen(const char *s)
 {
 	size_t i = 0;
 
-	while(*s++)
+	while (*s++)
 		i++;
-	return i + 1;
+	return i;
 }
 
-void * memcpy(void *dest, const void *src, size_t n)
+void *memcpy(void *dest, const void *src, size_t n)
 {
 	unsigned char *d = dest;
 	const unsigned char *s = src;
 
-	while (n) {
+	while (n--)
 		*d++ = *s++;
-		n -= sizeof(unsigned char);
-	}
 	return dest;
 }
