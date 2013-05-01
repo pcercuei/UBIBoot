@@ -719,16 +719,16 @@ do {							\
 #define TCU_TCNT5	(TCU_BASE + 0x98)
 #define TCU_TCSR5	(TCU_BASE + 0x9C)
 
-#define REG_TCU_TSR	REG32(TCU_TSR)
+#define REG_TCU_TSR		REG32(TCU_TSR)
 #define REG_TCU_TSSR	REG32(TCU_TSSR)
 #define REG_TCU_TSCR	REG32(TCU_TSCR)
-#define REG_TCU_TER	REG8(TCU_TER)
-#define REG_TCU_TESR	REG8(TCU_TESR)
-#define REG_TCU_TECR	REG8(TCU_TECR)
-#define REG_TCU_TFR	REG32(TCU_TFR)
+#define REG_TCU_TER		REG16(TCU_TER)
+#define REG_TCU_TESR	REG16(TCU_TESR)
+#define REG_TCU_TECR	REG16(TCU_TECR)
+#define REG_TCU_TFR		REG32(TCU_TFR)
 #define REG_TCU_TFSR	REG32(TCU_TFSR)
 #define REG_TCU_TFCR	REG32(TCU_TFCR)
-#define REG_TCU_TMR	REG32(TCU_TMR)
+#define REG_TCU_TMR		REG32(TCU_TMR)
 #define REG_TCU_TMSR	REG32(TCU_TMSR)
 #define REG_TCU_TMCR	REG32(TCU_TMCR)
 #define REG_TCU_TDFR0	REG16(TCU_TDFR0)
@@ -902,6 +902,35 @@ do {							\
 #define TCU_TSSR_STPC1		(1 << 1)
 #define TCU_TSSR_STPC0		(1 << 0)
 
+/*************************************************************************
+ * OST (Operating System Timer)
+ *************************************************************************/
+
+#define OST_OSTDR			(OST_BASE + 0xE0)
+#define OST_OSTCNTL			(OST_BASE + 0xE4)
+#define OST_OSTCNTH			(OST_BASE + 0xE8)
+#define OST_OSTCSR			(OST_BASE + 0xEC)
+#define OST_OSTCNTH_BUF		(OST_BASE + 0xFC)
+
+#define REG_OST_OSTDR		REG32(OST_OSTDR)
+#define REG_OST_OSTCNTL		REG32(OST_OSTCNTL)
+#define REG_OST_OSTCNTH		REG32(OST_OSTCNTH)
+#define REG_OST_OSTCSR		REG16(OST_OSTCSR)
+#define REG_OST_OSTCNTH_BUF	REG32(OST_OSTCNTH_BUF)
+
+#define OSTCSR_CNT_MD			(1 << 15)
+#define OSTCSR_SD				(1 << 9)
+#define OSTCSR_PRESCALE_BIT		3
+#define OSTCSR_PRESCALE_MASK	(0x7 << OSTCSR_PRESCALE_BIT)
+  #define OSTCSR_PRESCALE1		(0x0 << OSTCSR_PRESCALE_BIT)
+  #define OSTCSR_PRESCALE4		(0x1 << OSTCSR_PRESCALE_BIT)
+  #define OSTCSR_PRESCALE16		(0x2 << OSTCSR_PRESCALE_BIT)
+  #define OSTCSR_PRESCALE64		(0x3 << OSTCSR_PRESCALE_BIT)
+  #define OSTCSR_PRESCALE256	(0x4 << OSTCSR_PRESCALE_BIT)
+  #define OSTCSR_PRESCALE1024	(0x5 << OSTCSR_PRESCALE_BIT)
+#define OSTCSR_EXT_EN			(1 << 2)
+#define OSTCSR_RTC_EN			(1 << 1)
+#define OSTCSR_PCK_EN			(1 << 0)
 
 /*************************************************************************
  * WDT (WatchDog Timer)
