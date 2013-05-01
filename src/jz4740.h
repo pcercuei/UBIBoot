@@ -10,21 +10,10 @@ typedef unsigned int u32;
 
 
 #ifndef __ASSEMBLY__
-#define UCOS_CSP 0
 
-#if UCOS_CSP
-#define __KERNEL__
-#include <bsp.h>
-#include <types.h>
-
-#include <sysdefs.h>
-#include <cacheops.h>
-#define KSEG0 KSEG0BASE
-#else
 #include "config.h"
 #include "asm/cacheops.h"
 #include "asm/addrspace.h"
-#endif
 
 #define cache_unroll(base,op)	        	\
 	__asm__ __volatile__("	         	\

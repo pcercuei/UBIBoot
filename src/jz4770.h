@@ -18,20 +18,8 @@ typedef unsigned long ulong;
 
 #ifndef __ASSEMBLY__
 
-#define UCOS_CSP 0
-
-#if UCOS_CSP
-#define __KERNEL__
-#include <bsp.h>
-#include <types.h>
-
-#include <sysdefs.h>
-#include <cacheops.h>
-#define KSEG0 KSEG0BASE
-#else
 #include "asm/addrspace.h"
 #include "asm/cacheops.h"
-#endif
 
 #define cache_unroll(base,op)	        	\
 	__asm__ __volatile__("	         	\
