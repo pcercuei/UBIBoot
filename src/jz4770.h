@@ -21,6 +21,11 @@ typedef unsigned long ulong;
 #include "asm/addrspace.h"
 #include "asm/cacheops.h"
 
+/* cache parameters */
+#define CFG_ICACHE_SIZE         0x4000
+#define CFG_DCACHE_SIZE         0x4000
+#define CFG_CACHELINE_SIZE      0x20
+
 #define cache_unroll(base,op)	        	\
 	__asm__ __volatile__("	         	\
 		.set noreorder;		        \
@@ -31,7 +36,7 @@ typedef unsigned long ulong;
 		:				\
 		: "r" (base),			\
 		  "i" (op));
-#if 0
+
 static inline void jz_flush_dcache(void)
 {
 	unsigned long start;
@@ -57,7 +62,7 @@ static inline void jz_flush_icache(void)
 		start += CFG_CACHELINE_SIZE;
 	}
 }
-#endif
+
 /* cpu pipeline flush */
 static inline void jz_sync(void)
 {
