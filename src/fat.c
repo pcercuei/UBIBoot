@@ -37,32 +37,48 @@ static int get_first_partition(uint32_t *lba)
 
 static int load_from_cluster(uint32_t lba, uint32_t cluster, void *ld_addr)
 {
-	uint32_t old_fat_sector = 0;
+	uint32_t sector[FAT_BLOCK_SIZE >> 2];
+	uint32_t cached_fat_sector = -1;
 
-	while(1) {
-		uint32_t sector[FAT_BLOCK_SIZE >> 2];
-		uint32_t fat_sector = lba + bs.reserved + (cluster / (FAT_BLOCK_SIZE >> 2));
+	while (1) {
+		uint32_t data_sector = lba + bs.reserved + bs.fat32_length * bs.fats +
+							   (cluster - 2) * bs.cluster_size;
+		uint32_t num_data_sectors = bs.cluster_size;
+
+		/* Figure out how many consecutive clusters we can load.
+		 * Since every MMC command has a significant overhead, loading more
+		 * data at once gives a big speed boost.
+		 */
+		while (1) {
+			uint32_t fat_sector = lba + bs.reserved +
+								  cluster / (FAT_BLOCK_SIZE >> 2);
+
+			/* Read FAT */
+			if (fat_sector != cached_fat_sector) {
+				if (mmc_block_read(sector, fat_sector, 1)) {
+					/* Unable to read the FAT table. */
+					SERIAL_PUTI(0x04);
+					return -1;
+				}
+				cached_fat_sector = fat_sector;
+			}
+
+			uint32_t prev_cluster = cluster;
+			cluster = sector[cluster % (FAT_BLOCK_SIZE >> 2)] & 0x0fffffff;
+			if (cluster == prev_cluster + 1)
+				num_data_sectors += bs.cluster_size;
+			else
+				break;
+		}
 
 		/* Read file data */
-		if (mmc_block_read(ld_addr, lba + bs.reserved + bs.fat32_length * bs.fats
-						+ (cluster-2) * bs.cluster_size, bs.cluster_size)) {
+		if (mmc_block_read(ld_addr, data_sector, num_data_sectors)) {
 			/* Unable to read from first partition. */
 			SERIAL_PUTI(0x03);
 			return -1;
 		}
-		ld_addr += bs.cluster_size * FAT_BLOCK_SIZE;
+		ld_addr += num_data_sectors * FAT_BLOCK_SIZE;
 
-		/* Read FAT */
-		if (fat_sector != old_fat_sector) {
-			if (mmc_block_read(sector, fat_sector, 1)) {
-				/* Unable to read the FAT table. */
-				SERIAL_PUTI(0x04);
-				return -1;
-			}
-			old_fat_sector = fat_sector;
-		}
-
-		cluster = sector[cluster % (FAT_BLOCK_SIZE >> 2)] & 0x0fffffff;
 		if ((cluster >= 0x0ffffff0) || (cluster <= 1))
 			break;
 	}
