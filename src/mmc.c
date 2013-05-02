@@ -134,17 +134,13 @@ int mmc_init(void)
 	/* reset */
 	mmc_cmd(0, 0, 0x80, 0, resp);
 	mmc_cmd(8, 0x1aa, 0x1, MSC_RESPONSE_R1, resp);
-	mmc_cmd(55, 0, 0x1, MSC_RESPONSE_R1, resp);
 
-	mmc_cmd(41, 0x40ff8000, 0x3, MSC_RESPONSE_R3, resp);
-
-	while (retries-- && !(resp[4] & 0x80)) {
+	do {
 		mmc_cmd(55, 0, 0x1, MSC_RESPONSE_R1, resp);
 		mmc_cmd(41, 0x40ff8000, 0x3, MSC_RESPONSE_R3, resp);
-		udelay(100000);
-	}
+	} while (!(resp[4] & 0x80) && --retries);
 
-	if (!(resp[4] & 0x80)) {
+	if (!retries) {
 		/* Initialization failed. */
 		SERIAL_PUTI(0x10);
 		return -1;
