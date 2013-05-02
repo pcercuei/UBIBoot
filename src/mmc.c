@@ -65,21 +65,20 @@ static void mmc_cmd(uint16_t cmd, unsigned int arg, unsigned int cmdat, int word
 	}
 }
 
-int mmc_block_read(uint32_t *dst, uint32_t src, size_t nb)
+int mmc_block_read(uint32_t *dst, uint32_t src, uint32_t num_blocks)
 {
-	uint32_t nob = nb;
 	uint8_t resp[20];
 
 	mmc_cmd(16, 0x200, 0x401, MSC_RESPONSE_R1, resp);
 	__msc_set_blklen(0x200);
-	__msc_set_nob(nob);
+	__msc_set_nob(num_blocks);
 
 	if (is_sdhc) 
 		mmc_cmd(18, src, 0x409, MSC_RESPONSE_R1, resp);
 	else
 		mmc_cmd(18, src * MMC_SECTOR_SIZE, 0x409, MSC_RESPONSE_R1, resp);
 
-	for (; nob >= 1; nob--) {
+	for (; num_blocks >= 1; num_blocks--) {
 		uint32_t cnt = 128, timeout = 0x3ffffff;
 
 		while (--timeout) {
