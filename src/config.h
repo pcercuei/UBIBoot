@@ -65,7 +65,7 @@
 #define FAT_BOOTFILE_ALT_NAME	"VMLINUZ"
 #define FAT_BOOTFILE_ALT_EXT	"BAK"
 
-#define LD_ADDR				0x80600000
+#define LD_ADDR				0x00600000
 
 #endif
 

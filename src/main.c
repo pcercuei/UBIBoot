@@ -80,7 +80,6 @@ void c_main(void)
 	register uint32_t reg;
 	int boot = 0;
 	int mmc_inited;
-	long offset;
 
 #if BENCHMARK
 	/* Setup 3 MHz timer, 64-bit wrap, abrupt stop. */
@@ -101,38 +100,30 @@ void c_main(void)
 
 	/* Tests on JZ4770 show that the data cache lines that contain the boot
 	 * loader are not marked as dirty initially. Therefore, if those cache
-	 * lines are evicted, the data is lost. To avoid that, we copy the data
-	 * into SDRAM, by copying from kseg0 (cached) to the same area in kseg1
-	 * (uncached).
+	 * lines are evicted, the data is lost. To avoid that, we load to the
+	 * uncached kseg1 virtual address region, so we never trigger a cache
+	 * miss and therefore cause no evictions.
 	 */
-	for (offset = 0; offset < CFG_DCACHE_SIZE; offset += 16) {
-		volatile uint32_t *p0 = (volatile uint32_t *)(KSEG0 + offset);
-		volatile uint32_t *p1 = (volatile uint32_t *)(KSEG1 + offset);
-		p1[0] = p0[0];
-		p1[1] = p0[1];
-		p1[2] = p0[2];
-		p1[3] = p0[3];
-	}
 
 	mmc_inited = !mmc_init();
 	if (mmc_inited) {
 		/* Alt key not pressed: try to boot the regular kernel;
 		 * if it fails, try to boot the alt kernel */
 		if (!alt_key_pressed()) {
-			boot = !mmc_load_kernel((void *) LD_ADDR,
+			boot = !mmc_load_kernel((void *) (KSEG1 + LD_ADDR),
 						FAT_BOOTFILE_NAME, FAT_BOOTFILE_EXT);
 			if (!boot)
-				boot = !mmc_load_kernel((void *) LD_ADDR,
+				boot = !mmc_load_kernel((void *) (KSEG1 + LD_ADDR),
 							FAT_BOOTFILE_ALT_NAME, FAT_BOOTFILE_ALT_EXT);
 		}
 
 		/* Alt key is pressed: try to boot the alt kernel;
 		 * if it fails, try to boot the regular kernel */
 		else {
-			boot = !mmc_load_kernel((void *) LD_ADDR,
+			boot = !mmc_load_kernel((void *) (KSEG1 + LD_ADDR),
 						FAT_BOOTFILE_ALT_NAME, FAT_BOOTFILE_ALT_EXT);
 			if (!boot)
-				boot = !mmc_load_kernel((void *) LD_ADDR,
+				boot = !mmc_load_kernel((void *) (KSEG1 + LD_ADDR),
 							FAT_BOOTFILE_NAME, FAT_BOOTFILE_EXT);
 		}
 	}
@@ -148,7 +139,7 @@ void c_main(void)
 	if (!boot) {
 		nand_init();
 #ifdef USE_UBI
-		if (ubi_load_kernel((void *) LD_ADDR)) {
+		if (ubi_load_kernel((void *) (KSEG1 + LD_ADDR))) {
 			SERIAL_PUTS("Unable to boot from NAND.\n");
 			return;
 		}
@@ -171,8 +162,11 @@ void c_main(void)
 
 	set_mem_param();
 
+	/* Since we load to kseg1, there is no data we want to keep in the cache,
+	 * so no need to flush it to RAM.
 	jz_flush_dcache();
 	jz_flush_icache();
+	*/
 
 	SERIAL_PUTS("Kernel loaded. Executing...\n");
 
@@ -183,7 +177,7 @@ void c_main(void)
 				"mtc0 %0, $13\n\t" : "=r"(reg) :);
 
 	/* Boot the kernel */
-	((void (*)(int, char**, char**, int*)) LD_ADDR) (
+	((void (*)(int, char**, char**, int*)) (KSEG0 + LD_ADDR)) (
 			ARRAY_SIZE(kernel_params), kernel_params, NULL, NULL );
 }
 
