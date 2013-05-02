@@ -65,7 +65,7 @@ static void mmc_cmd(uint16_t cmd, unsigned int arg, unsigned int cmdat, int word
 	}
 }
 
-int mmc_block_read(uint8_t *dst, uint32_t src, size_t nb)
+int mmc_block_read(uint32_t *dst, uint32_t src, size_t nb)
 {
 	uint32_t nob = nb;
 	uint8_t resp[20];
@@ -111,15 +111,8 @@ int mmc_block_read(uint8_t *dst, uint32_t src, size_t nb)
 
 		/* Read data from RXFIFO. It could be FULL or PARTIAL FULL */
 		while (cnt--) {
-			uint32_t data;
-
 			while (__msc_get_stat() & MSC_STAT_DATA_FIFO_EMPTY);
-			data = __msc_rd_rxfifo();
-
-			*dst++ = (uint8_t)(data >> 0);
-			*dst++ = (uint8_t)(data >> 8);
-			*dst++ = (uint8_t)(data >> 16);
-			*dst++ = (uint8_t)(data >> 24);
+			*dst++ = __msc_rd_rxfifo();
 		}
 	}
 

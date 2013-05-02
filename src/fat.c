@@ -12,7 +12,7 @@ static int get_first_partition(uint32_t *lba)
 {
 	struct mbr mbr;
 
-	if (mmc_block_read((uint8_t *) &mbr, 0, 1)) {
+	if (mmc_block_read((uint32_t *) &mbr, 0, 1)) {
 		/* Unable to read bootsector. */
 		SERIAL_PUTI(0x00);
 		return -1;
@@ -35,12 +35,12 @@ static int get_first_partition(uint32_t *lba)
 	return 0;
 }
 
-static int load_from_cluster(uint32_t lba, uint32_t cluster, unsigned char *ld_addr)
+static int load_from_cluster(uint32_t lba, uint32_t cluster, void *ld_addr)
 {
 	uint32_t old_fat_sector = 0;
 
 	while(1) {
-		uint8_t sector[FAT_BLOCK_SIZE];
+		uint32_t sector[FAT_BLOCK_SIZE >> 2];
 		uint32_t fat_sector = lba + bs.reserved + (cluster / (FAT_BLOCK_SIZE >> 2));
 
 		/* Read file data */
@@ -62,7 +62,7 @@ static int load_from_cluster(uint32_t lba, uint32_t cluster, unsigned char *ld_a
 			old_fat_sector = fat_sector;
 		}
 
-		cluster = ((uint32_t *)sector) [cluster % (FAT_BLOCK_SIZE >> 2)] & 0x0fffffff;
+		cluster = sector[cluster % (FAT_BLOCK_SIZE >> 2)] & 0x0fffffff;
 		if ((cluster >= 0x0ffffff0) || (cluster <= 1))
 			break;
 	}
@@ -70,10 +70,10 @@ static int load_from_cluster(uint32_t lba, uint32_t cluster, unsigned char *ld_a
 	return 0;
 }
 
-static int load_kernel_lba(uint32_t lba,
-			unsigned char *ld_addr, const char *name, const char *ext)
+static int load_kernel_lba(uint32_t lba, void *ld_addr,
+						   const char *name, const char *ext)
 {
-	uint8_t sector[FAT_BLOCK_SIZE];
+	uint32_t sector[FAT_BLOCK_SIZE >> 2];
 	uint32_t cur_sect;
 	size_t i, j;
 	struct volume_info vinfo;
@@ -147,8 +147,7 @@ static int load_kernel_lba(uint32_t lba,
 	return -1;
 }
 
-int mmc_load_kernel(unsigned char *ld_addr,
-			const char *name, const char *ext)
+int mmc_load_kernel(void *ld_addr, const char *name, const char *ext)
 {
 	uint32_t lba;
 	int err;

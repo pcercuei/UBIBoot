@@ -119,20 +119,20 @@ void c_main(void)
 		/* Alt key not pressed: try to boot the regular kernel;
 		 * if it fails, try to boot the alt kernel */
 		if (!alt_key_pressed()) {
-			boot = !mmc_load_kernel((unsigned char *) LD_ADDR,
+			boot = !mmc_load_kernel((void *) LD_ADDR,
 						FAT_BOOTFILE_NAME, FAT_BOOTFILE_EXT);
 			if (!boot)
-				boot = !mmc_load_kernel((unsigned char *) LD_ADDR,
+				boot = !mmc_load_kernel((void *) LD_ADDR,
 							FAT_BOOTFILE_ALT_NAME, FAT_BOOTFILE_ALT_EXT);
 		}
 
 		/* Alt key is pressed: try to boot the alt kernel;
 		 * if it fails, try to boot the regular kernel */
 		else {
-			boot = !mmc_load_kernel((unsigned char *) LD_ADDR,
+			boot = !mmc_load_kernel((void *) LD_ADDR,
 						FAT_BOOTFILE_ALT_NAME, FAT_BOOTFILE_ALT_EXT);
 			if (!boot)
-				boot = !mmc_load_kernel((unsigned char *) LD_ADDR,
+				boot = !mmc_load_kernel((void *) LD_ADDR,
 							FAT_BOOTFILE_NAME, FAT_BOOTFILE_EXT);
 		}
 	}
@@ -148,7 +148,7 @@ void c_main(void)
 	if (!boot) {
 		nand_init();
 #ifdef USE_UBI
-		if (ubi_load_kernel((unsigned char *) LD_ADDR)) {
+		if (ubi_load_kernel((void *) LD_ADDR)) {
 			SERIAL_PUTS("Unable to boot from NAND.\n");
 			return;
 		}

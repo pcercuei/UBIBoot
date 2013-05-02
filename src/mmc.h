@@ -8,6 +8,6 @@
 #define MMC_SECTOR_SIZE 512
 
 int mmc_init(void);
-int mmc_block_read(uint8_t *dst, uint32_t src, size_t nb);
+int mmc_block_read(uint32_t *dst, uint32_t src, size_t nb);
 
 #endif
