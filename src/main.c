@@ -48,7 +48,7 @@ static char *kernel_params [] = {
 
 static void set_alt_param(void)
 {
-	kernel_params[3] = "alt";
+	kernel_params[3] = "rootfs_bak";
 }
 
 static void write_hex_digits(unsigned int value, char *last_digit)
