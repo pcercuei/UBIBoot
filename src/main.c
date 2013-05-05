@@ -37,8 +37,9 @@ static char *kernel_params [] = {
 	[1] = "mem=0x0000M",
 	[2] = "mem=0x0000M@0x30000000",
 	[3] = "",
+	[4] = "",
 #if BENCHMARK
-	[4] = "bootbench=0x0000000000000000",
+	"bootbench=0x0000000000000000",
 #endif
 	"hwvariant=" VARIANT,
 #ifdef JZ_SLCD_PANEL
@@ -48,7 +49,12 @@ static char *kernel_params [] = {
 
 static void set_alt_param(void)
 {
-	kernel_params[3] = "rootfs_bak";
+	kernel_params[3] = "kernel_bak";
+}
+
+static void set_alt2_param(void)
+{
+	kernel_params[4] = "rootfs_bak";
 }
 
 static void write_hex_digits(unsigned int value, char *last_digit)
@@ -112,9 +118,11 @@ void c_main(void)
 		if (!alt_key_pressed()) {
 			boot = !mmc_load_kernel((void *) (KSEG1 + LD_ADDR),
 						FAT_BOOTFILE_NAME, FAT_BOOTFILE_EXT);
-			if (!boot)
+			if (!boot) {
 				boot = !mmc_load_kernel((void *) (KSEG1 + LD_ADDR),
 							FAT_BOOTFILE_ALT_NAME, FAT_BOOTFILE_ALT_EXT);
+				set_alt_param();
+			}
 		}
 
 		/* Alt key is pressed: try to boot the alt kernel;
@@ -125,6 +133,8 @@ void c_main(void)
 			if (!boot)
 				boot = !mmc_load_kernel((void *) (KSEG1 + LD_ADDR),
 							FAT_BOOTFILE_NAME, FAT_BOOTFILE_EXT);
+			else
+				set_alt_param();
 		}
 	}
 
@@ -158,7 +168,7 @@ void c_main(void)
 #endif
 
 	if (alt2_key_pressed())
-		set_alt_param();
+		set_alt2_param();
 
 	set_mem_param();
 
