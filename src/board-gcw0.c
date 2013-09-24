@@ -13,7 +13,7 @@
 /* Authorized values: 1 2 3 4 6 8 12 */
 #define CFG_CDIV  1
 #define CFG_H0DIV 6
-#define CFG_H1DIV 3
+#define CFG_H1DIV 6
 #define CFG_H2DIV 6
 #define CFG_PDIV  6
 #define CFG_C1DIV 2
