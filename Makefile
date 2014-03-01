@@ -20,7 +20,8 @@ OBJCOPY = $(CROSS_COMPILE)objcopy
 OBJDUMP = $(CROSS_COMPILE)objdump
 NM = $(CROSS_COMPILE)nm
 
-CFLAGS	:= -Wall -mips32 -Os -fno-pic -mno-abicalls -DBOARD_$(BOARD)
+CFLAGS	:= -Wall -mips32 -Os -fno-pic -mno-abicalls
+CPPFLAGS := -DBOARD_$(BOARD) -DJZ_VERSION=$(JZ_VERSION)
 LDFLAGS	:= -nostdlib -EL -T target-$(BOARD).ld
 
 OUTDIR	:= output/$(CONFIG)
@@ -34,21 +35,21 @@ ifdef GC_FUNCTIONS
 endif
 
 ifdef USE_SERIAL
-	CFLAGS += -DUSE_SERIAL
+	CPPFLAGS += -DUSE_SERIAL
 	OBJS += serial.o
 endif
 
 ifdef BKLIGHT_ON
-	CFLAGS += -DBKLIGHT_ON
+	CPPFLAGS += -DBKLIGHT_ON
 endif
 
 ifdef USE_NAND
-	CFLAGS += -DUSE_NAND
+	CPPFLAGS += -DUSE_NAND
 	OBJS += nand.o
 endif
 
 ifdef USE_UBI
-	CFLAGS += -DUSE_UBI
+	CPPFLAGS += -DUSE_UBI
 	OBJS += ubi.o
 endif
 
@@ -74,26 +75,26 @@ $(BINFILES): $(OUTDIR)/%.bin: $(OUTDIR)/%.elf
 $(OUTDIR)/%.o: src/%.c
 	@mkdir -p $(@D)
 	$(SUM) "  CC      $@"
-	$(CMD)$(CC) $(CFLAGS) -c $< -o $@
+	$(CMD)$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 $(OUTDIR)/%.o: src/%.S
 	@mkdir -p $(@D)
 	$(SUM) "  CC      $@"
-	$(CMD)$(CC) $(CFLAGS) -c $< -o $@
+	$(CMD)$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 CFLAGS_FOR_VARIANT=$(CFLAGS) -DVARIANT="\"$(1)\"" $(CFLAGS_$(1))
 
 $(OUTDIR)/board-$(BOARD)_%.o: src/board-$(BOARD).c
 	@mkdir -p $(@D)
 	$(SUM) "  CC      $@"
-	$(CMD)$(CC) \
+	$(CMD)$(CC) $(CPPFLAGS) \
 		$(call CFLAGS_FOR_VARIANT,$(@:$(OUTDIR)/board-$(BOARD)_%.o=%)) \
 		-c $< -o $@
 
 $(OUTDIR)/main_%.o: src/main.c
 	@mkdir -p $(@D)
 	$(SUM) "  CC      $@"
-	$(CMD)$(CC) \
+	$(CMD)$(CC) $(CPPFLAGS) \
 		$(call CFLAGS_FOR_VARIANT,$(@:$(OUTDIR)/main_%.o=%)) \
 		-c $< -o $@
 
