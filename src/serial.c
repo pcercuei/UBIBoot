@@ -2,6 +2,7 @@
 #include "board.h"
 
 #include "serial.h"
+#include "jz.h"
 
 void serial_putc (const char c)
 {

@@ -17,6 +17,7 @@
 #include "ubi.h"
 #include "mmc.h"
 #include "fat.h"
+#include "jz.h"
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
@@ -24,6 +25,8 @@
  * Uses the JZ4770 OST, so won't work on JZ4740.
  */
 #define BENCHMARK 0
+
+#define MMC_ID 0
 
 /* Kernel parameters list */
 static char *kernel_params [] = {
@@ -105,15 +108,15 @@ void c_main(void)
 	 * miss and therefore cause no evictions.
 	 */
 
-	mmc_inited = !mmc_init();
+	mmc_inited = !mmc_init(MMC_ID);
 	if (mmc_inited) {
 		/* Alt key not pressed: try to boot the regular kernel;
 		 * if it fails, try to boot the alt kernel */
 		if (!alt_key_pressed()) {
-			boot = !mmc_load_kernel((void *) (KSEG1 + LD_ADDR),
+			boot = !mmc_load_kernel(MMC_ID, (void *) (KSEG1 + LD_ADDR),
 						FAT_BOOTFILE_NAME, FAT_BOOTFILE_EXT);
 			if (!boot) {
-				boot = !mmc_load_kernel((void *) (KSEG1 + LD_ADDR),
+				boot = !mmc_load_kernel(MMC_ID, (void *) (KSEG1 + LD_ADDR),
 							FAT_BOOTFILE_ALT_NAME, FAT_BOOTFILE_ALT_EXT);
 				set_alt_param();
 			}
@@ -122,10 +125,10 @@ void c_main(void)
 		/* Alt key is pressed: try to boot the alt kernel;
 		 * if it fails, try to boot the regular kernel */
 		else {
-			boot = !mmc_load_kernel((void *) (KSEG1 + LD_ADDR),
+			boot = !mmc_load_kernel(MMC_ID, (void *) (KSEG1 + LD_ADDR),
 						FAT_BOOTFILE_ALT_NAME, FAT_BOOTFILE_ALT_EXT);
 			if (!boot)
-				boot = !mmc_load_kernel((void *) (KSEG1 + LD_ADDR),
+				boot = !mmc_load_kernel(MMC_ID, (void *) (KSEG1 + LD_ADDR),
 							FAT_BOOTFILE_NAME, FAT_BOOTFILE_EXT);
 			else
 				set_alt_param();

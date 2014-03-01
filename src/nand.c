@@ -12,6 +12,7 @@
 #include "serial.h"
 #include "nand.h"
 #include "config.h"
+#include "jz.h"
 
 /*
  * NAND flash definitions

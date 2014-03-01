@@ -8,11 +8,11 @@
 
 static struct boot_sector bs;
 
-static int get_first_partition(uint32_t *lba)
+static int get_first_partition(unsigned int id, uint32_t *lba)
 {
 	struct mbr mbr;
 
-	if (mmc_block_read((uint32_t *) &mbr, 0, 1)) {
+	if (mmc_block_read(id, (uint32_t *) &mbr, 0, 1)) {
 		/* Unable to read bootsector. */
 		SERIAL_PUTI(0x00);
 		return -1;
@@ -35,7 +35,8 @@ static int get_first_partition(uint32_t *lba)
 	return 0;
 }
 
-static int load_from_cluster(uint32_t lba, uint32_t cluster, void *ld_addr)
+static int load_from_cluster(unsigned int id, uint32_t lba,
+			uint32_t cluster, void *ld_addr)
 {
 	uint32_t sector[FAT_BLOCK_SIZE >> 2];
 	uint32_t cached_fat_sector = -1;
@@ -55,7 +56,7 @@ static int load_from_cluster(uint32_t lba, uint32_t cluster, void *ld_addr)
 
 			/* Read FAT */
 			if (fat_sector != cached_fat_sector) {
-				if (mmc_block_read(sector, fat_sector, 1)) {
+				if (mmc_block_read(id, sector, fat_sector, 1)) {
 					/* Unable to read the FAT table. */
 					SERIAL_PUTI(0x04);
 					return -1;
@@ -72,7 +73,7 @@ static int load_from_cluster(uint32_t lba, uint32_t cluster, void *ld_addr)
 		}
 
 		/* Read file data */
-		if (mmc_block_read(ld_addr, data_sector, num_data_sectors)) {
+		if (mmc_block_read(id, ld_addr, data_sector, num_data_sectors)) {
 			/* Unable to read from first partition. */
 			SERIAL_PUTI(0x03);
 			return -1;
@@ -86,7 +87,7 @@ static int load_from_cluster(uint32_t lba, uint32_t cluster, void *ld_addr)
 	return 0;
 }
 
-static int load_kernel_lba(uint32_t lba, void *ld_addr,
+static int load_kernel_lba(unsigned int id, uint32_t lba, void *ld_addr,
 						   const char *name, const char *ext)
 {
 	uint32_t sector[FAT_BLOCK_SIZE >> 2];
@@ -96,7 +97,7 @@ static int load_kernel_lba(uint32_t lba, void *ld_addr,
 	size_t name_len = strlen(name);
 	size_t ext_len = strlen(ext);
 
-	if (mmc_block_read(sector, lba, 1)) {
+	if (mmc_block_read(id, sector, lba, 1)) {
 		/* Unable to read from first partition. */
 		SERIAL_PUTI(0x03);
 		return -1;
@@ -119,7 +120,7 @@ static int load_kernel_lba(uint32_t lba, void *ld_addr,
 		struct dir_entry *entry;
 
 		/* Read one sector */
-		if (mmc_block_read(sector, cur_sect, 1)) {
+		if (mmc_block_read(id, sector, cur_sect, 1)) {
 			/* Unable to read rootdir sector. */
 			SERIAL_PUTI(0x06);
 			return -1;
@@ -152,7 +153,7 @@ static int load_kernel_lba(uint32_t lba, void *ld_addr,
 				continue;
 
 			SERIAL_PUTS("MMC: Loading kernel file...\n");
-			return load_from_cluster(lba,
+			return load_from_cluster(id, lba,
 						entry->starthi << 16
 						| entry->start, ld_addr);
 		}
@@ -163,15 +164,16 @@ static int load_kernel_lba(uint32_t lba, void *ld_addr,
 	return -1;
 }
 
-int mmc_load_kernel(void *ld_addr, const char *name, const char *ext)
+int mmc_load_kernel(unsigned int id, void *ld_addr,
+			const char *name, const char *ext)
 {
 	uint32_t lba;
 	int err;
 
-	err = get_first_partition(&lba);
+	err = get_first_partition(id, &lba);
 	if (err)
 		return err;
 
-	return load_kernel_lba(lba, ld_addr, name, ext);
+	return load_kernel_lba(id, lba, ld_addr, name, ext);
 }
 

@@ -5,6 +5,7 @@
 #include "config.h"
 #include "sdram.h"
 #include "serial.h"
+#include "jz.h"
 
 #define PIN_X (32*4 + 28)		/* Port 4 pin 28: X button */
 #define PIN_Y (32*4 + 27)		/* Port 4 pin 27: Y button */
@@ -312,7 +313,6 @@ void board_init(void)
 #endif
 	__cpm_start_msc0();
 	__cpm_select_msc_clk(0, 1);
-	__msc_set_rdto(0xffff);
 }
 
 void udelay(unsigned int us)

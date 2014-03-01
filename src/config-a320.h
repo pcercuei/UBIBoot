@@ -7,8 +7,6 @@
 #define CFG_CPU_SPEED		336000000
 #define CFG_EXTAL			12000000
 
-#include "jz4740.h"
-
 /* serial parameters */
 #define UART_BASE			UART0_BASE
 #define CONFIG_BAUDRATE		57600

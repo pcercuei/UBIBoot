@@ -11,6 +11,7 @@
 
 #include "board.h"
 #include "serial.h"
+#include "jz.h"
 
 #define PIN_X (32*3 + 19)		/* Port 3 pin 19: X button */
 #define PIN_Y (32*3 + 2)		/* Port 3 pin 2:  Y button */
