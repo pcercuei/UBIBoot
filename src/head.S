@@ -34,7 +34,7 @@ _start:
 	addiu zero, zero, 0xffff
 #endif
 
-	la	sp, 0x80004000
+	la	sp, __stack
 	j	c_main
 	nop
 

@@ -28,5 +28,7 @@ SECTIONS
 	.sbss : { *(.sbss*) } > ram
 	.bss : { *(.bss*) } > ram
 	. = ALIGN (4);
+
+	__stack = 0x80002000;
 }
 
