@@ -26,8 +26,7 @@ LDFLAGS	:= -nostdlib -EL -T target-$(BOARD).ld
 
 OUTDIR	:= output/$(CONFIG)
 
-OBJS	:= utils.o mmc.o fat.o
-OBJS	+= head-$(BOARD).o
+OBJS	:= utils.o mmc.o fat.o head.o
 
 ifdef GC_FUNCTIONS
 	CFLAGS += -ffunction-sections

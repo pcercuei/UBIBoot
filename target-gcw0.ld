@@ -8,8 +8,8 @@ MEMORY
 SECTIONS
 {
 	. = ALIGN(4);
-	.text : { output/gcw0/head-gcw0.o(.text*) } > ram
-	.text : { *(EXCLUDE_FILE (output/gcw0/head-gcw0.o) .text*) } > ram
+	.text : { output/gcw0/head.o(.text*) } > ram
+	.text : { *(EXCLUDE_FILE (output/gcw0/head.o) .text*) } > ram
 
 	. = ALIGN(4);
 	.rodata : { *(.rodata*) } > ram

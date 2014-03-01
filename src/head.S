@@ -24,9 +24,15 @@ _start:
 	// setup stack, jump to C code
 	//----------------------------------------------------
 
-	// This does nothing, but the JZ won't load the program
+#if JZ_VERSION >= 4770
+	// The JZ4770 won't load the program
+	// if the first word is not 'MSPL'
+	.word 0x4d53504c
+#else
+	// The JZ4740 won't load the program
 	// if the first byte is not 0xff.
-	addiu zero,zero,0xffff
+	addiu zero, zero, 0xffff
+#endif
 
 	la	sp, 0x80004000
 	j	c_main
