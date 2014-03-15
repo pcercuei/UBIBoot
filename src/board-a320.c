@@ -15,6 +15,7 @@
 
 #define PIN_X (32*3 + 19)		/* Port 3 pin 19: X button */
 #define PIN_Y (32*3 + 2)		/* Port 3 pin 2:  Y button */
+#define PIN_A (32*3 + 0)		/* Port 3 pin 0: A button */
 #define PIN_BKLIGHT	(32*3+31)	/* Port 3 pin 31: Backlight PWM  */
 
 #define CDIV 1
@@ -212,6 +213,11 @@ int alt_key_pressed(void)
 int alt2_key_pressed(void)
 {
 	return !__gpio_get_pin(PIN_Y);
+}
+
+int alt3_key_pressed(void)
+{
+	return !__gpio_get_pin(PIN_A);
 }
 
 #ifdef BKLIGHT_ON

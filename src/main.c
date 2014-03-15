@@ -35,6 +35,7 @@ static char *kernel_params [] = {
 	[2] = "mem=0x0000M@0x30000000",
 	[3] = "",
 	[4] = "",
+	[5] = "",
 #if BENCHMARK
 	"bootbench=0x0000000000000000",
 #endif
@@ -52,6 +53,14 @@ static void set_alt_param(void)
 static void set_alt2_param(void)
 {
 	kernel_params[4] = "rootfs_bak";
+}
+
+static void set_logo_param(int show_logo)
+{
+	if (show_logo)
+		kernel_params[5] = "fbcon=bind:0";
+	else
+		kernel_params[5] = "logo.nologo";
 }
 
 static void write_hex_digits(unsigned int value, char *last_digit)
@@ -167,6 +176,7 @@ void c_main(void)
 	if (alt2_key_pressed())
 		set_alt2_param();
 
+	set_logo_param(!alt3_key_pressed());
 	set_mem_param();
 
 	/* Since we load to kseg1, there is no data we want to keep in the cache,

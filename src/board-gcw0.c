@@ -7,6 +7,7 @@
 #include "serial.h"
 #include "jz.h"
 
+#define PIN_A (32*4 + 29)		/* Port 4 pin 29: A button */
 #define PIN_X (32*4 + 28)		/* Port 4 pin 28: X button */
 #define PIN_Y (32*4 + 27)		/* Port 4 pin 27: Y button */
 #define PIN_BKLIGHT	(32*4+1)	/* Port 4 pin 1: Backlight PWM  */
@@ -339,6 +340,12 @@ int alt2_key_pressed(void)
 {
 	__gpio_as_input(PIN_Y);
 	return !__gpio_get_pin(PIN_Y);
+}
+
+int alt3_key_pressed(void)
+{
+	__gpio_as_input(PIN_A);
+	return !__gpio_get_pin(PIN_A);
 }
 
 unsigned int get_memory_size(void)
