@@ -18,7 +18,7 @@
 #define CFG_H1DIV 6
 #define CFG_H2DIV 6
 #define CFG_PDIV  6
-#define CFG_C1DIV 2
+#define CFG_C1DIV 6
 
 
 #define FVCO_MIN  300*1000*1000	/* 300 MHz */
