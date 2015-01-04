@@ -173,6 +173,12 @@ void c_main(void)
 	register uint32_t reg;
 	int boot = 0;
 	int mmc_inited;
+	extern unsigned int _bss_start, _bss_end;
+	unsigned int *ptr;
+
+	/* Clear the BSS section */
+	for (ptr = &_bss_start; ptr < &_bss_end; ptr += 4)
+		*ptr = 0;
 
 #if BENCHMARK
 	/* Setup 3 MHz timer, 64-bit wrap, abrupt stop. */

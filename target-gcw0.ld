@@ -25,9 +25,11 @@ SECTIONS
 	.got : { *(.got*) } > ram
 
 	. = ALIGN(4);
+	_bss_start = ABSOLUTE(.);
 	.sbss : { *(.sbss*) } > ram
 	.bss : { *(.bss*) } > ram
 	. = ALIGN (4);
+	_bss_end = ABSOLUTE(.);
 
 	__stack = 0x80002000;
 }
