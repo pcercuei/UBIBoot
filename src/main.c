@@ -43,6 +43,9 @@ enum {
 #ifdef JZ_SLCD_PANEL
 	PARAM_SLCD_PANEL,
 #endif
+#ifdef RFKILL_STATE
+	PARAM_RFKILL_STATE,
+#endif
 	/* Arguments for user space (init and later). */
 	PARAM_SEPARATOR,
 	PARAM_HWVARIANT,
@@ -68,6 +71,9 @@ static char *kernel_params[] = {
 	[PARAM_LOGO] = "",
 #ifdef JZ_SLCD_PANEL
 	[PARAM_SLCD_PANEL] = "jz4740_slcd_panels.panel=" JZ_SLCD_PANEL,
+#endif
+#ifdef RFKILL_STATE
+	[PARAM_RFKILL_STATE] = "rfkill.default_state=" STRINGIFY_IND(RFKILL_STATE),
 #endif
 	[PARAM_SEPARATOR] = "--",
 	[PARAM_HWVARIANT] = "hwvariant=" VARIANT,
