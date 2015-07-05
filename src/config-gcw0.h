@@ -8,5 +8,5 @@
 #define CFG_EXTAL			12000000
 
 /* serial parameters */
-#define UART_BASE			UART2_BASE
+#define LOG_UART			2
 #define CONFIG_BAUDRATE		57600

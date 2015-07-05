@@ -187,9 +187,9 @@ static void sdram_init(void)
 #ifdef USE_SERIAL
 void serial_setbrg(void)
 {
-	volatile u8 *uart_lcr = (volatile u8 *)(UART_BASE + OFF_LCR);
-	volatile u8 *uart_dlhr = (volatile u8 *)(UART_BASE + OFF_DLHR);
-	volatile u8 *uart_dllr = (volatile u8 *)(UART_BASE + OFF_DLLR);
+	volatile u8 *uart_lcr = (volatile u8 *)(UART_BASE(LOG_UART) + OFF_LCR);
+	volatile u8 *uart_dlhr = (volatile u8 *)(UART_BASE(LOG_UART) + OFF_DLHR);
+	volatile u8 *uart_dllr = (volatile u8 *)(UART_BASE(LOG_UART) + OFF_DLLR);
 	u32 baud_div, tmp;
 
 	baud_div = CFG_EXTAL / 16 / CONFIG_BAUDRATE;

@@ -913,8 +913,8 @@ static inline u32 jz_readl(u32 address)
  *************************************************************************/
 
 #define IRDA_BASE	UART0_BASE
-//#define UART_BASE	UART0_BASE
 #define UART_OFF	0x1000
+#define UART_BASE(n)	(UART0_BASE + (n) * UART_OFF)
 
 /* Register Offset */
 #define OFF_RDR		(0x00)	/* R  8b H'xx */

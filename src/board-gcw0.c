@@ -357,9 +357,9 @@ unsigned int get_memory_size(void)
 #ifdef USE_SERIAL
 void serial_setbrg(void)
 {
-	volatile u8 *uart_lcr = (u8 *)(UART_BASE + OFF_LCR);
-	volatile u8 *uart_dlhr = (u8 *)(UART_BASE + OFF_DLHR);
-	volatile u8 *uart_dllr = (u8 *)(UART_BASE + OFF_DLLR);
+	volatile u8 *uart_lcr = (u8 *)(UART_BASE(LOG_UART) + OFF_LCR);
+	volatile u8 *uart_dlhr = (u8 *)(UART_BASE(LOG_UART) + OFF_DLHR);
+	volatile u8 *uart_dllr = (u8 *)(UART_BASE(LOG_UART) + OFF_DLLR);
 	u32 baud_div, tmp;
 
 	baud_div = CFG_EXTAL / 16 / CONFIG_BAUDRATE;

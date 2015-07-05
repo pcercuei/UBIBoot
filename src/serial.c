@@ -6,8 +6,8 @@
 
 void serial_putc (const char c)
 {
-	volatile u8 *uart_lsr = (volatile u8 *)(UART_BASE + OFF_LSR);
-	volatile u8 *uart_tdr = (volatile u8 *)(UART_BASE + OFF_TDR);
+	volatile u8 *uart_lsr = (volatile u8 *)(UART_BASE(LOG_UART) + OFF_LSR);
+	volatile u8 *uart_tdr = (volatile u8 *)(UART_BASE(LOG_UART) + OFF_TDR);
 
 	if (c == '\n') serial_putc ('\r');
 
@@ -26,7 +26,7 @@ void serial_puts (const char *s)
 
 int serial_getc (void)
 {
-	volatile u8 *uart_rdr = (volatile u8 *)(UART_BASE + OFF_RDR);
+	volatile u8 *uart_rdr = (volatile u8 *)(UART_BASE(LOG_UART) + OFF_RDR);
 
 	while (!serial_tstc());
 
@@ -35,7 +35,7 @@ int serial_getc (void)
 
 int serial_tstc (void)
 {
-	volatile u8 *uart_lsr = (volatile u8 *)(UART_BASE + OFF_LSR);
+	volatile u8 *uart_lsr = (volatile u8 *)(UART_BASE(LOG_UART) + OFF_LSR);
 
 	if (*uart_lsr & UART_LSR_DR) {
 		/* Data in rfifo */
@@ -46,10 +46,10 @@ int serial_tstc (void)
 
 void serial_init(void)
 {
-	volatile u8 *uart_fcr = (volatile u8 *)(UART_BASE + OFF_FCR);
-	volatile u8 *uart_lcr = (volatile u8 *)(UART_BASE + OFF_LCR);
-	volatile u8 *uart_ier = (volatile u8 *)(UART_BASE + OFF_IER);
-	volatile u8 *uart_sircr = (volatile u8 *)(UART_BASE + OFF_SIRCR);
+	volatile u8 *uart_fcr = (volatile u8 *)(UART_BASE(LOG_UART) + OFF_FCR);
+	volatile u8 *uart_lcr = (volatile u8 *)(UART_BASE(LOG_UART) + OFF_LCR);
+	volatile u8 *uart_ier = (volatile u8 *)(UART_BASE(LOG_UART) + OFF_IER);
+	volatile u8 *uart_sircr = (volatile u8 *)(UART_BASE(LOG_UART) + OFF_SIRCR);
 
 	/* Disable port interrupts while changing hardware */
 	*uart_ier = 0;

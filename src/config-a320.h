@@ -8,7 +8,7 @@
 #define CFG_EXTAL			12000000
 
 /* serial parameters */
-#define UART_BASE			UART0_BASE
+#define LOG_UART			0
 #define CONFIG_BAUDRATE		57600
 
 /* NAND flash parameters */
