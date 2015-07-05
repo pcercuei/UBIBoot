@@ -192,7 +192,7 @@ void serial_setbrg(void)
 	volatile u8 *uart_dllr = (volatile u8 *)(UART_BASE(LOG_UART) + OFF_DLLR);
 	u32 baud_div, tmp;
 
-	baud_div = CFG_EXTAL / 16 / CONFIG_BAUDRATE;
+	baud_div = CFG_EXTAL / 16 / LOG_BAUDRATE;
 	tmp = *uart_lcr;
 	tmp |= UART_LCR_DLAB;
 	*uart_lcr = tmp;

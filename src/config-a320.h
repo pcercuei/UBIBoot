@@ -9,7 +9,7 @@
 
 /* serial parameters */
 #define LOG_UART			0
-#define CONFIG_BAUDRATE		57600
+#define LOG_BAUDRATE		57600
 
 /* NAND flash parameters */
 #define BUS_WIDTH	8

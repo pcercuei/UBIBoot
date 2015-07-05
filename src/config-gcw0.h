@@ -9,4 +9,4 @@
 
 /* serial parameters */
 #define LOG_UART			2
-#define CONFIG_BAUDRATE		57600
+#define LOG_BAUDRATE		57600
