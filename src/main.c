@@ -29,38 +29,56 @@
 #define MMC_ID 0
 
 /* Kernel parameters list */
-static char *kernel_params [] = {
-	[0] = "linux",
-	[1] = "mem=0x0000M",
-	[2] = "mem=0x0000M@0x30000000",
-	[3] = "",
-	[4] = "",
-	[5] = "",
-#if BENCHMARK
-	"bootbench=0x0000000000000000",
-#endif
-	"hwvariant=" VARIANT,
+
+enum {
+	/* Arguments for the kernel itself. */
+	PARAM_EXEC = 0,
+	PARAM_LOWMEM,
+	PARAM_HIGHMEM,
+	PARAM_LOGO,
 #ifdef JZ_SLCD_PANEL
-	"jz4740_slcd_panels.panel=" JZ_SLCD_PANEL,
+	PARAM_SLCD_PANEL,
+#endif
+	/* Arguments for user space (init and later). */
+	PARAM_SEPARATOR,
+	PARAM_HWVARIANT,
+	PARAM_KERNEL_BAK,
+	PARAM_ROOTFS_BAK,
+#if BENCHMARK
+	PARAM_BOOTBENCH,
+#endif
+};
+
+static char *kernel_params[] = {
+	[PARAM_EXEC] = "linux",
+	[PARAM_LOWMEM] = "mem=0x0000M",
+	[PARAM_HIGHMEM] = "mem=0x0000M@0x30000000",
+	[PARAM_LOGO] = "",
+#ifdef JZ_SLCD_PANEL
+	[PARAM_SLCD_PANEL] = "jz4740_slcd_panels.panel=" JZ_SLCD_PANEL,
+#endif
+	[PARAM_SEPARATOR] = "--",
+	[PARAM_HWVARIANT] = "hwvariant=" VARIANT,
+	[PARAM_KERNEL_BAK] = "",
+	[PARAM_ROOTFS_BAK] = "",
+#if BENCHMARK
+	[PARAM_BOOTBENCH] = "bootbench=0x0000000000000000",
 #endif
 };
 
 static void set_alt_param(void)
 {
-	kernel_params[3] = "kernel_bak";
+	kernel_params[PARAM_KERNEL_BAK] = "kernel_bak";
 }
 
 static void set_alt2_param(void)
 {
-	kernel_params[4] = "rootfs_bak";
+	kernel_params[PARAM_ROOTFS_BAK] = "rootfs_bak";
 }
 
 static void set_logo_param(int show_logo)
 {
-	if (show_logo)
-		kernel_params[5] = "fbcon=bind:0";
-	else
-		kernel_params[5] = "logo.nologo";
+	kernel_params[PARAM_LOGO] = show_logo ? "fbcon=bind:0" : "logo.nologo";
 }
 
 static void write_hex_digits(unsigned int value, char *last_digit)
@@ -82,8 +100,8 @@ static void set_mem_param(void)
 	unsigned int low_mem_size = mem_size > 256 ? 256 : mem_size;
 	unsigned int high_mem_size = mem_size > 256 ? mem_size - 256 : 0;
 
-	write_hex_digits(low_mem_size, &kernel_params[1][9]);
-	write_hex_digits(high_mem_size, &kernel_params[2][9]);
+	write_hex_digits(low_mem_size, &kernel_params[PARAM_LOWMEM][9]);
+	write_hex_digits(high_mem_size, &kernel_params[PARAM_HIGHMEM][9]);
 }
 
 
@@ -169,8 +187,10 @@ void c_main(void)
 	/* Stop timer. */
 	__tcu_stop_counter(15);
 	/* Store timer count in kernel command line. */
-	write_hex_digits(REG_OST_OSTCNTL, &kernel_params[4][27]);
-	write_hex_digits(REG_OST_OSTCNTH_BUF, &kernel_params[4][27 - 8]);
+	write_hex_digits(REG_OST_OSTCNTL,
+			&kernel_params[PARAM_BOOTBENCH][27]);
+	write_hex_digits(REG_OST_OSTCNTH_BUF,
+			&kernel_params[PARAM_BOOTBENCH][27 - 8]);
 #endif
 
 	if (alt2_key_pressed())
