@@ -7,6 +7,8 @@
 #define CFG_CPU_SPEED		1020000000
 #define CFG_EXTAL			12000000
 
+#define SYSPART_INIT		"/mininit-syspart"
+
 #define RFKILL_STATE		0
 
 /* serial parameters */

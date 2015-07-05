@@ -30,11 +30,30 @@
 
 /* Kernel parameters list */
 
+/* Fill in root device and file system type? */
+#if defined(SYSPART_INIT) || (defined(USE_UBI) && defined(UBI_ROOTFS_VOLUME))
+#define PASS_ROOTFS_PARAMS 1
+#else
+#define PASS_ROOTFS_PARAMS 0
+#endif
+
 enum {
 	/* Arguments for the kernel itself. */
 	PARAM_EXEC = 0,
 	PARAM_LOWMEM,
 	PARAM_HIGHMEM,
+#if defined(USE_UBI) && defined(UBI_ROOTFS_MTDNAME)
+	PARAM_UBIMTD,
+#endif
+#if PASS_ROOTFS_PARAMS
+	PARAM_ROOTDEV,
+	PARAM_ROOTTYPE,
+	PARAM_ROOTWAIT,
+#endif
+#ifdef SYSPART_INIT
+	PARAM_READONLY,
+	PARAM_INIT,
+#endif
 #ifdef USE_SERIAL
 	PARAM_CONSOLE_SERIAL,
 #endif
@@ -63,6 +82,18 @@ static char *kernel_params[] = {
 	[PARAM_EXEC] = "linux",
 	[PARAM_LOWMEM] = "mem=0x0000M",
 	[PARAM_HIGHMEM] = "mem=0x0000M@0x30000000",
+#if defined(USE_UBI) && defined(UBI_ROOTFS_MTDNAME)
+	[PARAM_UBIMTD] = "",
+#endif
+#if PASS_ROOTFS_PARAMS
+	[PARAM_ROOTDEV] = "",
+	[PARAM_ROOTTYPE] = "",
+	[PARAM_ROOTWAIT] = "rootwait",
+#endif
+#ifdef SYSPART_INIT
+	[PARAM_READONLY] = "ro",
+	[PARAM_INIT] = "init=" SYSPART_INIT,
+#endif
 #ifdef USE_SERIAL
 	[PARAM_CONSOLE_SERIAL] = "console=ttyS" STRINGIFY_IND(LOG_UART)
 			"," STRINGIFY_IND(LOG_BAUDRATE),
@@ -178,6 +209,14 @@ void c_main(void)
 			else
 				set_alt_param();
 		}
+
+		if (boot) {
+#if PASS_ROOTFS_PARAMS
+			kernel_params[PARAM_ROOTDEV] =
+					"root=/dev/mmcblk" STRINGIFY_IND(MMC_ID) "p1";
+			kernel_params[PARAM_ROOTTYPE] = "rootfstype=vfat";
+#endif
+		}
 	}
 
 	if (!mmc_inited || !boot)
@@ -194,6 +233,14 @@ void c_main(void)
 		if (ubi_load_kernel((void *) (KSEG1 + LD_ADDR))) {
 			SERIAL_PUTS("Unable to boot from NAND.\n");
 			return;
+		} else {
+#ifdef UBI_ROOTFS_MTDNAME
+			kernel_params[PARAM_UBIMTD] = "ubi.mtd=" UBI_ROOTFS_MTDNAME;
+#endif
+#if PASS_ROOTFS_PARAMS
+			kernel_params[PARAM_ROOTDEV] = "root=ubi0:" UBI_ROOTFS_VOLUME;
+			kernel_params[PARAM_ROOTTYPE] = "rootfstype=ubifs";
+#endif
 		}
 #else /* USE_UBI */
 #warning UBI is currently the only supported NAND file system and it was not selected.
