@@ -35,6 +35,10 @@ enum {
 	PARAM_EXEC = 0,
 	PARAM_LOWMEM,
 	PARAM_HIGHMEM,
+#ifdef USE_SERIAL
+	PARAM_CONSOLE_SERIAL,
+#endif
+	PARAM_CONSOLE_LOCAL,
 	PARAM_LOGO,
 #ifdef JZ_SLCD_PANEL
 	PARAM_SLCD_PANEL,
@@ -49,10 +53,18 @@ enum {
 #endif
 };
 
+#define STRINGIFY(s) #s
+#define STRINGIFY_IND(s) STRINGIFY(s)
+
 static char *kernel_params[] = {
 	[PARAM_EXEC] = "linux",
 	[PARAM_LOWMEM] = "mem=0x0000M",
 	[PARAM_HIGHMEM] = "mem=0x0000M@0x30000000",
+#ifdef USE_SERIAL
+	[PARAM_CONSOLE_SERIAL] = "console=ttyS" STRINGIFY_IND(LOG_UART)
+			"," STRINGIFY_IND(LOG_BAUDRATE),
+#endif
+	[PARAM_CONSOLE_LOCAL] = "console=tty0",
 	[PARAM_LOGO] = "",
 #ifdef JZ_SLCD_PANEL
 	[PARAM_SLCD_PANEL] = "jz4740_slcd_panels.panel=" JZ_SLCD_PANEL,
