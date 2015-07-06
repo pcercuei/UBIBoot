@@ -8,6 +8,7 @@
 #define CFG_EXTAL			12000000
 
 #define SYSPART_INIT		"/mininit-syspart"
+#define MININIT1_COMPAT
 
 #define RFKILL_STATE		0
 
