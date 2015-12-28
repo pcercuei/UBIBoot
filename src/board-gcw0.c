@@ -71,6 +71,9 @@ static void pll_init(void)
 	/* Wait for a stable output */
 	while (!__cpm_pll_is_on());
 	while (!(REG_CPM_CPPCR & CPM_CPPCR_PLLS));
+
+	/* Disable pll0/2 divider */
+	REG_CPM_CPCCR &= ~CPM_CPCCR_PCS;
 }
 
 static void ddr_mem_init(void)
