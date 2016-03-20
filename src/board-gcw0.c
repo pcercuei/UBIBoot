@@ -317,6 +317,13 @@ void board_init(void)
 #endif
 	__cpm_start_msc0();
 	__cpm_select_msc_clk(0, 1);
+
+	/* This is magic. If you know what Cop0 register $5 config 4 does,
+	 * please tell us. */
+	asm volatile ("li $2, 0xa9000000\n\t"
+			"mtc0 $2, $5, 4\n\t"
+			"nop\n\t"
+			::"r"(2));
 }
 
 void udelay(unsigned int us)
