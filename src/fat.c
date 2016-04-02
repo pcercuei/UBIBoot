@@ -7,7 +7,9 @@
 #include "mmc.h"
 #include "fat.h"
 
-static struct boot_sector bs;
+uint32_t lba_fat1;			/* sector of first FAT */
+uint32_t lba_data;			/* sector of first cluster (contains root dir) */
+uint8_t cluster_size;		/* sectors per cluster */
 
 static int get_first_partition(unsigned int id, uint32_t *lba)
 {
@@ -36,24 +38,49 @@ static int get_first_partition(unsigned int id, uint32_t *lba)
 	return 0;
 }
 
-static int load_from_cluster(unsigned int id, uint32_t lba,
-			uint32_t cluster, void *ld_addr)
+static int process_boot_sector(unsigned int id, uint32_t lba)
+{
+	uint32_t sector[FAT_BLOCK_SIZE >> 2];
+	struct boot_sector *bs;
+	struct volume_info *vinfo;
+
+	if (mmc_block_read(id, sector, lba, 1)) {
+		/* Unable to read from first partition. */
+		SERIAL_PUTI(0x03);
+		return -1;
+	}
+
+	bs = (void *)sector;
+	lba_fat1 = lba + bs->reserved;
+	lba_data = lba_fat1 + bs->fat32_length * bs->fats;
+	cluster_size = bs->cluster_size;
+
+	vinfo = (void *) sector + sizeof(struct boot_sector);
+	if (strncmp(vinfo->fs_type, "FAT32", 5)) {
+		/* No FAT32 filesystem detected. */
+		SERIAL_PUTI(0x05);
+		return -1;
+	}
+
+	SERIAL_PUTS("MMC: FAT32 filesystem detected.\n");
+	return 0;
+}
+
+static int load_from_cluster(unsigned int id, uint32_t cluster, void *ld_addr)
 {
 	uint32_t sector[FAT_BLOCK_SIZE >> 2];
 	uint32_t cached_fat_sector = -1;
 
 	while (1) {
-		uint32_t data_sector = lba + bs.reserved + bs.fat32_length * bs.fats +
-							   (cluster - 2) * bs.cluster_size;
-		uint32_t num_data_sectors = bs.cluster_size;
+		uint32_t data_sector = lba_data + (cluster - 2) * cluster_size;
+		uint32_t num_data_sectors = cluster_size;
 
 		/* Figure out how many consecutive clusters we can load.
 		 * Since every MMC command has a significant overhead, loading more
 		 * data at once gives a big speed boost.
 		 */
 		while (1) {
-			uint32_t fat_sector = lba + bs.reserved +
-								  cluster / (FAT_BLOCK_SIZE >> 2);
+			uint32_t fat_sector = lba_fat1 + cluster / (FAT_BLOCK_SIZE >> 2);
 
 			/* Read FAT */
 			if (fat_sector != cached_fat_sector) {
@@ -68,7 +95,7 @@ static int load_from_cluster(unsigned int id, uint32_t lba,
 			uint32_t prev_cluster = cluster;
 			cluster = sector[cluster % (FAT_BLOCK_SIZE >> 2)] & 0x0fffffff;
 			if (cluster == prev_cluster + 1)
-				num_data_sectors += bs.cluster_size;
+				num_data_sectors += cluster_size;
 			else
 				break;
 		}
@@ -88,40 +115,19 @@ static int load_from_cluster(unsigned int id, uint32_t lba,
 	return 0;
 }
 
-static int load_kernel_lba(unsigned int id, uint32_t lba, void *ld_addr,
-						   const char *name, const char *ext)
+static int load_kernel_file(unsigned int id, void *ld_addr,
+							const char *name, const char *ext)
 {
 	uint32_t sector[FAT_BLOCK_SIZE >> 2];
-	uint32_t cur_sect;
 	size_t i, j;
-	struct volume_info vinfo;
 	size_t name_len = strlen(name);
 	size_t ext_len = strlen(ext);
 
-	if (mmc_block_read(id, sector, lba, 1)) {
-		/* Unable to read from first partition. */
-		SERIAL_PUTI(0x03);
-		return -1;
-	}
-
-	memcpy(&bs, sector, sizeof(struct boot_sector));
-	memcpy(&vinfo, (void *) sector + sizeof(struct boot_sector),
-				sizeof(struct volume_info));
-
-	if (strncmp(vinfo.fs_type, "FAT32", 5)) {
-		/* No FAT32 filesystem detected. */
-		SERIAL_PUTI(0x05);
-		return -1;
-	}
-
-	SERIAL_PUTS("MMC: FAT32 filesystem detected.\n");
-
-	for (cur_sect = lba + bs.reserved + bs.fat32_length * bs.fats, i = 0;
-				i < bs.cluster_size; cur_sect++, i++) {
+	for (i = 0; i < cluster_size; i++) {
 		struct dir_entry *entry;
 
 		/* Read one sector */
-		if (mmc_block_read(id, sector, cur_sect, 1)) {
+		if (mmc_block_read(id, sector, lba_data + i, 1)) {
 			/* Unable to read rootdir sector. */
 			SERIAL_PUTI(0x06);
 			return -1;
@@ -154,9 +160,8 @@ static int load_kernel_lba(unsigned int id, uint32_t lba, void *ld_addr,
 				continue;
 
 			SERIAL_PUTS("MMC: Loading kernel file...\n");
-			return load_from_cluster(id, lba,
-						entry->starthi << 16
-						| entry->start, ld_addr);
+			return load_from_cluster(
+						id, entry->starthi << 16 | entry->start, ld_addr);
 		}
 	}
 
@@ -174,16 +179,20 @@ int mmc_load_kernel(unsigned int id, void *ld_addr, int alt)
 	if (err)
 		return err;
 
+	err = process_boot_sector(id, lba);
+	if (err)
+		return err;
+
 	for (i = 0; i < 2; i++) {
 		if (i == !!alt) {
 			/* try to load the regular kernel */
-			err = load_kernel_lba(id, lba, ld_addr,
+			err = load_kernel_file(id, ld_addr,
 					FAT_BOOTFILE_NAME, FAT_BOOTFILE_EXT);
 			if (!err)
 				return 0;
 		} else {
 			/* try to load the alt kernel */
-			err = load_kernel_lba(id, lba, ld_addr,
+			err = load_kernel_file(id, ld_addr,
 					FAT_BOOTFILE_ALT_NAME, FAT_BOOTFILE_ALT_EXT);
 			if (!err)
 				return 1;
