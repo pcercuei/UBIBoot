@@ -206,28 +206,11 @@ void c_main(void)
 
 	mmc_inited = !mmc_init(MMC_ID);
 	if (mmc_inited) {
-		/* Alt key not pressed: try to boot the regular kernel;
-		 * if it fails, try to boot the alt kernel */
-		if (!alt_key_pressed()) {
-			boot = !mmc_load_kernel(MMC_ID, (void *) (KSEG1 + LD_ADDR),
-						FAT_BOOTFILE_NAME, FAT_BOOTFILE_EXT);
-			if (!boot) {
-				boot = !mmc_load_kernel(MMC_ID, (void *) (KSEG1 + LD_ADDR),
-							FAT_BOOTFILE_ALT_NAME, FAT_BOOTFILE_ALT_EXT);
-				if (boot)
-					set_alt_param();
-			}
-		}
-
-		/* Alt key is pressed: try to boot the alt kernel;
-		 * if it fails, try to boot the regular kernel */
-		else {
-			boot = !mmc_load_kernel(MMC_ID, (void *) (KSEG1 + LD_ADDR),
-						FAT_BOOTFILE_ALT_NAME, FAT_BOOTFILE_ALT_EXT);
-			if (!boot)
-				boot = !mmc_load_kernel(MMC_ID, (void *) (KSEG1 + LD_ADDR),
-							FAT_BOOTFILE_NAME, FAT_BOOTFILE_EXT);
-			else
+		int loaded = mmc_load_kernel(
+				MMC_ID, (void *) (KSEG1 + LD_ADDR), alt_key_pressed());
+		if (loaded >= 0) {
+			boot = 1;
+			if (loaded == 1)
 				set_alt_param();
 		}
 

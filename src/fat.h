@@ -82,7 +82,12 @@ struct dir_entry {
 	uint32_t	size;				/* File size in bytes */
 };
 
-int mmc_load_kernel(unsigned int id, void *ld_addr,
-			const char *name, const char *ext);
+/*
+ * Attempts to load a kernel from the MMC/SD card in slot 'id' into memory
+ * at 'ld_addr'. If 'alt' is true, try the alternative name first.
+ * Return 0 if a regular kernel was loaded, 1 if an alternative kernel
+ * was loaded or a negative number on error.
+ */
+int mmc_load_kernel(unsigned int id, void *ld_addr, int alt);
 
 #endif

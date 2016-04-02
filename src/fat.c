@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "config.h"
 #include "serial.h"
 #include "mmc.h"
 #include "fat.h"
@@ -164,16 +165,30 @@ static int load_kernel_lba(unsigned int id, uint32_t lba, void *ld_addr,
 	return -1;
 }
 
-int mmc_load_kernel(unsigned int id, void *ld_addr,
-			const char *name, const char *ext)
+int mmc_load_kernel(unsigned int id, void *ld_addr, int alt)
 {
 	uint32_t lba;
-	int err;
+	int err, i;
 
 	err = get_first_partition(id, &lba);
 	if (err)
 		return err;
 
-	return load_kernel_lba(id, lba, ld_addr, name, ext);
-}
+	for (i = 0; i < 2; i++) {
+		if (i == !!alt) {
+			/* try to load the regular kernel */
+			err = load_kernel_lba(id, lba, ld_addr,
+					FAT_BOOTFILE_NAME, FAT_BOOTFILE_EXT);
+			if (!err)
+				return 0;
+		} else {
+			/* try to load the alt kernel */
+			err = load_kernel_lba(id, lba, ld_addr,
+					FAT_BOOTFILE_ALT_NAME, FAT_BOOTFILE_ALT_EXT);
+			if (!err)
+				return 1;
+		}
+	}
 
+	return err;
+}
