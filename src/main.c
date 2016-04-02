@@ -214,7 +214,8 @@ void c_main(void)
 			if (!boot) {
 				boot = !mmc_load_kernel(MMC_ID, (void *) (KSEG1 + LD_ADDR),
 							FAT_BOOTFILE_ALT_NAME, FAT_BOOTFILE_ALT_EXT);
-				set_alt_param();
+				if (boot)
+					set_alt_param();
 			}
 		}
 
