@@ -117,11 +117,8 @@ static void *load_from_cluster(unsigned int id, uint32_t cluster, void *ld_addr)
 	return ld_addr;
 }
 
-static int load_kernel_file(unsigned int id, void *ld_addr,
-							const char *name, const char *ext)
+static int load_kernel_file(unsigned int id, void *ld_addr, const char *name)
 {
-	size_t name_len = strlen(name);
-	size_t ext_len = strlen(ext);
 	struct dir_entry *entry, *end;
 
 	end = load_from_cluster(id, root_cluster, ld_addr);
@@ -129,23 +126,19 @@ static int load_kernel_file(unsigned int id, void *ld_addr,
 		return -1;
 
 	for (entry = ld_addr; entry != end; entry++) {
-		char c;
 
 		if (entry->attr & (ATTR_VOLUME | ATTR_DIR))
-			continue;
-
-		if (entry->name[0] == 0xe5)
 			continue;
 
 		if (!entry->name[0])
 			break;
 
-		if (strncmp(entry->name, name, name_len) ||
-					strncmp(entry->ext, ext, ext_len))
-			continue;
+		/*
+		 * Entries starting with 0xE5 are deleted and should be ignored,
+		 * but they won't match the name we're searching for anyway.
+		 */
 
-		c = entry->name[name_len];
-		if (c && c != ' ')
+		if (strncmp(entry->name, name, 8 + 3))
 			continue;
 
 		SERIAL_PUTS("MMC: Loading kernel file...\n");
@@ -174,14 +167,12 @@ int mmc_load_kernel(unsigned int id, void *ld_addr, int alt)
 	for (i = 0; i < 2; i++) {
 		if (i == !!alt) {
 			/* try to load the regular kernel */
-			err = load_kernel_file(id, ld_addr,
-					FAT_BOOTFILE_NAME, FAT_BOOTFILE_EXT);
+			err = load_kernel_file(id, ld_addr, FAT_BOOTFILE_NAME);
 			if (!err)
 				return 0;
 		} else {
 			/* try to load the alt kernel */
-			err = load_kernel_file(id, ld_addr,
-					FAT_BOOTFILE_ALT_NAME, FAT_BOOTFILE_ALT_EXT);
+			err = load_kernel_file(id, ld_addr, FAT_BOOTFILE_ALT_NAME);
 			if (!err)
 				return 1;
 		}

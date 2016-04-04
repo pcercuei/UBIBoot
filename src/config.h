@@ -2,10 +2,11 @@
 #define _CONFIG_H
 
 /* FAT parameters */
-#define FAT_BOOTFILE_NAME		"VMLINUZ"
-#define FAT_BOOTFILE_EXT		"BIN"
-#define FAT_BOOTFILE_ALT_NAME	"VMLINUZ"
-#define FAT_BOOTFILE_ALT_EXT	"BAK"
+/* File names must be 8+3 characters, with spaces at unused positions. */
+#define FAT_BOOTFILE_NAME		"VMLINUZ BIN"
+/*                       		12345678123 */
+#define FAT_BOOTFILE_ALT_NAME	"VMLINUZ BAK"
+/*                           	12345678123 */
 
 /* Physical address to load kernel image at */
 #define LD_ADDR					0x00600000
