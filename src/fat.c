@@ -68,7 +68,7 @@ static int process_boot_sector(unsigned int id, uint32_t lba)
 	return 0;
 }
 
-static int load_from_cluster(unsigned int id, uint32_t cluster, void *ld_addr)
+static void *load_from_cluster(unsigned int id, uint32_t cluster, void *ld_addr)
 {
 	uint32_t sector[FAT_BLOCK_SIZE >> 2];
 	uint32_t cached_fat_sector = -1;
@@ -89,7 +89,7 @@ static int load_from_cluster(unsigned int id, uint32_t cluster, void *ld_addr)
 				if (mmc_block_read(id, sector, fat_sector, 1)) {
 					/* Unable to read the FAT table. */
 					SERIAL_PUTI(0x04);
-					return -1;
+					return NULL;
 				}
 				cached_fat_sector = fat_sector;
 			}
@@ -106,7 +106,7 @@ static int load_from_cluster(unsigned int id, uint32_t cluster, void *ld_addr)
 		if (mmc_block_read(id, ld_addr, data_sector, num_data_sectors)) {
 			/* Unable to read from first partition. */
 			SERIAL_PUTI(0x03);
-			return -1;
+			return NULL;
 		}
 		ld_addr += num_data_sectors * FAT_BLOCK_SIZE;
 
@@ -114,61 +114,43 @@ static int load_from_cluster(unsigned int id, uint32_t cluster, void *ld_addr)
 			break;
 	}
 
-	return 0;
+	return ld_addr;
 }
 
 static int load_kernel_file(unsigned int id, void *ld_addr,
 							const char *name, const char *ext)
 {
-	uint32_t sector[FAT_BLOCK_SIZE >> 2];
-	uint32_t root_sector = lba_data + (root_cluster - 2) * cluster_size;
-	size_t i, j;
 	size_t name_len = strlen(name);
 	size_t ext_len = strlen(ext);
+	struct dir_entry *entry, *end;
 
-	/* Note: This assumes the root directory fits into a single cluster,
-	 *       which is typically true but in no way guaranteed.
-	 */
-	for (i = 0; i < cluster_size; i++) {
-		struct dir_entry *entry;
+	end = load_from_cluster(id, root_cluster, ld_addr);
+	if (!end)
+		return -1;
 
-		/* Read one sector */
-		if (mmc_block_read(id, sector, root_sector + i, 1)) {
-			/* Unable to read rootdir sector. */
-			SERIAL_PUTI(0x06);
-			return -1;
-		}
+	for (entry = ld_addr; entry != end; entry++) {
+		char c;
 
-		/* Read all file handles from this sector */
-		for (entry = (struct dir_entry *) sector, j = 0;
-					j < FAT_BLOCK_SIZE / sizeof(struct dir_entry);
-					entry++, j++) {
-			char c;
+		if (entry->attr & (ATTR_VOLUME | ATTR_DIR))
+			continue;
 
-			if (entry->attr & (ATTR_VOLUME | ATTR_DIR))
-				continue;
+		if (entry->name[0] == 0xe5)
+			continue;
 
-			if (entry->name[0] == 0xe5)
-				continue;
+		if (!entry->name[0])
+			break;
 
-			if (!entry->name[0]) {
-				/* Kernel file not found. */
-				SERIAL_PUTI(0x07);
-				return -1;
-			}
+		if (strncmp(entry->name, name, name_len) ||
+					strncmp(entry->ext, ext, ext_len))
+			continue;
 
-			if (strncmp(entry->name, name, name_len) ||
-						strncmp(entry->ext, ext, ext_len))
-				continue;
+		c = entry->name[name_len];
+		if (c && c != ' ')
+			continue;
 
-			c = entry->name[name_len];
-			if (c && c != ' ')
-				continue;
-
-			SERIAL_PUTS("MMC: Loading kernel file...\n");
-			return load_from_cluster(
-						id, entry->starthi << 16 | entry->start, ld_addr);
-		}
+		SERIAL_PUTS("MMC: Loading kernel file...\n");
+		return load_from_cluster(
+					id, entry->starthi << 16 | entry->start, ld_addr) ? 0 : -1;
 	}
 
 	/* Kernel file not found. */
