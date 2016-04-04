@@ -8,7 +8,8 @@
 #include "fat.h"
 
 uint32_t lba_fat1;			/* sector of first FAT */
-uint32_t lba_data;			/* sector of first cluster (contains root dir) */
+uint32_t lba_data;			/* sector of first cluster */
+uint32_t root_cluster;		/* cluster where root dir starts */
 uint8_t cluster_size;		/* sectors per cluster */
 
 static int get_first_partition(unsigned int id, uint32_t *lba)
@@ -53,6 +54,7 @@ static int process_boot_sector(unsigned int id, uint32_t lba)
 	bs = (void *)sector;
 	lba_fat1 = lba + bs->reserved;
 	lba_data = lba_fat1 + bs->fat32_length * bs->fats;
+	root_cluster = bs->root_cluster;
 	cluster_size = bs->cluster_size;
 
 	vinfo = (void *) sector + sizeof(struct boot_sector);
@@ -119,15 +121,19 @@ static int load_kernel_file(unsigned int id, void *ld_addr,
 							const char *name, const char *ext)
 {
 	uint32_t sector[FAT_BLOCK_SIZE >> 2];
+	uint32_t root_sector = lba_data + (root_cluster - 2) * cluster_size;
 	size_t i, j;
 	size_t name_len = strlen(name);
 	size_t ext_len = strlen(ext);
 
+	/* Note: This assumes the root directory fits into a single cluster,
+	 *       which is typically true but in no way guaranteed.
+	 */
 	for (i = 0; i < cluster_size; i++) {
 		struct dir_entry *entry;
 
 		/* Read one sector */
-		if (mmc_block_read(id, sector, lba_data + i, 1)) {
+		if (mmc_block_read(id, sector, root_sector + i, 1)) {
 			/* Unable to read rootdir sector. */
 			SERIAL_PUTI(0x06);
 			return -1;
