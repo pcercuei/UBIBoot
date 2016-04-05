@@ -62,8 +62,7 @@ static void mmc_cmd(unsigned int id, uint16_t cmd,
 		resp[i] = __msc_rd_resfifo(id);
 }
 
-int mmc_block_read(unsigned int id, uint32_t *dst,
-			uint32_t src, uint32_t num_blocks)
+void mmc_start_block(unsigned int id, uint32_t src, uint32_t num_blocks)
 {
 	uint16_t resp[MSC_RESPONSE_R1];
 
@@ -75,48 +74,73 @@ int mmc_block_read(unsigned int id, uint32_t *dst,
 		mmc_cmd(id, 18, src, 0x409, MSC_RESPONSE_R1, resp);
 	else
 		mmc_cmd(id, 18, src * MMC_SECTOR_SIZE, 0x409, MSC_RESPONSE_R1, resp);
+}
 
-	for (; num_blocks >= 1; num_blocks--) {
-		uint32_t cnt = 128, timeout = 0x3ffffff;
+void mmc_stop_block(unsigned int id)
+{
+	uint16_t resp[MSC_RESPONSE_R1];
 
-		while (--timeout) {
-			uint32_t stat = __msc_get_stat(id);
+	mmc_cmd(id, 12, 0, 0x41, MSC_RESPONSE_R1, resp);
+	jz_mmc_stop_clock(id);
+}
 
-			if (stat & MSC_STAT_TIME_OUT_READ) {
-				/* Time out. */
-				SERIAL_PUTI(0x11);
-				return -1;
-			}
-			else if (stat & MSC_STAT_CRC_READ_ERROR) {
-				/* Read error. */
-				SERIAL_PUTI(0x12);
-				return -1;
-			}
-			else if (!(stat & MSC_STAT_DATA_FIFO_EMPTY)) {
-				/* Ready to read data */
-				break;
-			}
+int mmc_receive_block(unsigned int id, uint32_t *dst)
+{
+	uint32_t cnt = 128, timeout = 0x3ffffff;
 
-			udelay(1);
-		}
+	while (--timeout) {
+		uint32_t stat = __msc_get_stat(id);
 
-		if (!timeout) {
+		if (stat & MSC_STAT_TIME_OUT_READ) {
 			/* Time out. */
 			SERIAL_PUTI(0x11);
 			return -1;
 		}
-
-		/* Read data from RXFIFO. It could be FULL or PARTIAL FULL */
-		while (cnt--) {
-			while (__msc_get_stat(id) & MSC_STAT_DATA_FIFO_EMPTY);
-			*dst++ = __msc_rd_rxfifo(id);
+		else if (stat & MSC_STAT_CRC_READ_ERROR) {
+			/* Read error. */
+			SERIAL_PUTI(0x12);
+			return -1;
 		}
+		else if (!(stat & MSC_STAT_DATA_FIFO_EMPTY)) {
+			/* Ready to read data */
+			break;
+		}
+
+		udelay(1);
 	}
 
-	mmc_cmd(id, 12, 0, 0x41, MSC_RESPONSE_R1, resp);
-	jz_mmc_stop_clock(id);
+	if (!timeout) {
+		/* Time out. */
+		SERIAL_PUTI(0x11);
+		return -1;
+	}
+
+	/* Read data from RXFIFO. It could be FULL or PARTIAL FULL */
+	while (cnt--) {
+		while (__msc_get_stat(id) & MSC_STAT_DATA_FIFO_EMPTY);
+		*dst++ = __msc_rd_rxfifo(id);
+	}
 
 	return 0;
+}
+
+int mmc_block_read(unsigned int id, uint32_t *dst,
+			uint32_t src, uint32_t num_blocks)
+{
+	int err = 0;
+
+	mmc_start_block(id, src, num_blocks);
+
+	for (; num_blocks >= 1; num_blocks--) {
+		err = mmc_receive_block(id, dst);
+		if (err)
+			break;
+		dst += 128;
+	}
+
+	mmc_stop_block(id);
+
+	return err;
 }
 
 int mmc_init(unsigned int id)
