@@ -117,6 +117,28 @@ static void *load_from_cluster(unsigned int id, uint32_t cluster, void *ld_addr)
 	return ld_addr;
 }
 
+static struct dir_entry *find_file(
+		struct dir_entry *first, struct dir_entry *end, const char *name)
+{
+	struct dir_entry *entry;
+
+	for (entry = first; entry != end && entry->name[0]; entry++) {
+
+		if (entry->attr & (ATTR_VOLUME | ATTR_DIR))
+			continue;
+
+		/*
+		 * Entries starting with 0xE5 are deleted and should be ignored,
+		 * but they won't match the name we're searching for anyway.
+		 */
+
+		if (!strncmp(entry->name, name, 8 + 3))
+			return entry;
+	}
+
+	return NULL;
+}
+
 static int load_kernel_file(unsigned int id, void *ld_addr, const char *name)
 {
 	struct dir_entry *entry, *end;
@@ -125,30 +147,16 @@ static int load_kernel_file(unsigned int id, void *ld_addr, const char *name)
 	if (!end)
 		return -1;
 
-	for (entry = ld_addr; entry != end; entry++) {
-
-		if (entry->attr & (ATTR_VOLUME | ATTR_DIR))
-			continue;
-
-		if (!entry->name[0])
-			break;
-
-		/*
-		 * Entries starting with 0xE5 are deleted and should be ignored,
-		 * but they won't match the name we're searching for anyway.
-		 */
-
-		if (strncmp(entry->name, name, 8 + 3))
-			continue;
-
+	entry = find_file(ld_addr, end, name);
+	if (entry) {
 		SERIAL_PUTS("MMC: Loading kernel file...\n");
 		return load_from_cluster(
 					id, entry->starthi << 16 | entry->start, ld_addr) ? 0 : -1;
+	} else {
+		/* Kernel file not found. */
+		SERIAL_PUTI(0x07);
+		return -1;
 	}
-
-	/* Kernel file not found. */
-	SERIAL_PUTI(0x07);
-	return -1;
 }
 
 int mmc_load_kernel(unsigned int id, void *ld_addr, int alt)
