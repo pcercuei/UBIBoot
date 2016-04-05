@@ -20,6 +20,7 @@
 #define MSC_RESPONSE_R1 3
 #define MSC_RESPONSE_R2 8
 #define MSC_RESPONSE_R3 3
+#define MSC_RESPONSE_MAX MSC_RESPONSE_R2
 
 static unsigned int is_sdhc;
 
@@ -38,7 +39,7 @@ static inline void jz_mmc_start_clock(unsigned int id)
 }
 
 static void mmc_cmd(unsigned int id, uint16_t cmd,
-			unsigned int arg, unsigned int cmdat, int words, uint8_t *resp)
+			unsigned int arg, unsigned int cmdat, int words, uint16_t *resp)
 {
 	uint32_t timeout = 0x3fffff;
 	int i;
@@ -57,19 +58,14 @@ static void mmc_cmd(unsigned int id, uint16_t cmd,
 	if (!words)
 		return;
 
-	for (i = words-1; i >= 0; i--) {
-		uint16_t res_fifo = __msc_rd_resfifo(id);
-		int offset = i << 1;
-
-		resp[offset] = ((uint8_t *) &res_fifo) [0];
-		resp[offset + 1] = ((uint8_t *) &res_fifo) [1];
-	}
+	for (i = words - 1; i >= 0; i--)
+		resp[i] = __msc_rd_resfifo(id);
 }
 
 int mmc_block_read(unsigned int id, uint32_t *dst,
 			uint32_t src, uint32_t num_blocks)
 {
-	uint8_t resp[20];
+	uint16_t resp[MSC_RESPONSE_R1];
 
 	mmc_cmd(id, 16, 0x200, 0x401, MSC_RESPONSE_R1, resp);
 	__msc_set_blklen(id, 0x200);
@@ -125,7 +121,7 @@ int mmc_block_read(unsigned int id, uint32_t *dst,
 
 int mmc_init(unsigned int id)
 {
-	uint8_t resp[20];
+	uint16_t resp[MSC_RESPONSE_MAX];
 	uint32_t rca, retries = 2000;
 
 #if JZ_VERSION >= 4770
@@ -149,7 +145,7 @@ int mmc_init(unsigned int id)
 	do {
 		mmc_cmd(id, 55, 0, 0x1, MSC_RESPONSE_R1, resp);
 		mmc_cmd(id, 41, 0x40ff8000, 0x3, MSC_RESPONSE_R3, resp);
-	} while (!(resp[4] & 0x80) && --retries);
+	} while (!(resp[2] & 0x0080) && --retries);
 
 	if (!retries) {
 		/* Initialization failed. */
@@ -160,10 +156,10 @@ int mmc_init(unsigned int id)
 	/* try to get card id */
 	mmc_cmd(id, 2, 0, 0x2, MSC_RESPONSE_R2, resp);
 	mmc_cmd(id, 3, 0, 0x6, MSC_RESPONSE_R1, resp);
-	rca = ((resp[4] << 8) | resp[3]) << 16; 
+	rca = ((resp[2] & 0x00FF) << 24) | ((resp[1] & 0xFF00) << 8);
 
 	mmc_cmd(id, 9, rca, 0x2, MSC_RESPONSE_R2, resp);
-	is_sdhc = (resp[14] & 0xc0) >> 6;
+	is_sdhc = (resp[7] & 0x00c0) >> 6;
 
 	__msc_set_clkrt(id, 0);
 	mmc_cmd(id, 7, rca, 0x41, MSC_RESPONSE_R1, resp);
