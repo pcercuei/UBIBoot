@@ -6,5 +6,6 @@
 int strncmp(const char *s1, const char *s2, size_t n);
 
 void *memcpy(void *dest, const void *src, size_t n);
+void *memmove(void *dest, const void *src, size_t n);
 
 #endif /* __UTILS_H__ */

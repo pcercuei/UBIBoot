@@ -23,3 +23,19 @@ void *memcpy(void *dest, const void *src, size_t n)
 		*d++ = *s++;
 	return dest;
 }
+
+void *memmove(void *dest, const void *src, size_t n)
+{
+	if (dest <= src || src + n <= dest) {
+		/* Copying in forward direction won't lose data. */
+		return memcpy(dest, src, n);
+	} else {
+		/* Copying in backward direction won't lose data. */
+		unsigned char *d = dest + n;
+		const unsigned char *s = src + n;
+
+		while (n--)
+			*--d = *--s;
+		return dest;
+	}
+}
