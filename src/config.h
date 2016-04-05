@@ -7,6 +7,10 @@
 /*                       		12345678123 */
 #define FAT_BOOTFILE_ALT_NAME	"VMLINUZ BAK"
 /*                           	12345678123 */
+#define FAT_BOOTIMAGE_NAME		"UZIMAGE BIN"
+/*                        		12345678123 */
+#define FAT_BOOTIMAGE_ALT_NAME	"UZIMAGE BAK"
+/*                            	12345678123 */
 
 /* Physical address to load kernel image at */
 #define LD_ADDR					0x00600000

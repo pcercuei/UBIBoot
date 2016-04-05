@@ -39,3 +39,11 @@ void *memmove(void *dest, const void *src, size_t n)
 		return dest;
 	}
 }
+
+uint32_t swap_be32(uint32_t val)
+{
+	return ((val & 0xFF000000) >> 24)
+	     | ((val & 0x00FF0000) >> 8)
+	     | ((val & 0x0000FF00) << 8)
+	     | ((val & 0x000000FF) << 24);
+}

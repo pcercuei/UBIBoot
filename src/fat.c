@@ -6,6 +6,8 @@
 #include "serial.h"
 #include "mmc.h"
 #include "fat.h"
+#include "uimage.h"
+#include "utils.h"
 
 uint32_t lba_fat1;			/* sector of first FAT */
 uint32_t lba_data;			/* sector of first cluster */
@@ -139,6 +141,33 @@ static struct dir_entry *find_file(
 	return NULL;
 }
 
+static int check_uimage(struct uimage_header *header)
+{
+	if (swap_be32(header->magic) != UIMAGE_MAGIC)
+		return -1;
+
+	if (header->os != UIMAGE_OS_LINUX)
+		return -1;
+
+	if (header->arch != UIMAGE_ARCH_MIPS)
+		return -1;
+
+	if (header->type != UIMAGE_TYPE_KERNEL)
+		return -1;
+
+	if (header->comp != UIMAGE_COMP_NONE)
+		return -1;
+
+	return 0;
+}
+
+static const char *kernel_names[] = {
+	FAT_BOOTIMAGE_NAME,
+	FAT_BOOTFILE_NAME,
+	FAT_BOOTIMAGE_ALT_NAME,
+	FAT_BOOTFILE_ALT_NAME,
+};
+
 int mmc_load_kernel(unsigned int id, void *ld_addr, int alt, void **exec_addr)
 {
 	struct dir_entry *dir_start, *dir_end;
@@ -155,7 +184,8 @@ int mmc_load_kernel(unsigned int id, void *ld_addr, int alt, void **exec_addr)
 
 	dir_start = NULL;
 	err = 0;
-	for (i = 0; i < 2; i++) {
+	for (i = 0; i < 4; i++) {
+		const int kernel = i ^ (alt ? 2 : 0);
 		struct dir_entry *entry;
 
 		if (!dir_start) {
@@ -166,23 +196,30 @@ int mmc_load_kernel(unsigned int id, void *ld_addr, int alt, void **exec_addr)
 				return -1;
 		}
 
-		if (i == !!alt) {
-			/* try to find the regular kernel */
-			entry = find_file(dir_start, dir_end, FAT_BOOTFILE_NAME);
-		} else {
-			/* try to find the alt kernel */
-			entry = find_file(dir_start, dir_end, FAT_BOOTFILE_ALT_NAME);
-		}
+		entry = find_file(dir_start, dir_end, kernel_names[kernel]);
 
 		if (entry) {
+			dir_start = NULL;
 			SERIAL_PUTS("MMC: Loading kernel file...\n");
 			if (load_from_cluster(
 						id, entry->starthi << 16 | entry->start, ld_addr)) {
-				*exec_addr = ld_addr;
-				return i == !alt;
+				if (kernel & 1) {
+					/* Raw binary. */
+					*exec_addr = ld_addr;
+					return kernel >> 1;
+				} else {
+					/* U-Boot image. */
+					struct uimage_header *header = ld_addr;
+					if (!check_uimage(header)) {
+						*exec_addr = (void *) swap_be32(header->ep);
+						memmove((void *) swap_be32(header->load),
+								ld_addr + sizeof(struct uimage_header),
+								swap_be32(header->size));
+						return kernel >> 1;
+					}
+				}
 			} else {
 				err = -1;
-				dir_start = NULL;
 			}
 		}
 	}
