@@ -70,41 +70,55 @@ static int process_boot_sector(unsigned int id, uint32_t lba)
 	return 0;
 }
 
-static void *load_from_cluster(unsigned int id, uint32_t cluster, void *ld_addr)
+/*
+ * Given a cluster, follow the cluster chain while the cluster numbers are
+ * consecutive. Outputs the next cluster number and the number of clusters
+ * advanced along the chain.
+ * Since every MMC command has a significant overhead, loading more data
+ * at once gives a big speed boost.
+ */
+static int cluster_span(
+		unsigned int id, uint32_t cluster, uint32_t *next, uint32_t *count)
 {
 	uint32_t sector[FAT_BLOCK_SIZE >> 2];
 	uint32_t cached_fat_sector = -1;
+	uint32_t start_cluster = cluster;
 
 	while (1) {
-		uint32_t data_sector = lba_data + (cluster - 2) * cluster_size;
-		uint32_t num_data_sectors = cluster_size;
+		uint32_t fat_sector = lba_fat1 + cluster / (FAT_BLOCK_SIZE >> 2);
 
-		/* Figure out how many consecutive clusters we can load.
-		 * Since every MMC command has a significant overhead, loading more
-		 * data at once gives a big speed boost.
-		 */
-		while (1) {
-			uint32_t fat_sector = lba_fat1 + cluster / (FAT_BLOCK_SIZE >> 2);
-
-			/* Read FAT */
-			if (fat_sector != cached_fat_sector) {
-				if (mmc_block_read(id, sector, fat_sector, 1)) {
-					/* Unable to read the FAT table. */
-					SERIAL_PUTI(0x04);
-					return NULL;
-				}
-				cached_fat_sector = fat_sector;
+		/* Read FAT */
+		if (fat_sector != cached_fat_sector) {
+			if (mmc_block_read(id, sector, fat_sector, 1)) {
+				/* Unable to read the FAT table. */
+				SERIAL_PUTI(0x04);
+				return -1;
 			}
-
-			uint32_t prev_cluster = cluster;
-			cluster = sector[cluster % (FAT_BLOCK_SIZE >> 2)] & 0x0fffffff;
-			if (cluster == prev_cluster + 1)
-				num_data_sectors += cluster_size;
-			else
-				break;
+			cached_fat_sector = fat_sector;
 		}
 
+		uint32_t prev_cluster = cluster;
+		cluster = sector[cluster % (FAT_BLOCK_SIZE >> 2)] & 0x0fffffff;
+		if (cluster != prev_cluster + 1) {
+			*next = cluster;
+			*count = prev_cluster + 1 - start_cluster;
+			return 0;
+		}
+	}
+}
+
+static void *load_from_cluster(unsigned int id, uint32_t cluster, void *ld_addr)
+{
+	while (1) {
+		uint32_t data_sector, num_data_sectors;
+		uint32_t next_cluster, num_clusters;
+
+		if (cluster_span(id, cluster, &next_cluster, &num_clusters))
+			return NULL;
+
 		/* Read file data */
+		data_sector = lba_data + (cluster - 2) * cluster_size;
+		num_data_sectors = num_clusters * cluster_size;
 		if (mmc_block_read(id, ld_addr, data_sector, num_data_sectors)) {
 			/* Unable to read from first partition. */
 			SERIAL_PUTI(0x03);
@@ -112,11 +126,10 @@ static void *load_from_cluster(unsigned int id, uint32_t cluster, void *ld_addr)
 		}
 		ld_addr += num_data_sectors * FAT_BLOCK_SIZE;
 
+		cluster = next_cluster;
 		if ((cluster >= 0x0ffffff0) || (cluster <= 1))
-			break;
+			return ld_addr;
 	}
-
-	return ld_addr;
 }
 
 static struct dir_entry *find_file(
