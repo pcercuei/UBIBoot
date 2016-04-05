@@ -141,7 +141,7 @@ static struct dir_entry *find_file(
 
 int mmc_load_kernel(unsigned int id, void *ld_addr, int alt)
 {
-	struct dir_entry *dir_end;
+	struct dir_entry *dir_start, *dir_end;
 	uint32_t lba;
 	int err, i;
 
@@ -153,32 +153,44 @@ int mmc_load_kernel(unsigned int id, void *ld_addr, int alt)
 	if (err)
 		return err;
 
-	/* Load root directory. */
-	dir_end = load_from_cluster(id, root_cluster, ld_addr);
-	if (!dir_end)
-		return -1;
-
+	dir_start = NULL;
+	err = 0;
 	for (i = 0; i < 2; i++) {
 		struct dir_entry *entry;
 
+		if (!dir_start) {
+			/* Load root directory. */
+			dir_start = ld_addr;
+			dir_end = load_from_cluster(id, root_cluster, dir_start);
+			if (!dir_end)
+				return -1;
+		}
+
 		if (i == !!alt) {
 			/* try to find the regular kernel */
-			entry = find_file(ld_addr, dir_end, FAT_BOOTFILE_NAME);
+			entry = find_file(dir_start, dir_end, FAT_BOOTFILE_NAME);
 		} else {
 			/* try to find the alt kernel */
-			entry = find_file(ld_addr, dir_end, FAT_BOOTFILE_ALT_NAME);
+			entry = find_file(dir_start, dir_end, FAT_BOOTFILE_ALT_NAME);
 		}
 
 		if (entry) {
 			SERIAL_PUTS("MMC: Loading kernel file...\n");
-			return load_from_cluster(
-						id, entry->starthi << 16 | entry->start, ld_addr)
-					? (i == !alt)
-					: -1;
+			if (load_from_cluster(
+						id, entry->starthi << 16 | entry->start, ld_addr)) {
+				return i == !alt;
+			} else {
+				err = -1;
+				dir_start = NULL;
+			}
 		}
 	}
 
-	/* Kernel file not found. */
-	SERIAL_PUTI(0x07);
-	return err;
+	if (err) {
+		return err;
+	} else {
+		/* Kernel file not found. */
+		SERIAL_PUTI(0x07);
+		return -1;
+	}
 }
