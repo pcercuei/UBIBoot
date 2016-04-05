@@ -139,7 +139,7 @@ static struct dir_entry *find_file(
 	return NULL;
 }
 
-int mmc_load_kernel(unsigned int id, void *ld_addr, int alt)
+int mmc_load_kernel(unsigned int id, void *ld_addr, int alt, void **exec_addr)
 {
 	struct dir_entry *dir_start, *dir_end;
 	uint32_t lba;
@@ -178,6 +178,7 @@ int mmc_load_kernel(unsigned int id, void *ld_addr, int alt)
 			SERIAL_PUTS("MMC: Loading kernel file...\n");
 			if (load_from_cluster(
 						id, entry->starthi << 16 | entry->start, ld_addr)) {
+				*exec_addr = ld_addr;
 				return i == !alt;
 			} else {
 				err = -1;

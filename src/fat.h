@@ -85,9 +85,11 @@ struct dir_entry {
 /*
  * Attempts to load a kernel from the MMC/SD card in slot 'id' into memory
  * at 'ld_addr'. If 'alt' is true, try the alternative name first.
+ * The execution address of the loaded kernel is written to the output argument
+ * 'exec_addr'; nothing is written if the load was unsuccessful.
  * Return 0 if a regular kernel was loaded, 1 if an alternative kernel
  * was loaded or a negative number on error.
  */
-int mmc_load_kernel(unsigned int id, void *ld_addr, int alt);
+int mmc_load_kernel(unsigned int id, void *ld_addr, int alt, void **exec_addr);
 
 #endif

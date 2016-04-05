@@ -171,7 +171,7 @@ static void set_mem_param(void)
 void c_main(void)
 {
 	register uint32_t reg;
-	int boot = 0;
+	void *exec_addr = NULL;
 	int mmc_inited;
 	extern unsigned int _bss_start, _bss_end;
 	unsigned int *ptr;
@@ -206,15 +206,12 @@ void c_main(void)
 
 	mmc_inited = !mmc_init(MMC_ID);
 	if (mmc_inited) {
-		int loaded = mmc_load_kernel(
-				MMC_ID, (void *) (KSEG1 + LD_ADDR), alt_key_pressed());
-		if (loaded >= 0) {
-			boot = 1;
-			if (loaded == 1)
-				set_alt_param();
-		}
+		if (mmc_load_kernel(
+				MMC_ID, (void *) (KSEG1 + LD_ADDR), alt_key_pressed(),
+				&exec_addr) == 1)
+			set_alt_param();
 
-		if (boot) {
+		if (exec_addr) {
 #if PASS_ROOTFS_PARAMS
 			kernel_params[PARAM_ROOTDEV] =
 					"root=/dev/mmcblk" STRINGIFY_IND(MMC_ID) "p1";
@@ -223,7 +220,7 @@ void c_main(void)
 		}
 	}
 
-	if (!mmc_inited || !boot)
+	if (!mmc_inited || !exec_addr)
 		SERIAL_PUTS("Unable to boot from SD."
 #ifdef USE_NAND
 					" Falling back to NAND."
@@ -231,13 +228,14 @@ void c_main(void)
 					"\n");
 
 #ifdef USE_NAND
-	if (!boot) {
+	if (!exec_addr) {
 		nand_init();
 #ifdef USE_UBI
 		if (ubi_load_kernel((void *) (KSEG1 + LD_ADDR))) {
 			SERIAL_PUTS("Unable to boot from NAND.\n");
 			return;
 		} else {
+			exec_addr = (void *) (KSEG1 + LD_ADDR);
 #ifdef UBI_ROOTFS_MTDNAME
 			kernel_params[PARAM_UBIMTD] = "ubi.mtd=" UBI_ROOTFS_MTDNAME;
 #endif
@@ -283,7 +281,7 @@ void c_main(void)
 				"mtc0 %0, $13\n\t" : "=r"(reg) :);
 
 	/* Boot the kernel */
-	((void (*)(int, char**, char**, int*)) (KSEG0 + LD_ADDR)) (
+	((void (*)(int, char**, char**, int*)) exec_addr) (
 			ARRAY_SIZE(kernel_params), kernel_params, NULL, NULL );
 }
 
