@@ -11,7 +11,7 @@
 
 #include "asm/regdef.h"
 
-	.text
+	.text 1
 
 	.extern c_main
 
