@@ -167,6 +167,7 @@ static void set_mem_param(void)
 	write_hex_digits(high_mem_size, &kernel_params[PARAM_HIGHMEM][9]);
 }
 
+typedef void (*kernel_main)(int, char**, char**, int*) __attribute__((noreturn));
 
 void c_main(void)
 {
@@ -281,7 +282,7 @@ void c_main(void)
 				"mtc0 %0, $13\n\t" : "=r"(reg) :);
 
 	/* Boot the kernel */
-	((void (*)(int, char**, char**, int*)) exec_addr) (
+	((kernel_main) exec_addr) (
 			ARRAY_SIZE(kernel_params), kernel_params, NULL, NULL );
 }
 
