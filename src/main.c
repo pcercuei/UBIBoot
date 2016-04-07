@@ -178,7 +178,7 @@ void c_main(void)
 	unsigned int *ptr;
 
 	/* Clear the BSS section */
-	for (ptr = &_bss_start; ptr < &_bss_end; ptr += 4)
+	for (ptr = &_bss_start; ptr < &_bss_end; ptr++)
 		*ptr = 0;
 
 #if BENCHMARK
