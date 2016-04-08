@@ -180,6 +180,8 @@ static void sdram_init(void)
 	unsigned int mem_mask, mem_base, mem_clk, ps, timing, tmp, ns_int;
 	unsigned int mem_size = get_memory_size();
 
+	__cpm_start_ddr();
+
 	mem_clk = __cpm_get_mclk();
 	ps = 1000000000 / (mem_clk / 1000); /* ns per tck ns <= real value */
 	ns_int = (1000000000 % mem_clk == 0) ?
@@ -303,10 +305,6 @@ static void sdram_init(void)
 
 void board_init(void)
 {
-	__gpio_as_msc0_boot();
-
-	__cpm_start_ddr();
-
 	pll_init();
 	sdram_init();
 
@@ -315,6 +313,7 @@ void board_init(void)
 	__cpm_start_uart2();
 	serial_init();
 #endif
+	__gpio_as_msc0_boot();
 	__cpm_start_msc0();
 	__cpm_select_msc_clk(0, 1);
 
