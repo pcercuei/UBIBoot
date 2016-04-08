@@ -16,28 +16,32 @@ uint8_t cluster_size;		/* sectors per cluster */
 
 static int get_first_partition(unsigned int id, uint32_t *lba)
 {
-	struct mbr mbr;
+#ifdef MBR_PRELOAD_ADDR
+	struct mbr *mbr = (struct mbr *) MBR_PRELOAD_ADDR;
+#else
+	uint8_t mbr_data[MMC_SECTOR_SIZE];
+	struct mbr *mbr = (struct mbr *) &mbr_data;
 
-	if (mmc_block_read(id, (uint32_t *) &mbr, 0, 1)) {
+	if (mmc_block_read(id, (uint32_t *) mbr, 0, 1)) {
 		/* Unable to read bootsector. */
 		SERIAL_PUTI(0x00);
 		return -1;
 	}
+#endif
 
-	if (mbr.signature != 0xAA55) {
+	if (mbr->signature != 0xAA55) {
 		/* No MBR detected. */
 		SERIAL_PUTI(0x01);
 		return -1;
 	}
 
-	if (mbr.partitions[0].status
-				&& mbr.partitions[0].status != 0x80) {
+	if (mbr->partitions[0].status && mbr->partitions[0].status != 0x80) {
 		/* Unable to detect first physical partition. */
 		SERIAL_PUTI(0x02);
 		return -1;
 	}
 
-	*lba =  mbr.partitions[0].lba;
+	*lba =  mbr->partitions[0].lba;
 	return 0;
 }
 
