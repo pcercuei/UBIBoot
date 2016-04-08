@@ -111,24 +111,88 @@ static int cluster_span(
 	}
 }
 
-static void *load_from_cluster(unsigned int id, uint32_t cluster, void *ld_addr)
+static int check_uimage(struct uimage_header *header)
+{
+	if (swap_be32(header->magic) != UIMAGE_MAGIC)
+		return -1;
+
+	if (header->os != UIMAGE_OS_LINUX)
+		return -1;
+
+	if (header->arch != UIMAGE_ARCH_MIPS)
+		return -1;
+
+	if (header->type != UIMAGE_TYPE_KERNEL)
+		return -1;
+
+	if (header->comp != UIMAGE_COMP_NONE)
+		return -1;
+
+	return 0;
+}
+
+static void *process_uimage_header(
+		struct uimage_header *header, void **exec_addr)
+{
+	if (check_uimage(header)) {
+		return NULL;
+	} else {
+		void *ld_addr = (void *) swap_be32(header->load);
+		void *body = (void *) header + sizeof(struct uimage_header);
+		size_t move_size = MMC_SECTOR_SIZE - sizeof(struct uimage_header);
+		*exec_addr = (void *) swap_be32(header->ep);
+		memmove(ld_addr, body, move_size);
+		return ld_addr + move_size;
+	}
+}
+
+/*
+ * When 'exec_addr' is not NULL, it indicates that an uImage is being loaded
+ * and the execution address (entry point) should be extracted from the
+ * uImage header and written via that pointer. Also the image body should
+ * be loaded to the load address from the uImage header instead of 'ld_addr'.
+ */
+static void *load_from_cluster(unsigned int id, uint32_t cluster,
+		void *ld_addr, void **exec_addr)
 {
 	while (1) {
 		uint32_t data_sector, num_data_sectors;
 		uint32_t next_cluster, num_clusters;
+		int err = 0;
 
 		if (cluster_span(id, cluster, &next_cluster, &num_clusters))
 			return NULL;
 
-		/* Read file data */
+		/* Start read command. */
 		data_sector = lba_data + (cluster - 2) * cluster_size;
 		num_data_sectors = num_clusters * cluster_size;
-		if (mmc_block_read(id, ld_addr, data_sector, num_data_sectors)) {
+		mmc_start_block(id, data_sector, num_data_sectors);
+
+		/* Receive data. */
+		while (num_data_sectors--) {
+			err = mmc_receive_block(id, ld_addr);
+			if (err)
+				break;
+			if (exec_addr) {
+				ld_addr = process_uimage_header(ld_addr, exec_addr);
+				if (!ld_addr) {
+					/* TODO: Separate error for I/O error vs rejected image. */
+					err = -1;
+					break;
+				}
+				exec_addr = NULL;
+			} else {
+				ld_addr += MMC_SECTOR_SIZE;
+			}
+		}
+
+		mmc_stop_block(id);
+
+		if (err) {
 			/* Unable to read from first partition. */
 			SERIAL_PUTI(0x03);
 			return NULL;
 		}
-		ld_addr += num_data_sectors * FAT_BLOCK_SIZE;
 
 		cluster = next_cluster;
 		if ((cluster >= 0x0ffffff0) || (cluster <= 1))
@@ -156,26 +220,6 @@ static struct dir_entry *find_file(
 	}
 
 	return NULL;
-}
-
-static int check_uimage(struct uimage_header *header)
-{
-	if (swap_be32(header->magic) != UIMAGE_MAGIC)
-		return -1;
-
-	if (header->os != UIMAGE_OS_LINUX)
-		return -1;
-
-	if (header->arch != UIMAGE_ARCH_MIPS)
-		return -1;
-
-	if (header->type != UIMAGE_TYPE_KERNEL)
-		return -1;
-
-	if (header->comp != UIMAGE_COMP_NONE)
-		return -1;
-
-	return 0;
 }
 
 static const char *kernel_names[] = {
@@ -208,7 +252,7 @@ int mmc_load_kernel(unsigned int id, void *ld_addr, int alt, void **exec_addr)
 		if (!dir_start) {
 			/* Load root directory. */
 			dir_start = ld_addr;
-			dir_end = load_from_cluster(id, root_cluster, dir_start);
+			dir_end = load_from_cluster(id, root_cluster, dir_start, NULL);
 			if (!dir_end)
 				return -1;
 		}
@@ -217,27 +261,13 @@ int mmc_load_kernel(unsigned int id, void *ld_addr, int alt, void **exec_addr)
 
 		if (entry) {
 			dir_start = NULL;
+			*exec_addr = ld_addr;
 			SERIAL_PUTS("MMC: Loading kernel file...\n");
 			if (load_from_cluster(
-						id, entry->starthi << 16 | entry->start, ld_addr)) {
-				if (kernel & 1) {
-					/* Raw binary. */
-					*exec_addr = ld_addr;
-					return kernel >> 1;
-				} else {
-					/* U-Boot image. */
-					struct uimage_header *header = ld_addr;
-					if (!check_uimage(header)) {
-						*exec_addr = (void *) swap_be32(header->ep);
-						memmove((void *) swap_be32(header->load),
-								ld_addr + sizeof(struct uimage_header),
-								swap_be32(header->size));
-						return kernel >> 1;
-					}
-				}
-			} else {
-				err = -1;
-			}
+						id, entry->starthi << 16 | entry->start,
+						ld_addr, (kernel & 1) ? NULL : exec_addr))
+				return kernel >> 1;
+			err = -1;
 		}
 	}
 
