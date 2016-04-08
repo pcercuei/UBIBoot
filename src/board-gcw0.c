@@ -328,8 +328,15 @@ void board_init(void)
 
 void udelay(unsigned int us)
 {
-	volatile unsigned int tmp = (CFG_CPU_SPEED / 1000000) * us;
-	while (tmp--);
+	unsigned int tmp = (CFG_CPU_SPEED / 1000000 / 2) * us;
+	asm volatile (
+		".set noreorder\n\t"
+		"0:\n\t"
+			"bnez %0,0b\n\t"
+			"addiu %0, %0, -1\n\t"
+		".set reorder\n\t"
+			::"r"(tmp)
+		);
 }
 
 void light(int i)
