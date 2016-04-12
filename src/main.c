@@ -236,7 +236,7 @@ void c_main(void)
 			SERIAL_PUTS("Unable to boot from NAND.\n");
 			return;
 		} else {
-			exec_addr = (void *) (KSEG1 + LD_ADDR);
+			exec_addr = (void *) (KSEG0 + LD_ADDR);
 #ifdef UBI_ROOTFS_MTDNAME
 			kernel_params[PARAM_UBIMTD] = "ubi.mtd=" UBI_ROOTFS_MTDNAME;
 #endif
