@@ -3,6 +3,7 @@
 
 #include "serial.h"
 #include "jz.h"
+#include "utils.h"
 
 void serial_putc(const char c)
 {
@@ -72,8 +73,6 @@ void serial_init(void)
 
 
 
-static const char hex [16] = "0123456789ABCDEF";
-
 void serial_putb(unsigned int d)
 {
 	unsigned int m;
@@ -88,16 +87,10 @@ void serial_putb(unsigned int d)
 
 void serial_puth(unsigned int d)
 {
-	serial_puts("ERR: 0x");
-	serial_putc(hex[(d >> 28) & 0xF]);
-	serial_putc(hex[(d >> 24) & 0xF]);
-	serial_putc(hex[(d >> 20) & 0xF]);
-	serial_putc(hex[(d >> 16) & 0xF]);
-	serial_putc(hex[(d >> 12) & 0xF]);
-	serial_putc(hex[(d >>  8) & 0xF]);
-	serial_putc(hex[(d >>  4) & 0xF]);
-	serial_putc(hex[(d >>  0) & 0xF]);
-	serial_putc('\r');
+	char *message = "ERR: 0x00000000\r";
+	/*               0123456789012345 */
+	write_hex_digits(d, &message[14]);
+	serial_puts(message);
 }
 
 void serial_put_regb(const char *name, unsigned int value)
