@@ -12,6 +12,7 @@
 #include "serial.h"
 #include "nand.h"
 #include "config.h"
+#include "errorcodes.h"
 #include "jz.h"
 
 /*
@@ -201,13 +202,11 @@ static void __nand_read_page(uint32_t page_addr, uint8_t *dst, uint8_t *oobbuf)
 				/* XXX: Why is that appearing all the time, and the
 				 * kernel still boots fine? */
 
-				/* Uncorrectable read error. */
-				SERIAL_PUTI(0x20);
+				SERIAL_PUTI(ERR_NAND_IO_UNC);
 			}
 			else {
 				unsigned int errcnt, index, mask;
-				/* Read error. */
-				SERIAL_PUTI(0x21);
+				SERIAL_PUTI(ERR_NAND_IO);
 
 				errcnt = (stat & EMC_NFINTS_ERRCNT_MASK) >> EMC_NFINTS_ERRCNT_BIT;
 				switch (errcnt) {

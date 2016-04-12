@@ -7,6 +7,7 @@
 #include "serial.h"
 #include "mmc.h"
 #include "fat.h"
+#include "errorcodes.h"
 #include "uimage.h"
 #include "utils.h"
 
@@ -24,21 +25,18 @@ static int get_first_partition(unsigned int id, uint32_t *lba)
 	struct mbr *mbr = (struct mbr *) &mbr_data;
 
 	if (mmc_block_read(id, (uint32_t *) mbr, 0, 1)) {
-		/* Unable to read bootsector. */
-		SERIAL_PUTI(0x00);
+		SERIAL_PUTI(ERR_FAT_IO_BOOT);
 		return -1;
 	}
 #endif
 
 	if (mbr->signature != 0xAA55) {
-		/* No MBR detected. */
-		SERIAL_PUTI(0x01);
+		SERIAL_PUTI(ERR_FAT_NO_MBR);
 		return -1;
 	}
 
 	if (mbr->partitions[0].status && mbr->partitions[0].status != 0x80) {
-		/* Unable to detect first physical partition. */
-		SERIAL_PUTI(0x02);
+		SERIAL_PUTI(ERR_FAT_NO_PART);
 		return -1;
 	}
 
@@ -53,8 +51,7 @@ static int process_boot_sector(unsigned int id, uint32_t lba)
 	struct volume_info *vinfo;
 
 	if (mmc_block_read(id, sector, lba, 1)) {
-		/* Unable to read from first partition. */
-		SERIAL_PUTI(0x03);
+		SERIAL_PUTI(ERR_FAT_IO_PART);
 		return -1;
 	}
 
@@ -66,8 +63,7 @@ static int process_boot_sector(unsigned int id, uint32_t lba)
 
 	vinfo = (void *) sector + sizeof(struct boot_sector);
 	if (strncmp(vinfo->fs_type, "FAT32", 5)) {
-		/* No FAT32 filesystem detected. */
-		SERIAL_PUTI(0x05);
+		SERIAL_PUTI(ERR_FAT_NO_FAT32);
 		return -1;
 	}
 
@@ -95,8 +91,7 @@ static int cluster_span(
 		/* Read FAT */
 		if (fat_sector != cached_fat_sector) {
 			if (mmc_block_read(id, sector, fat_sector, 1)) {
-				/* Unable to read the FAT table. */
-				SERIAL_PUTI(0x04);
+				SERIAL_PUTI(ERR_FAT_IO_FAT);
 				return -1;
 			}
 			cached_fat_sector = fat_sector;
@@ -190,8 +185,7 @@ static void *load_from_cluster(unsigned int id, uint32_t cluster,
 		mmc_stop_block(id);
 
 		if (err) {
-			/* Unable to read from first partition. */
-			SERIAL_PUTI(0x03);
+			SERIAL_PUTI(ERR_FAT_IO_PART);
 			return NULL;
 		}
 
@@ -275,8 +269,7 @@ int mmc_load_kernel(unsigned int id, void *ld_addr, int alt, void **exec_addr)
 	if (err) {
 		return err;
 	} else {
-		/* Kernel file not found. */
-		SERIAL_PUTI(0x07);
+		SERIAL_PUTI(ERR_FAT_NO_KERNEL);
 		return -1;
 	}
 }

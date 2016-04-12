@@ -10,6 +10,7 @@
 #include <alloca.h>
 
 #include "ubi.h"
+#include "errorcodes.h"
 #include "nand.h"
 #include "serial.h"
 #include "config.h"
@@ -30,8 +31,7 @@ static int load_kernel(uint32_t eb_start, uint32_t count,
 	memcpy(&ec_hdr, eb_copy, sizeof(struct ubi_ec_hdr));
 
 	if (ec_hdr.magic != UBI_EC_HDR_MAGIC) {
-		/* Partition is not a UBI drive. */
-		SERIAL_PUTI(0x30);
+		SERIAL_PUTI(ERR_UBI_NO_PART);
 		return -1;
 	}
 
@@ -73,8 +73,7 @@ static int load_kernel(uint32_t eb_start, uint32_t count,
 	}
 
 	if (kernel_vol_id >= UBI_VOL_TABLE_ID) {
-		/* Unable to locate kernel partition. */
-		SERIAL_PUTI(0x31);
+		SERIAL_PUTI(ERR_UBI_NO_KERNEL);
 		return -1;
 	}
 

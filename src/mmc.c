@@ -12,6 +12,7 @@
 
 #include "config.h"
 
+#include "errorcodes.h"
 #include "serial.h"
 #include "mmc.h"
 #include "board.h"
@@ -92,13 +93,11 @@ int mmc_receive_block(unsigned int id, uint32_t *dst)
 		uint32_t stat = __msc_get_stat(id);
 
 		if (stat & MSC_STAT_TIME_OUT_READ) {
-			/* Time out. */
-			SERIAL_PUTI(0x11);
+			SERIAL_PUTI(ERR_MMC_TIMEOUT);
 			return -1;
 		}
 		else if (stat & MSC_STAT_CRC_READ_ERROR) {
-			/* Read error. */
-			SERIAL_PUTI(0x12);
+			SERIAL_PUTI(ERR_MMC_IO);
 			return -1;
 		}
 		else if (!(stat & MSC_STAT_DATA_FIFO_EMPTY)) {
@@ -110,8 +109,7 @@ int mmc_receive_block(unsigned int id, uint32_t *dst)
 	}
 
 	if (!timeout) {
-		/* Time out. */
-		SERIAL_PUTI(0x11);
+		SERIAL_PUTI(ERR_MMC_TIMEOUT);
 		return -1;
 	}
 
@@ -172,8 +170,7 @@ int mmc_init(unsigned int id)
 	} while (!(resp[2] & 0x0080) && --retries);
 
 	if (!retries) {
-		/* Initialization failed. */
-		SERIAL_PUTI(0x10);
+		SERIAL_PUTI(ERR_MMC_INIT);
 		return -1;
 	}
 
