@@ -4,12 +4,12 @@
 #include "serial.h"
 #include "jz.h"
 
-void serial_putc (const char c)
+void serial_putc(const char c)
 {
 	volatile u8 *uart_lsr = (volatile u8 *)(UART_BASE(LOG_UART) + OFF_LSR);
 	volatile u8 *uart_tdr = (volatile u8 *)(UART_BASE(LOG_UART) + OFF_TDR);
 
-	if (c == '\n') serial_putc ('\r');
+	if (c == '\n') serial_putc('\r');
 
 	/* Wait for fifo to shift out some bytes */
 	while ( !((*uart_lsr & (UART_LSR_TDRQ | UART_LSR_TEMT)) == 0x60) );
@@ -17,14 +17,14 @@ void serial_putc (const char c)
 	*uart_tdr = (u8)c;
 }
 
-void serial_puts (const char *s)
+void serial_puts(const char *s)
 {
 	while (*s) {
-		serial_putc (*s++);
+		serial_putc(*s++);
 	}
 }
 
-int serial_getc (void)
+int serial_getc(void)
 {
 	volatile u8 *uart_rdr = (volatile u8 *)(UART_BASE(LOG_UART) + OFF_RDR);
 
@@ -33,13 +33,13 @@ int serial_getc (void)
 	return *uart_rdr;
 }
 
-int serial_tstc (void)
+int serial_tstc(void)
 {
 	volatile u8 *uart_lsr = (volatile u8 *)(UART_BASE(LOG_UART) + OFF_LSR);
 
 	if (*uart_lsr & UART_LSR_DR) {
 		/* Data in rfifo */
-		return (1);
+		return 1;
 	}
 	return 0;
 }
@@ -74,7 +74,8 @@ void serial_init(void)
 
 static const char hex [16] = "0123456789ABCDEF";
 
-void serial_putb (unsigned int d) {
+void serial_putb(unsigned int d)
+{
 	unsigned int m;
 	for (m = 0x80000000; m != 0x00800000; m >>= 1) serial_putc(m & d ? '1' : '0');
 	serial_putc(' ');
@@ -85,7 +86,8 @@ void serial_putb (unsigned int d) {
 	for (m = 0x00000080; m != 0x00000000; m >>= 1) serial_putc(m & d ? '1' : '0');
 }
 
-void serial_puth (unsigned int d) {
+void serial_puth(unsigned int d)
+{
 	serial_puts("ERR: 0x");
 	serial_putc(hex[(d >> 28) & 0xF]);
 	serial_putc(hex[(d >> 24) & 0xF]);
@@ -98,14 +100,16 @@ void serial_puth (unsigned int d) {
 	serial_putc('\r');
 }
 
-void serial_put_regb(const char *name, unsigned int value) {
+void serial_put_regb(const char *name, unsigned int value)
+{
 	serial_puts(name);
 	serial_puts(" = ");
 	serial_putb(value);
 	serial_putc('\n');
 }
 
-void serial_put_regh(const char *name, unsigned int value) {
+void serial_put_regh(const char *name, unsigned int value)
+{
 	serial_puts(name);
 	serial_puts(" = ");
 	serial_puth(value);
