@@ -166,14 +166,14 @@ static void *load_from_cluster(unsigned int id, uint32_t cluster,
 
 		/* Receive data. */
 		while (num_data_sectors--) {
-			err = mmc_receive_block(id, ld_addr);
-			if (err)
+			if (mmc_receive_block(id, ld_addr)) {
+				err = ERR_FAT_IO_PART;
 				break;
+			}
 			if (exec_addr) {
 				ld_addr = process_uimage_header(ld_addr, exec_addr);
 				if (!ld_addr) {
-					/* TODO: Separate error for I/O error vs rejected image. */
-					err = -1;
+					err = ERR_FAT_BAD_IMAGE;
 					break;
 				}
 				exec_addr = NULL;
@@ -185,7 +185,7 @@ static void *load_from_cluster(unsigned int id, uint32_t cluster,
 		mmc_stop_block(id);
 
 		if (err) {
-			SERIAL_PUTI(ERR_FAT_IO_PART);
+			SERIAL_PUTI(err);
 			return NULL;
 		}
 

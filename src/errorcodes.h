@@ -10,6 +10,7 @@
 #define ERR_FAT_IO_ROOT		0x06		/* Unable to read root directory. */
 #define ERR_FAT_NO_KERNEL	0x07		/* Kernel file not found. */
 #define ERR_FAT_IO_BOOT		0x08		/* Unable to read bootsector. */
+#define ERR_FAT_BAD_IMAGE	0x09		/* uImage header rejected. */
 
 #define ERR_MMC_INIT		0x10		/* Initialization failed. */
 #define ERR_MMC_TIMEOUT		0x11		/* Time out. */
