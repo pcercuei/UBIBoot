@@ -20,7 +20,7 @@ OBJCOPY = $(CROSS_COMPILE)objcopy
 OBJDUMP = $(CROSS_COMPILE)objdump
 NM = $(CROSS_COMPILE)nm
 
-CFLAGS	:= -Wall -Os -fno-pic -mno-abicalls -mno-check-zero-division
+CFLAGS	:= -Wall -Os -fno-pic -mno-abicalls -mno-check-zero-division -flto -fwhole-program
 CFLAGS	+= $(CFLAGS_all)
 CPPFLAGS := -DBOARD_$(BOARD) -DJZ_VERSION=$(JZ_VERSION)
 LDFLAGS	:= -nostdlib -EL -T target-$(BOARD).ld
@@ -31,7 +31,7 @@ OBJS	:= utils.o mmc.o fat.o head.o
 
 ifdef GC_FUNCTIONS
 	CFLAGS += -ffunction-sections
-	LDFLAGS += --gc-sections
+	LDFLAGS += -Wl,--gc-sections
 endif
 
 ifdef USE_SERIAL
@@ -65,7 +65,7 @@ $(ELFFILES): $(OUTDIR)/ubiboot-%.elf: \
 		$(OUTDIR)/main_%.o $(OUTDIR)/board-$(BOARD)_%.o $(OBJFILES)
 	@mkdir -p $(@D)
 	$(SUM) "  LD      $@"
-	$(CMD)$(LD) $(LDFLAGS) $^ -o $@
+	$(CMD)$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
 
 $(BINFILES): $(OUTDIR)/%.bin: $(OUTDIR)/%.elf
 	@mkdir -p $(@D)
