@@ -47,3 +47,16 @@ uint32_t swap_be32(uint32_t val)
 	     | ((val & 0x0000FF00) << 8)
 	     | ((val & 0x000000FF) << 24);
 }
+
+void write_hex_digits(unsigned int value, char *last_digit)
+{
+	char *ptr = last_digit;
+	do {
+		char nb = (char) (value & 0xf);
+		if (nb >= 10)
+			*ptr-- = 'a' + nb - 10;
+		else
+			*ptr-- = '0' + nb;
+		value >>= 4;
+	} while (value && (*ptr != 'x'));
+}

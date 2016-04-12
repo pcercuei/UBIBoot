@@ -18,6 +18,7 @@
 #include "mmc.h"
 #include "fat.h"
 #include "jz.h"
+#include "utils.h"
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
@@ -142,19 +143,6 @@ static void set_alt2_param(void)
 static void set_logo_param(int show_logo)
 {
 	kernel_params[PARAM_LOGO] = show_logo ? "fbcon=bind:0" : "logo.nologo";
-}
-
-static void write_hex_digits(unsigned int value, char *last_digit)
-{
-	char *ptr = last_digit;
-	do {
-		char nb = (char) (value & 0xf);
-		if (nb >= 10)
-			*ptr-- = 'a' + nb - 10;
-		else
-			*ptr-- = '0' + nb;
-		value >>= 4;
-	} while(value && (*ptr != 'x'));
 }
 
 static void set_mem_param(void)
