@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "config.h"
+#include "jz.h"
 #include "serial.h"
 #include "mmc.h"
 #include "fat.h"
@@ -137,7 +138,7 @@ static void *process_uimage_header(
 	if (check_uimage(header)) {
 		return NULL;
 	} else {
-		void *ld_addr = (void *) swap_be32(header->load);
+		void *ld_addr = (void *) KSEG1ADDR(swap_be32(header->load));
 		void *body = (void *) header + sizeof(struct uimage_header);
 		size_t move_size = MMC_SECTOR_SIZE - sizeof(struct uimage_header);
 		*exec_addr = (void *) swap_be32(header->ep);
