@@ -50,13 +50,10 @@ uint32_t swap_be32(uint32_t val)
 
 void write_hex_digits(unsigned int value, char *last_digit)
 {
-	char *ptr = last_digit;
+	unsigned char *ptr = (unsigned char *) last_digit;
 	do {
-		char nb = (char) (value & 0xf);
-		if (nb >= 10)
-			*ptr-- = 'a' + nb - 10;
-		else
-			*ptr-- = '0' + nb;
+		unsigned char nb = value & 0xf;
+		*ptr-- = nb >= 10 ? 'a' + nb - 10 : '0' + nb;
 		value >>= 4;
 	} while (value && (*ptr != 'x'));
 }
