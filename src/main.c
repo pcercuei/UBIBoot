@@ -157,7 +157,7 @@ static void set_mem_param(void)
 
 typedef void (*kernel_main)(int, char**, char**, int*) __attribute__((noreturn));
 
-__attribute__((used)) void c_main(void)
+void c_main(void)
 {
 	register uint32_t reg;
 	void *exec_addr = NULL;
