@@ -1,5 +1,6 @@
 
 #include <string.h>
+#include <stdint.h>
 
 #include "board.h"
 #include "config.h"
@@ -45,7 +46,7 @@ The highest divider yields the best resolution. */
 static void pll_init(void)
 {
 	unsigned int reg, i;
-	static const unsigned int n2FR[13] = {
+	static const uint8_t n2FR[13] = {
 		0, 0, 1, 2, 3, 0, 4, 0, 5, 0, 0, 0, 6,
 	};
 
@@ -54,11 +55,11 @@ static void pll_init(void)
 		REG_DDRC_CTRL = 0;
 
 	REG_CPM_CPCCR = ((CFG_CDIV - 1) << CPM_CPCCR_CDIV_BIT) |
-	  (n2FR[CFG_H0DIV] << CPM_CPCCR_H0DIV_BIT) |
-	  (n2FR[CFG_H1DIV] << CPM_CPCCR_H1DIV_BIT) |
-	  (n2FR[CFG_H2DIV] << CPM_CPCCR_H2DIV_BIT) |
-	  (n2FR[CFG_PDIV]  << CPM_CPCCR_PDIV_BIT)  |
-	  (n2FR[CFG_C1DIV] << CPM_CPCCR_C1DIV_BIT) |
+	  ((unsigned int) n2FR[CFG_H0DIV] << CPM_CPCCR_H0DIV_BIT) |
+	  ((unsigned int) n2FR[CFG_H1DIV] << CPM_CPCCR_H1DIV_BIT) |
+	  ((unsigned int) n2FR[CFG_H2DIV] << CPM_CPCCR_H2DIV_BIT) |
+	  ((unsigned int) n2FR[CFG_PDIV]  << CPM_CPCCR_PDIV_BIT)  |
+	  ((unsigned int) n2FR[CFG_C1DIV] << CPM_CPCCR_C1DIV_BIT) |
 	  CPM_CPCCR_MEM | CPM_CPCCR_CE;
 
 	reg = ((FEEDBACK(CFG_CPU_SPEED, CFG_EXTAL) - 1) << CPM_CPPCR_PLLM_BIT) |
@@ -80,7 +81,7 @@ static void pll_init(void)
 static void ddr_mem_init(void)
 {
 	/* TODO: Add support for CL=1.5 CL=2.5 CL=3.5 CL=4.5 */
-	static const unsigned int ddr_cl_lookup[5] = {
+	static const uint8_t ddr_cl_lookup[5] = {
 		0, 9, 10, 11, 12,
 	};
 
@@ -106,7 +107,7 @@ static void ddr_mem_init(void)
 	  ((DDR_COL - 8) << DDRC_CFG_COL_BIT) |
 	  (DDR_CS1EN << 7) |
 	  (DDR_CS0EN << 6) |
-	  (ddr_cl_lookup[DDR_CL - 1] << DDRC_CFG_CL_BIT) |
+	  ((unsigned int) ddr_cl_lookup[DDR_CL - 1] << DDRC_CFG_CL_BIT) |
 	  (DDR_BANK8 << 1) |
 	  DDR_DW32;
 

@@ -7,6 +7,8 @@
  *
  */
 
+#include <stdint.h>
+
 #include "config.h"
 
 #include "board.h"
@@ -32,7 +34,7 @@
 static void pll_init(void)
 {
 	register unsigned int cfcr, plcr1, pllout2;
-	static const int n2FR[33] = {
+	static const uint8_t n2FR[33] = {
 		0, 0, 1, 2, 3, 0, 4, 0, 5, 0, 0, 0, 6, 0, 0, 0,
 		7, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0,
 		9
@@ -40,11 +42,11 @@ static void pll_init(void)
 
 	cfcr = CPM_CPCCR_CLKOEN |
 		CPM_CPCCR_PCS |
-		(n2FR[CDIV] << CPM_CPCCR_CDIV_BIT) |
-		(n2FR[HDIV] << CPM_CPCCR_HDIV_BIT) |
-		(n2FR[PDIV] << CPM_CPCCR_PDIV_BIT) |
-		(n2FR[MDIV] << CPM_CPCCR_MDIV_BIT) |
-		(n2FR[LDIV] << CPM_CPCCR_LDIV_BIT);
+		((unsigned int) n2FR[CDIV] << CPM_CPCCR_CDIV_BIT) |
+		((unsigned int) n2FR[HDIV] << CPM_CPCCR_HDIV_BIT) |
+		((unsigned int) n2FR[PDIV] << CPM_CPCCR_PDIV_BIT) |
+		((unsigned int) n2FR[MDIV] << CPM_CPCCR_MDIV_BIT) |
+		((unsigned int) n2FR[LDIV] << CPM_CPCCR_LDIV_BIT);
 
 	pllout2 = (cfcr & CPM_CPCCR_PCS) ? CFG_CPU_SPEED : (CFG_CPU_SPEED / 2);
 

@@ -4627,7 +4627,7 @@ static __inline__ unsigned int __cpm_get_pllout(void)
 {
 	unsigned long m, n, no, pllout;
 	unsigned long cppcr = REG_CPM_CPPCR;
-	static const unsigned long od[4] = {1, 2, 4, 8};
+	static const u8 od[4] = {1, 2, 4, 8};
 	if ((cppcr & CPM_CPPCR_PLLEN) && (!(cppcr & CPM_CPPCR_PLLBP))) {
 		m = __cpm_get_pllm() + 1;
 		n = __cpm_get_plln() + 1;
@@ -4643,7 +4643,7 @@ static __inline__ unsigned int __cpm_get_pll1out(void)
 {
 	unsigned long m, n, no, pllout;
 	unsigned long cppcr1 = REG_CPM_CPPCR1;
-	static const unsigned long od[4] = {1, 2, 4, 8};
+	static const u8 od[4] = {1, 2, 4, 8};
 	if (cppcr1 & CPM_CPPCR1_PLL1EN)
 	{
 		m = __cpm_get_pll1m() + 1;
@@ -4671,7 +4671,7 @@ static __inline__ unsigned int __cpm_get_pllout2(void)
 /* CPU core clock */
 static __inline__ unsigned int __cpm_get_cclk(void)
 {
-	static const int div[] = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32};
+	static const u8 div[] = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32};
 
 	return __cpm_get_pllout() / div[__cpm_get_cdiv()];
 }
@@ -4679,7 +4679,7 @@ static __inline__ unsigned int __cpm_get_cclk(void)
 /* AHB system bus clock */
 static __inline__ unsigned int __cpm_get_hclk(void)
 {
-	static const int div[] = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32};
+	static const u8 div[] = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32};
 
 	return __cpm_get_pllout() / div[__cpm_get_hdiv()];
 }
@@ -4687,7 +4687,7 @@ static __inline__ unsigned int __cpm_get_hclk(void)
 /* Memory bus clock */
 static __inline__ unsigned int __cpm_get_mclk(void)
 {
-	static const int div[] = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32};
+	static const u8 div[] = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32};
 
 	return __cpm_get_pllout() / div[__cpm_get_mdiv()];
 }
@@ -4695,7 +4695,7 @@ static __inline__ unsigned int __cpm_get_mclk(void)
 /* APB peripheral bus clock */
 static __inline__ unsigned int __cpm_get_pclk(void)
 {
-	static const int div[] = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32};
+	static const u8 div[] = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32};
 
 	return __cpm_get_pllout() / div[__cpm_get_pdiv()];
 }
@@ -4703,7 +4703,7 @@ static __inline__ unsigned int __cpm_get_pclk(void)
 /* AHB1 module clock */
 static __inline__ unsigned int __cpm_get_h2clk(void)
 {
-	static const int div[] = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32};
+	static const u8 div[] = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32};
 
 	return __cpm_get_pllout() / div[__cpm_get_h2div()];
 }
