@@ -3132,7 +3132,7 @@ static __inline__ unsigned int __cpm_get_pllout(void)
 {
 	unsigned long m, n, no, pllout;
 	unsigned long cppcr = REG_CPM_CPPCR;
-	unsigned long od[4] = {1, 2, 2, 4};
+	static const unsigned long od[4] = {1, 2, 2, 4};
 	if ((cppcr & CPM_CPPCR_PLLEN) && !(cppcr & CPM_CPPCR_PLLBP)) {
 		m = __cpm_get_pllm() + 2;
 		n = __cpm_get_plln() + 2;
@@ -3155,7 +3155,7 @@ static __inline__ unsigned int __cpm_get_pllout2(void)
 /* CPU core clock */
 static __inline__ unsigned int __cpm_get_cclk(void)
 {
-	int div[] = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32};
+	static const int div[] = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32};
 
 	return __cpm_get_pllout() / div[__cpm_get_cdiv()];
 }
@@ -3163,7 +3163,7 @@ static __inline__ unsigned int __cpm_get_cclk(void)
 /* AHB system bus clock */
 static __inline__ unsigned int __cpm_get_hclk(void)
 {
-	int div[] = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32};
+	static const int div[] = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32};
 
 	return __cpm_get_pllout() / div[__cpm_get_hdiv()];
 }
@@ -3171,7 +3171,7 @@ static __inline__ unsigned int __cpm_get_hclk(void)
 /* Memory bus clock */
 static __inline__ unsigned int __cpm_get_mclk(void)
 {
-	int div[] = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32};
+	static const int div[] = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32};
 
 	return __cpm_get_pllout() / div[__cpm_get_mdiv()];
 }
@@ -3179,7 +3179,7 @@ static __inline__ unsigned int __cpm_get_mclk(void)
 /* APB peripheral bus clock */
 static __inline__ unsigned int __cpm_get_pclk(void)
 {
-	int div[] = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32};
+	static const int div[] = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32};
 
 	return __cpm_get_pllout() / div[__cpm_get_pdiv()];
 }

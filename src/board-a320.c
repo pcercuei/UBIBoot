@@ -32,7 +32,7 @@
 static void pll_init(void)
 {
 	register unsigned int cfcr, plcr1, pllout2;
-	int n2FR[33] = {
+	static const int n2FR[33] = {
 		0, 0, 1, 2, 3, 0, 4, 0, 5, 0, 0, 0, 6, 0, 0, 0,
 		7, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0,
 		9
@@ -100,12 +100,12 @@ static void sdram_init(void)
 {
 	unsigned int dmcr0, dmcr, sdmode, tmp;
 
-	unsigned int cas_latency_sdmr[2] = {
+	static const unsigned int cas_latency_sdmr[2] = {
 		EMC_SDMR_CAS_2,
 		EMC_SDMR_CAS_3,
 	};
 
-	unsigned int cas_latency_dmcr[2] = {
+	static const unsigned int cas_latency_dmcr[2] = {
 		1 << EMC_DMCR_TCL_BIT,	/* CAS latency is 2 */
 		2 << EMC_DMCR_TCL_BIT	/* CAS latency is 3 */
 	};

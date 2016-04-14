@@ -44,7 +44,8 @@ The highest divider yields the best resolution. */
 
 static void pll_init(void)
 {
-	unsigned int reg, i, n2FR[13] = {
+	unsigned int reg, i;
+	static const unsigned int n2FR[13] = {
 		0, 0, 1, 2, 3, 0, 4, 0, 5, 0, 0, 0, 6,
 	};
 
@@ -79,7 +80,7 @@ static void pll_init(void)
 static void ddr_mem_init(void)
 {
 	/* TODO: Add support for CL=1.5 CL=2.5 CL=3.5 CL=4.5 */
-	unsigned int ddr_cl_lookup[5] = {
+	static const unsigned int ddr_cl_lookup[5] = {
 		0, 9, 10, 11, 12,
 	};
 
