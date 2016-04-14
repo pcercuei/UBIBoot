@@ -17,9 +17,9 @@ int strncmp(const char *s1, const char *s2, size_t n)
 void *memcpy(void *dest, const void *src, size_t n)
 {
 	unsigned char *d = dest;
-	const unsigned char *s = src;
+	const unsigned char *s = src, *e = src + n;
 
-	while (n--)
+	while (s != e)
 		*d++ = *s++;
 	return dest;
 }
@@ -34,8 +34,8 @@ void *memmove(void *dest, const void *src, size_t n)
 		unsigned char *d = dest + n;
 		const unsigned char *s = src + n;
 
-		while (n--)
-			*--d = *--s;
+		/* Note that n == 0 is handled by the other branch. */
+		do { *--d = *--s; } while (s != src);
 		return dest;
 	}
 }
