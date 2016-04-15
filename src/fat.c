@@ -152,10 +152,11 @@ static void *process_uimage_header(
 static void *load_cluster_chain(unsigned int id, uint32_t cluster,
 		void *ld_addr, void **exec_addr)
 {
-	while (1) {
+	int err = ERR_FAT_BAD_IMAGE;
+
+	while (cluster > 1 && cluster < 0x0ffffff0) {
 		uint32_t data_sector, num_data_sectors;
 		uint32_t next_cluster, num_clusters;
-		int err = 0;
 
 		if (cluster_span(id, cluster, &next_cluster, &num_clusters))
 			return NULL;
@@ -166,6 +167,7 @@ static void *load_cluster_chain(unsigned int id, uint32_t cluster,
 		mmc_start_block(id, data_sector, num_data_sectors);
 
 		/* Receive data. */
+		err = 0;
 		while (num_data_sectors--) {
 			if (mmc_receive_block(id, ld_addr)) {
 				err = ERR_FAT_IO_PART;
@@ -185,14 +187,17 @@ static void *load_cluster_chain(unsigned int id, uint32_t cluster,
 
 		mmc_stop_block(id);
 
-		if (err) {
-			SERIAL_PUTI(err);
-			return NULL;
-		}
+		if (err)
+			break;
 
 		cluster = next_cluster;
-		if ((cluster >= 0x0ffffff0) || (cluster <= 1))
-			return ld_addr;
+	}
+
+	if (err) {
+		SERIAL_PUTI(err);
+		return NULL;
+	} else {
+		return ld_addr;
 	}
 }
 
