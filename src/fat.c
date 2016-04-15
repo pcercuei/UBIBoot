@@ -143,12 +143,13 @@ static void *process_uimage_header(
 }
 
 /*
+ * Loads data from the cluster chain starting at the given cluster number.
  * When 'exec_addr' is not NULL, it indicates that an uImage is being loaded
  * and the execution address (entry point) should be extracted from the
  * uImage header and written via that pointer. Also the image body should
  * be loaded to the load address from the uImage header instead of 'ld_addr'.
  */
-static void *load_from_cluster(unsigned int id, uint32_t cluster,
+static void *load_cluster_chain(unsigned int id, uint32_t cluster,
 		void *ld_addr, void **exec_addr)
 {
 	while (1) {
@@ -247,7 +248,7 @@ int mmc_load_kernel(unsigned int id, void *ld_addr, int alt, void **exec_addr)
 		if (!dir_start) {
 			/* Load root directory. */
 			dir_start = ld_addr;
-			dir_end = load_from_cluster(id, root_cluster, dir_start, NULL);
+			dir_end = load_cluster_chain(id, root_cluster, dir_start, NULL);
 			if (!dir_end)
 				return -1;
 		}
@@ -258,7 +259,7 @@ int mmc_load_kernel(unsigned int id, void *ld_addr, int alt, void **exec_addr)
 			dir_start = NULL;
 			*exec_addr = ld_addr;
 			SERIAL_PUTS("MMC: Loading kernel file...\n");
-			if (load_from_cluster(
+			if (load_cluster_chain(
 						id, entry->starthi << 16 | entry->start,
 						ld_addr, (kernel & 1) ? NULL : exec_addr))
 				return kernel >> 1;
