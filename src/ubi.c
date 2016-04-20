@@ -14,6 +14,7 @@
 #include "nand.h"
 #include "serial.h"
 #include "config.h"
+#include "utils.h"
 
 static int load_kernel(uint32_t eb_start, uint32_t count,
 			unsigned char *ld_addr)
@@ -37,7 +38,7 @@ static int load_kernel(uint32_t eb_start, uint32_t count,
 
 	SERIAL_PUTS("UBI partition detected.\n");
 
-	vid_hdr_offset = ntohl(ec_hdr.vid_hdr_offset);
+	vid_hdr_offset = swap_be32(ec_hdr.vid_hdr_offset);
 
 	for (i=eb_start; i<(eb_start+count); i++) {
 		nand_read_page(i * PAGE_PER_BLOCK + vid_hdr_offset / PAGE_SIZE, eb_copy);
@@ -46,10 +47,10 @@ static int load_kernel(uint32_t eb_start, uint32_t count,
 		if (vid_hdr.magic == UBI_VID_HDR_MAGIC) {
 			struct EraseBlock *eb = alloca(sizeof(struct EraseBlock));
 			memcpy(&eb->vid_hdr, &vid_hdr, sizeof(struct ubi_vid_hdr));
-			eb->data_addr = i*BLOCK_SIZE + ntohl(ec_hdr.data_offset);
+			eb->data_addr = i*BLOCK_SIZE + swap_be32(ec_hdr.data_offset);
 
 			/* This eraseblock contains the volume table */
-			if (ntohl(vid_hdr.vol_id) == UBI_VOL_TABLE_ID) {
+			if (swap_be32(vid_hdr.vol_id) == UBI_VOL_TABLE_ID) {
 
 				/* Skip if we have already read the volume table */
 				if (kernel_vol_id < UBI_VOL_TABLE_ID) continue;
@@ -67,7 +68,7 @@ static int load_kernel(uint32_t eb_start, uint32_t count,
 					}
 				}
 			} else {
-				SLIST_INSERT_HEAD(&eb_list[ntohl(vid_hdr.vol_id)], eb, next);
+				SLIST_INSERT_HEAD(&eb_list[swap_be32(vid_hdr.vol_id)], eb, next);
 			}
 		}
 	}
@@ -81,9 +82,9 @@ static int load_kernel(uint32_t eb_start, uint32_t count,
 		struct EraseBlock *eb;
 		int found=0;
 		SLIST_FOREACH(eb, &eb_list[kernel_vol_id], next) {
-			if (ntohl(eb->vid_hdr.lnum) == i) {
-				nand_load(eb->data_addr / PAGE_SIZE, 1 + (ntohl(eb->vid_hdr.data_size) / PAGE_SIZE), ld_addr);
-				ld_addr += ntohl(eb->vid_hdr.data_size);
+			if (swap_be32(eb->vid_hdr.lnum) == i) {
+				nand_load(eb->data_addr / PAGE_SIZE, 1 + (swap_be32(eb->vid_hdr.data_size) / PAGE_SIZE), ld_addr);
+				ld_addr += swap_be32(eb->vid_hdr.data_size);
 				found = 1;
 				break;
 			}
