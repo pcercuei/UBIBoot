@@ -9,6 +9,7 @@ SECTIONS
 {
 	. = ALIGN(4);
 	.text.1 : { output/a320/head.o(.text*) } > ram
+	.text.0 : { *(EXCLUDE_FILE (output/a320/head.o) .text*) } > ram
 
 	. = ALIGN(4);
 	.rodata : { *(.rodata*) } > ram
@@ -30,13 +31,6 @@ SECTIONS
 	. = ALIGN (4);
 	_bss_end = ABSOLUTE(.);
 
-	/*
-	 * Having the code at the end allows the stack to use the same address
-	 * space, since instruction and data cache are independent.
-	 */
-	. = ALIGN(4);
-	.text.0 : { *(EXCLUDE_FILE (output/a320/head.o) .text*) } > ram
-
-	__stack = 0x80002000;
+	__stack = 0x80004000;
 }
 
