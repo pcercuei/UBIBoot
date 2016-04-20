@@ -12,9 +12,10 @@
 #define LOG_BAUDRATE		57600
 
 /* NAND flash parameters */
-#define BUS_WIDTH	8
-#define ROW_CYCLE	3
-#define PAGE_SIZE	4096
+#define BUS_WIDTH	8 /* 8 or 16 */
+#define ROW_CYCLE	3 /* 3 or 2 */
+#define PAGE_SIZE_OFFT	12
+#define PAGE_SIZE	(1 << (PAGE_SIZE_OFFT))
 #define OOB_SIZE 	(PAGE_SIZE/32)
 #define PAGE_PER_BLOCK	128
 #define BLOCK_SIZE 		(PAGE_PER_BLOCK * PAGE_SIZE)
