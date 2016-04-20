@@ -19,26 +19,27 @@
 static int load_kernel(uint32_t eb_start, uint32_t count,
 			unsigned char *ld_addr)
 {
-	struct ubi_ec_hdr ec_hdr;
+	struct ubi_ec_hdr *ec_hdr;
 	struct ubi_vid_hdr vid_hdr;
 	unsigned char eb_copy[PAGE_SIZE];
-	uint32_t i, vid_hdr_offset, kernel_vol_id = 0xffffffff;
+	uint32_t i, vid_hdr_offset, data_offset, kernel_vol_id = 0xffffffff;
 
 	SLIST_HEAD(EraseBlockList, EraseBlock) eb_list[UBI_NB_VOLUMES];
 
 	for (i=0; i<UBI_NB_VOLUMES; i++) SLIST_INIT(&eb_list[i]);
 
 	nand_read_page(eb_start * PAGE_PER_BLOCK, eb_copy);
-	memcpy(&ec_hdr, eb_copy, sizeof(struct ubi_ec_hdr));
+	ec_hdr = (struct ubi_ec_hdr *) eb_copy;
 
-	if (ec_hdr.magic != UBI_EC_HDR_MAGIC) {
+	if (ec_hdr->magic != UBI_EC_HDR_MAGIC) {
 		SERIAL_PUTI(ERR_UBI_NO_PART);
 		return -1;
 	}
 
 	SERIAL_PUTS("UBI partition detected.\n");
 
-	vid_hdr_offset = swap_be32(ec_hdr.vid_hdr_offset);
+	vid_hdr_offset = swap_be32(ec_hdr->vid_hdr_offset);
+	data_offset = swap_be32(ec_hdr->data_offset);
 
 	for (i=eb_start; i<(eb_start+count); i++) {
 		nand_read_page(i * PAGE_PER_BLOCK + vid_hdr_offset / PAGE_SIZE, eb_copy);
@@ -47,7 +48,7 @@ static int load_kernel(uint32_t eb_start, uint32_t count,
 		if (vid_hdr.magic == UBI_VID_HDR_MAGIC) {
 			struct EraseBlock *eb = alloca(sizeof(struct EraseBlock));
 			memcpy(&eb->vid_hdr, &vid_hdr, sizeof(struct ubi_vid_hdr));
-			eb->data_addr = i*BLOCK_SIZE + swap_be32(ec_hdr.data_offset);
+			eb->data_addr = i*BLOCK_SIZE + data_offset;
 
 			/* This eraseblock contains the volume table */
 			if (swap_be32(vid_hdr.vol_id) == UBI_VOL_TABLE_ID) {
