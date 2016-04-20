@@ -58,7 +58,8 @@ struct ubi_vol_tbl_record {
 
 struct EraseBlock {
 	uint32_t data_addr;
-	struct ubi_vid_hdr vid_hdr;
+	uint32_t lnum;
+	uint32_t data_size;
 	SLIST_ENTRY(EraseBlock) next;
 };
 

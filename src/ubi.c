@@ -20,7 +20,7 @@ static int load_kernel(uint32_t eb_start, uint32_t count,
 			unsigned char *ld_addr)
 {
 	struct ubi_ec_hdr *ec_hdr;
-	struct ubi_vid_hdr vid_hdr;
+	struct ubi_vid_hdr *vid_hdr;
 	unsigned char eb_copy[PAGE_SIZE];
 	uint32_t i, vid_hdr_offset, data_offset, kernel_vol_id = 0xffffffff;
 
@@ -43,15 +43,18 @@ static int load_kernel(uint32_t eb_start, uint32_t count,
 
 	for (i=eb_start; i<(eb_start+count); i++) {
 		nand_read_page(i * PAGE_PER_BLOCK + vid_hdr_offset / PAGE_SIZE, eb_copy);
-		memcpy(&vid_hdr, eb_copy + (vid_hdr_offset % PAGE_SIZE), sizeof(struct ubi_vid_hdr));
 
-		if (vid_hdr.magic == UBI_VID_HDR_MAGIC) {
+		vid_hdr = (struct ubi_vid_hdr *) ((uintptr_t) eb_copy + (vid_hdr_offset % PAGE_SIZE));
+
+		if (vid_hdr->magic == UBI_VID_HDR_MAGIC) {
 			struct EraseBlock *eb = alloca(sizeof(struct EraseBlock));
-			memcpy(&eb->vid_hdr, &vid_hdr, sizeof(struct ubi_vid_hdr));
+
 			eb->data_addr = i*BLOCK_SIZE + data_offset;
+			eb->lnum = vid_hdr->lnum;
+			eb->data_size = vid_hdr->data_size;
 
 			/* This eraseblock contains the volume table */
-			if (swap_be32(vid_hdr.vol_id) == UBI_VOL_TABLE_ID) {
+			if (swap_be32(vid_hdr->vol_id) == UBI_VOL_TABLE_ID) {
 
 				/* Skip if we have already read the volume table */
 				if (kernel_vol_id < UBI_VOL_TABLE_ID) continue;
@@ -69,7 +72,7 @@ static int load_kernel(uint32_t eb_start, uint32_t count,
 					}
 				}
 			} else {
-				SLIST_INSERT_HEAD(&eb_list[swap_be32(vid_hdr.vol_id)], eb, next);
+				SLIST_INSERT_HEAD(&eb_list[swap_be32(vid_hdr->vol_id)], eb, next);
 			}
 		}
 	}
@@ -83,9 +86,9 @@ static int load_kernel(uint32_t eb_start, uint32_t count,
 		struct EraseBlock *eb;
 		int found=0;
 		SLIST_FOREACH(eb, &eb_list[kernel_vol_id], next) {
-			if (swap_be32(eb->vid_hdr.lnum) == i) {
-				nand_load(eb->data_addr / PAGE_SIZE, 1 + (swap_be32(eb->vid_hdr.data_size) / PAGE_SIZE), ld_addr);
-				ld_addr += swap_be32(eb->vid_hdr.data_size);
+			if (swap_be32(eb->lnum) == i) {
+				nand_load(eb->data_addr / PAGE_SIZE, 1 + (swap_be32(eb->data_size) / PAGE_SIZE), ld_addr);
+				ld_addr += swap_be32(eb->data_size);
 				found = 1;
 				break;
 			}
