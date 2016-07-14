@@ -6,6 +6,7 @@
 #include "config.h"
 #include "sdram.h"
 #include "serial.h"
+#include "utils.h"
 #include "jz.h"
 
 #define PIN_A (32*4 + 29)		/* Port 4 pin 29: A button */
@@ -325,19 +326,6 @@ void board_init(void)
 			"mtc0 $2, $5, 4\n\t"
 			"nop\n\t"
 			::"r"(2));
-}
-
-void udelay(unsigned int us)
-{
-	unsigned int tmp = (CFG_CPU_SPEED / 1000000 / 2) * us;
-	asm volatile (
-		".set noreorder\n\t"
-		"0:\n\t"
-			"bnez %0,0b\n\t"
-			"addiu %0, %0, -1\n\t"
-		".set reorder\n\t"
-			::"r"(tmp)
-		);
 }
 
 void light(int i)

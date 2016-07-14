@@ -13,6 +13,7 @@
 
 #include "board.h"
 #include "serial.h"
+#include "utils.h"
 #include "jz.h"
 
 #define PIN_X (32*3 + 19)		/* Port 3 pin 19: X button */
@@ -65,12 +66,6 @@ static void pll_init(void)
 	REG_CPM_CPPCR = plcr1;
 
 	__cpm_enable_pll_change();
-}
-
-void udelay(unsigned int us)
-{
-	volatile unsigned int tmp = (CFG_CPU_SPEED / 1000000) * us;
-	while (tmp--);
 }
 
 /*

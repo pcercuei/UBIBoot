@@ -21,4 +21,6 @@ uint32_t swap_be32(uint32_t val);
  */
 void write_hex_digits(unsigned int value, char *last_digit);
 
+void udelay(unsigned int us);
+
 #endif /* __UTILS_H__ */

@@ -16,6 +16,7 @@
 #include "serial.h"
 #include "mmc.h"
 #include "board.h"
+#include "utils.h"
 #include "jz.h"
 
 #define MSC_RESPONSE_R1 3
