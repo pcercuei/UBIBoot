@@ -45,6 +45,12 @@ _start:
 #endif
 #endif
 
+	/* Disable interrupts */
+	mfc0 t0, $12
+	addi t1, zero, -2
+	and t0, t0, t1
+	mtc0 t0, $12
+
 	la	sp, __stack
 	j	c_main
 	nop
