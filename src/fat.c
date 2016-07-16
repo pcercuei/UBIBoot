@@ -263,7 +263,11 @@ int mmc_load_kernel(unsigned int id, void *ld_addr, int alt, void **exec_addr)
 		if (entry) {
 			dir_start = NULL;
 			*exec_addr = ld_addr;
-			SERIAL_PUTS("MMC: Loading kernel file...\n");
+
+			SERIAL_PUTS("MMC: Loading kernel file ");
+			SERIAL_PUTS(kernel_names[kernel]);
+			SERIAL_PUTC('\n');
+
 			if (load_cluster_chain(
 						id, entry->starthi << 16 | entry->start,
 						ld_addr, (kernel & 1) ? NULL : exec_addr))
