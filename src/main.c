@@ -63,6 +63,7 @@ enum {
 #endif
 #ifdef USE_SERIAL
 	PARAM_CONSOLE_SERIAL,
+	PARAM_CONSOLE_SERIAL_EARLYCON,
 #endif
 	PARAM_CONSOLE_LOCAL,
 	PARAM_LOGO,
@@ -112,6 +113,7 @@ static char *kernel_params[] = {
 #ifdef USE_SERIAL
 	[PARAM_CONSOLE_SERIAL] = "console=ttyS" STRINGIFY_IND(LOG_UART)
 			"," STRINGIFY_IND(LOG_BAUDRATE),
+	[PARAM_CONSOLE_SERIAL_EARLYCON] = "earlycon",
 #endif
 	[PARAM_CONSOLE_LOCAL] = "console=tty0",
 	[PARAM_LOGO] = "",
