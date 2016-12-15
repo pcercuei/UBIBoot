@@ -359,24 +359,3 @@ unsigned int get_memory_size(void)
 	return (1 << (DDR_ROW + DDR_COL + DDR_DW32 + DDR_BANK8 + 3))
 			* (DDR_CS1EN + DDR_CS0EN);
 }
-
-#ifdef USE_SERIAL
-void serial_setbrg(void)
-{
-	volatile u8 *uart_lcr = (u8 *)(UART_BASE(LOG_UART) + OFF_LCR);
-	volatile u8 *uart_dlhr = (u8 *)(UART_BASE(LOG_UART) + OFF_DLHR);
-	volatile u8 *uart_dllr = (u8 *)(UART_BASE(LOG_UART) + OFF_DLLR);
-	u32 baud_div, tmp;
-
-	baud_div = CFG_EXTAL / 16 / LOG_BAUDRATE;
-	tmp = *uart_lcr;
-	tmp |= UART_LCR_DLAB;
-	*uart_lcr = tmp;
-
-	*uart_dlhr = (baud_div >> 8) & 0xff;
-	*uart_dllr = baud_div & 0xff;
-
-	tmp &= ~UART_LCR_DLAB;
-	*uart_lcr = tmp;
-}
-#endif

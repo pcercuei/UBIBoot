@@ -181,27 +181,6 @@ static void sdram_init(void)
 	/* everything is ok now */
 }
 
-#ifdef USE_SERIAL
-void serial_setbrg(void)
-{
-	volatile u8 *uart_lcr = (volatile u8 *)(UART_BASE(LOG_UART) + OFF_LCR);
-	volatile u8 *uart_dlhr = (volatile u8 *)(UART_BASE(LOG_UART) + OFF_DLHR);
-	volatile u8 *uart_dllr = (volatile u8 *)(UART_BASE(LOG_UART) + OFF_DLLR);
-	u32 baud_div, tmp;
-
-	baud_div = CFG_EXTAL / 16 / LOG_BAUDRATE;
-	tmp = *uart_lcr;
-	tmp |= UART_LCR_DLAB;
-	*uart_lcr = tmp;
-
-	*uart_dlhr = (baud_div >> 8) & 0xff;
-	*uart_dllr = baud_div & 0xff;
-
-	tmp &= ~UART_LCR_DLAB;
-	*uart_lcr = tmp;
-}
-#endif
-
 int alt_key_pressed(void)
 {
 	return !__gpio_get_pin(PIN_X);

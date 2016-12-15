@@ -2,7 +2,6 @@
 #define _BOARD_H
 
 extern void board_init (void);
-extern void serial_setbrg (void);
 
 void light(int set);
 int alt_key_pressed(void);

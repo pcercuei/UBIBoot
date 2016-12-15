@@ -51,6 +51,9 @@ void serial_init(void)
 	volatile u8 *uart_lcr = (volatile u8 *)(UART_BASE(LOG_UART) + OFF_LCR);
 	volatile u8 *uart_ier = (volatile u8 *)(UART_BASE(LOG_UART) + OFF_IER);
 	volatile u8 *uart_sircr = (volatile u8 *)(UART_BASE(LOG_UART) + OFF_SIRCR);
+	volatile u8 *uart_dlhr = (volatile u8 *)(UART_BASE(LOG_UART) + OFF_DLHR);
+	volatile u8 *uart_dllr = (volatile u8 *)(UART_BASE(LOG_UART) + OFF_DLLR);
+	u32 baud_div, tmp;
 
 	/* Disable port interrupts while changing hardware */
 	*uart_ier = 0;
@@ -65,7 +68,16 @@ void serial_init(void)
 	*uart_lcr = UART_LCR_WLEN_8 | UART_LCR_STOP_1;
 
 	/* Set baud rate */
-	serial_setbrg();
+	baud_div = CFG_EXTAL / 16 / LOG_BAUDRATE;
+	tmp = *uart_lcr;
+	tmp |= UART_LCR_DLAB;
+	*uart_lcr = tmp;
+
+	*uart_dlhr = (baud_div >> 8) & 0xff;
+	*uart_dllr = baud_div & 0xff;
+
+	tmp &= ~UART_LCR_DLAB;
+	*uart_lcr = tmp;
 
 	/* Enable UART unit, enable and clear FIFO */
 	*uart_fcr = UART_FCR_UUE | UART_FCR_FE | UART_FCR_TFLS | UART_FCR_RFLS;
