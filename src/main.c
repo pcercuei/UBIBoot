@@ -154,7 +154,13 @@ static void set_mem_param(void)
 	unsigned int high_mem_size = mem_size > 256 ? mem_size - 256 : 0;
 
 	write_hex_digits(low_mem_size, &kernel_params[PARAM_LOWMEM][9]);
-	write_hex_digits(high_mem_size, &kernel_params[PARAM_HIGHMEM][9]);
+
+	if (high_mem_size) {
+		write_hex_digits(high_mem_size,
+				&kernel_params[PARAM_HIGHMEM][9]);
+	} else {
+		kernel_params[PARAM_HIGHMEM][0] = '\0';
+	}
 }
 
 typedef void (*kernel_main)(int, char**, char**, int*) __attribute__((noreturn));
