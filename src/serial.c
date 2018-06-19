@@ -113,9 +113,8 @@ void serial_puti(unsigned int value)
 
 void serial_puth(unsigned int d)
 {
-	char *message = "ERR: 0x00000000\r";
-	/*               0123456789012345 */
-	write_hex_digits(d, &message[14]);
+	char message[] = "0x00000000";
+	write_hex_digits(d, &message[9]);
 	serial_puts(message);
 }
 
