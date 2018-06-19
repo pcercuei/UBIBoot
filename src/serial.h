@@ -37,8 +37,6 @@ void serial_init(void);
 void serial_putb(unsigned int d);
 void serial_puth(unsigned int d);
 void serial_puti(unsigned int d);
-void serial_put_regb(const char *name, unsigned int value);
-void serial_put_regh(const char *name, unsigned int value);
 
 #endif
 

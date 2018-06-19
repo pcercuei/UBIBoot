@@ -117,19 +117,3 @@ void serial_puth(unsigned int d)
 	write_hex_digits(d, &message[9]);
 	serial_puts(message);
 }
-
-void serial_put_regb(const char *name, unsigned int value)
-{
-	serial_puts(name);
-	serial_puts(" = ");
-	serial_putb(value);
-	serial_putc('\n');
-}
-
-void serial_put_regh(const char *name, unsigned int value)
-{
-	serial_puts(name);
-	serial_puts(" = ");
-	serial_puth(value);
-	serial_putc('\n');
-}
