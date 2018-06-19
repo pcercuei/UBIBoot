@@ -97,6 +97,20 @@ void serial_putb(unsigned int d)
 	for (m = 0x00000080; m != 0x00000000; m >>= 1) serial_putc(m & d ? '1' : '0');
 }
 
+void serial_puti(unsigned int value)
+{
+	char message[32];
+	unsigned int i;
+
+	for (i = 0; (i < sizeof(message)) && value; i++) {
+		message[i] = value % 10;
+		value /= 10;
+	}
+
+	for (; i; i--)
+		serial_putc('0' + message[i - 1]);
+}
+
 void serial_puth(unsigned int d)
 {
 	char *message = "ERR: 0x00000000\r";

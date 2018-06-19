@@ -4,10 +4,12 @@
 #ifdef USE_SERIAL
 #define SERIAL_PUTS(x) serial_puts(x)
 #define SERIAL_PUTC(x) serial_putc(x)
-#define SERIAL_PUTI(x) serial_puth(x)
+#define SERIAL_PUTH(x) serial_puth(x)
+#define SERIAL_PUTI(x) serial_puti(x)
 #else
 #define SERIAL_PUTS(x)
 #define SERIAL_PUTC(x)
+#define SERIAL_PUTH(x)
 #define SERIAL_PUTI(x)
 #endif
 
@@ -18,6 +20,7 @@ int serial_tstc(void);
 void serial_init(void);
 void serial_putb(unsigned int d);
 void serial_puth(unsigned int d);
+void serial_puti(unsigned int d);
 void serial_put_regb(const char *name, unsigned int value);
 void serial_put_regh(const char *name, unsigned int value);
 
