@@ -202,11 +202,12 @@ static void __nand_read_page(uint32_t page_addr, uint8_t *dst, uint8_t *oobbuf)
 				/* XXX: Why is that appearing all the time, and the
 				 * kernel still boots fine? */
 
-				SERIAL_PUTI(ERR_NAND_IO_UNC);
+				SERIAL_ERR(ERR_NAND_IO_UNC);
 			}
 			else {
 				unsigned int errcnt, index, mask;
-				SERIAL_PUTI(ERR_NAND_IO);
+
+				SERIAL_ERR(ERR_NAND_IO);
 
 				errcnt = (stat & EMC_NFINTS_ERRCNT_MASK) >> EMC_NFINTS_ERRCNT_BIT;
 				switch (errcnt) {

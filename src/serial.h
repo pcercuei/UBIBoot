@@ -13,6 +13,22 @@
 #define SERIAL_PUTI(x)
 #endif
 
+#define SERIAL_PUTS_ARGI(pre, val, post) \
+	do {	\
+		SERIAL_PUTS(pre);	\
+		SERIAL_PUTI(val);	\
+		SERIAL_PUTS(post);	\
+	} while(0)
+
+#define SERIAL_PUTS_ARGH(pre, val, post) \
+	do {	\
+		SERIAL_PUTS(pre);	\
+		SERIAL_PUTH(val);	\
+		SERIAL_PUTS(post);	\
+	} while(0)
+
+#define SERIAL_ERR(err) SERIAL_PUTS_ARGI("ERROR ", (err), "\n")
+
 void serial_putc(const char c);
 void serial_puts(const char *s);
 int serial_getc(void);

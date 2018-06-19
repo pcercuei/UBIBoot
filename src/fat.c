@@ -25,18 +25,18 @@ static int get_first_partition(unsigned int id, uint32_t *lba)
 	struct mbr *mbr = (struct mbr *) &mbr_data;
 
 	if (mmc_block_read(id, (uint32_t *) mbr, 0, 1)) {
-		SERIAL_PUTI(ERR_FAT_IO_BOOT);
+		SERIAL_ERR(ERR_FAT_IO_BOOT);
 		return -1;
 	}
 #endif
 
 	if (mbr->signature != 0xAA55) {
-		SERIAL_PUTI(ERR_FAT_NO_MBR);
+		SERIAL_ERR(ERR_FAT_NO_MBR);
 		return -1;
 	}
 
 	if (mbr->partitions[0].status && mbr->partitions[0].status != 0x80) {
-		SERIAL_PUTI(ERR_FAT_NO_PART);
+		SERIAL_ERR(ERR_FAT_NO_PART);
 		return -1;
 	}
 
@@ -51,7 +51,7 @@ static int process_boot_sector(unsigned int id, uint32_t lba)
 	struct volume_info *vinfo;
 
 	if (mmc_block_read(id, sector, lba, 1)) {
-		SERIAL_PUTI(ERR_FAT_IO_PART);
+		SERIAL_ERR(ERR_FAT_IO_PART);
 		return -1;
 	}
 
@@ -63,7 +63,7 @@ static int process_boot_sector(unsigned int id, uint32_t lba)
 
 	vinfo = (void *) sector + sizeof(struct boot_sector);
 	if (strncmp(vinfo->fs_type, "FAT32", 5)) {
-		SERIAL_PUTI(ERR_FAT_NO_FAT32);
+		SERIAL_ERR(ERR_FAT_NO_FAT32);
 		return -1;
 	}
 
@@ -91,7 +91,7 @@ static int cluster_span(
 		/* Read FAT */
 		if (fat_sector != cached_fat_sector) {
 			if (mmc_block_read(id, sector, fat_sector, 1)) {
-				SERIAL_PUTI(ERR_FAT_IO_FAT);
+				SERIAL_ERR(ERR_FAT_IO_FAT);
 				return -1;
 			}
 			cached_fat_sector = fat_sector;
@@ -194,7 +194,7 @@ static void *load_cluster_chain(unsigned int id, uint32_t cluster,
 	}
 
 	if (err) {
-		SERIAL_PUTI(err);
+		SERIAL_ERR(err);
 		return NULL;
 	} else {
 		return ld_addr;
@@ -279,7 +279,7 @@ int mmc_load_kernel(unsigned int id, void *ld_addr, int alt, void **exec_addr)
 	if (err) {
 		return err;
 	} else {
-		SERIAL_PUTI(ERR_FAT_NO_KERNEL);
+		SERIAL_ERR(ERR_FAT_NO_KERNEL);
 		return -1;
 	}
 }

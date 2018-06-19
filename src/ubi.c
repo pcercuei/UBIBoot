@@ -32,7 +32,7 @@ static int load_kernel(uint32_t eb_start, uint32_t count,
 	ec_hdr = (struct ubi_ec_hdr *) eb_copy;
 
 	if (ec_hdr->magic != UBI_EC_HDR_MAGIC) {
-		SERIAL_PUTI(ERR_UBI_NO_PART);
+		SERIAL_ERR(ERR_UBI_NO_PART);
 		return -1;
 	}
 
@@ -78,7 +78,7 @@ static int load_kernel(uint32_t eb_start, uint32_t count,
 	}
 
 	if (kernel_vol_id >= UBI_VOL_TABLE_ID) {
-		SERIAL_PUTI(ERR_UBI_NO_KERNEL);
+		SERIAL_ERR(ERR_UBI_NO_KERNEL);
 		return -1;
 	}
 
