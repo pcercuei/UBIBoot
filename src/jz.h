@@ -1,6 +1,8 @@
 #ifndef __JZ47XX_H__
 #define __JZ47XX_H__
 
+#define BIT(x) (1 << (x))
+
 #if JZ_VERSION == 4740
 #	include "jz4740.h"
 #elif JZ_VERSION == 4770
