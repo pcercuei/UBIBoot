@@ -34,8 +34,13 @@
 #define ACMD_SET_BUS_WIDTH	6
 #define ACMD_SD_SEND_OP_COND	41
 
+#ifndef MMC_1BIT
 #define CMDAT_4BIT		BIT(10)
 #define MMC_BUS_WIDTH		0x2
+#else
+#define CMDAT_4BIT		0
+#define MMC_BUS_WIDTH		0x0
+#endif
 
 enum response {
 	MSC_NO_RESPONSE,
