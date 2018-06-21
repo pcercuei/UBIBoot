@@ -217,12 +217,16 @@ void c_main(void)
 		}
 	}
 
-	if (!mmc_inited || !exec_addr)
+	if (!mmc_inited || !exec_addr) {
 		SERIAL_PUTS("Unable to boot from SD."
 #ifdef USE_NAND
 					" Falling back to NAND."
 #endif
 					"\n");
+#ifndef USE_NAND
+		return;
+#endif
+	}
 
 #ifdef USE_NAND
 	if (!exec_addr) {
