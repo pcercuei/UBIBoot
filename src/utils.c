@@ -1,4 +1,5 @@
 #include "config.h"
+#include "jz.h"
 #include "utils.h"
 
 int strncmp(const char *s1, const char *s2, size_t n)
@@ -70,4 +71,19 @@ void udelay(unsigned int us)
 		".set reorder\n\t"
 			::"r"(tmp)
 		);
+}
+
+bool ram_works(void)
+{
+	unsigned int i;
+
+	for (i = 0; i < 2 * CFG_DCACHE_SIZE; i += 4)
+		*(u32 *)(KSEG1 + LD_ADDR + i) = i;
+
+	for (i = 0; i < 2 * CFG_DCACHE_SIZE; i += 4) {
+		if (*(u32 *)(KSEG1 + LD_ADDR + i) != i)
+			return false;
+	}
+
+	return true;
 }

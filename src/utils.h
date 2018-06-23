@@ -1,6 +1,7 @@
 #ifndef __UTILS_H__
 #define __UTILS_H__
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -22,5 +23,7 @@ uint32_t swap_be32(uint32_t val);
 void write_hex_digits(unsigned int value, char *last_digit);
 
 void udelay(unsigned int us);
+
+bool ram_works(void);
 
 #endif /* __UTILS_H__ */
