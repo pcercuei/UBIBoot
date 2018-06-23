@@ -45,11 +45,9 @@ _start:
 #endif
 #endif
 
-	/* Disable interrupts */
-	mfc0 t0, $12
-	addi t1, zero, -2
-	and t0, t0, t1
-	mtc0 t0, $12
+	/* Disable interrupts in CP0_STATUS */
+	li $8, 0x00400004
+	mtc0 $8, $12
 
 	/* Load the stack and branch to c_main() */
 	la	sp, __stack
