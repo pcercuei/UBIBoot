@@ -51,8 +51,14 @@ _start:
 	and t0, t0, t1
 	mtc0 t0, $12
 
+	/* Load the stack and branch to c_main() */
 	la	sp, __stack
-	j	c_main
+	jal	c_main
+	nop
+
+_end:
+	wait
+	b _end
 	nop
 
 	.set reorder
