@@ -170,11 +170,11 @@ static void sdram_init(void)
 	/* Wait for number of auto-refresh cycles */
 	udelay(1000);
 
- 	/* Stage 3. Mode Register Set */
+	/* Stage 3. Mode Register Set */
 	REG_EMC_DMCR = dmcr0 | EMC_DMCR_RFSH | EMC_DMCR_MRSET;
 	REG8(EMC_SDMR0|sdmode) = 0;
 
-        /* Set back to basic DMCR value */
+	/* Set back to basic DMCR value */
 	REG_EMC_DMCR = dmcr | EMC_DMCR_RFSH | EMC_DMCR_MRSET;
 
 	/* everything is ok now */
