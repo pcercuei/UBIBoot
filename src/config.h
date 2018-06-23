@@ -20,6 +20,8 @@
 #include "config-gcw0.h"
 #elif defined(BOARD_a320)
 #include "config-a320.h"
+#elif defined(BOARD_rs90)
+#include "config-rs90.h"
 #else
 #error "No config for your board"
 #endif

@@ -1,0 +1,12 @@
+GC_FUNCTIONS = True
+USE_SERIAL = True
+# BKLIGHT_ON = True
+# USE_NAND = True
+# USE_UBI = True
+
+BOARD := rs90
+
+VARIANTS := rs90
+JZ_VERSION = 4740
+
+CFLAGS_all := -mips32
