@@ -45,6 +45,9 @@ _start:
 #endif
 #endif
 
+	/* Without a NOP here it won't boot on the RS90. Go figure. */
+	nop
+
 	/* Disable interrupts in CP0_STATUS */
 	li $8, 0x00400004
 	mtc0 $8, $12
