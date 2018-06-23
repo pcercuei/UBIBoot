@@ -19,3 +19,6 @@
 /* serial parameters */
 #define LOG_UART			2
 #define LOG_BAUDRATE		57600
+
+/* MMC parameters */
+#define MMC_ID 0

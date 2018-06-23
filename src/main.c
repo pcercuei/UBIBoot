@@ -27,8 +27,6 @@
  */
 #define BENCHMARK 0
 
-#define MMC_ID 0
-
 /* Kernel parameters list */
 
 /* Fill in root device and file system type? */

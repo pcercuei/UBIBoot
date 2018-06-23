@@ -35,3 +35,6 @@
 #define UBI_KERNEL_VOLUME	"kernel"
 #define UBI_ROOTFS_MTDNAME	"rootfs"
 #define UBI_ROOTFS_VOLUME	"rootfs"
+
+/* MMC parameters */
+#define MMC_ID 0
