@@ -14,6 +14,8 @@
 
 #define RFKILL_STATE		0
 
+#define USES_HIGHMEM
+
 /* serial parameters */
 #define LOG_UART			2
 #define LOG_BAUDRATE		57600
