@@ -5,6 +5,11 @@
 #include "jz.h"
 #include "utils.h"
 
+#include "jz4740-uart.h"
+
+#define _STRINGIFY(x) #x
+#define STRINGIFY(x) _STRINGIFY(x)
+
 void serial_putc(const char c)
 {
 	volatile u8 *uart_lsr = (volatile u8 *)(UART_BASE(LOG_UART) + OFF_LSR);
@@ -81,6 +86,11 @@ void serial_init(void)
 
 	/* Enable UART unit, enable and clear FIFO */
 	*uart_fcr = UART_FCR_UUE | UART_FCR_FE | UART_FCR_TFLS | UART_FCR_RFLS;
+
+	/* Wait a bit for the hardware to be ready */
+	udelay(100);
+
+	serial_puts("UBIBoot: UART" STRINGIFY(LOG_UART) " initialized\n");
 }
 
 
