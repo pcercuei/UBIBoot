@@ -173,7 +173,6 @@ typedef void (*kernel_main)(int, char**, char**, int*) __attribute__((noreturn))
 
 void c_main(void)
 {
-	register uint32_t reg;
 	void *exec_addr = NULL;
 	int mmc_inited;
 	extern unsigned int _bss_start, _bss_end;
@@ -279,13 +278,7 @@ void c_main(void)
 	jz_flush_icache();
 	*/
 
-	SERIAL_PUTS("Kernel loaded. Executing...\n");
-
-	/* WP bit clear in CP0_CAUSE ($13), needed to boot dingux zImage
-	 * (original fix by BouKiCHi) */
-	 asm volatile("mfc0 %0, $13\n\t"
-				"and %0, ~(0x00400000)\n\t"
-				"mtc0 %0, $13\n\t" : "=r"(reg) :);
+	SERIAL_PUTS("Kernel loaded. Executing...\n\n");
 
 	/* Boot the kernel */
 	((kernel_main) exec_addr) (

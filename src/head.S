@@ -49,6 +49,10 @@ _start:
 	li $8, 0x00400004
 	mtc0 $8, $12
 
+	/* Clear CP0_CAUSE */
+	li $9, 0x00800000
+	mtc0 $9, $13
+
 	/* Load the stack and branch to c_main() */
 	la	sp, __stack
 	jal	c_main
