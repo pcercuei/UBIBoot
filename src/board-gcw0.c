@@ -9,9 +9,10 @@
 #include "utils.h"
 #include "jz.h"
 
-#define PIN_A (32*4 + 29)		/* Port 4 pin 29: A button */
-#define PIN_X (32*4 + 28)		/* Port 4 pin 28: X button */
-#define PIN_Y (32*4 + 27)		/* Port 4 pin 27: Y button */
+#include "jz4770-cpm.h"
+#include "jz4770-ddrc.h"
+#include "jz4770-gpio.h"
+
 #define PIN_BKLIGHT	(32*4+1)	/* Port 4 pin 1: Backlight PWM  */
 
 /* Authorized values: 1 2 3 4 6 8 12 */
@@ -312,11 +313,25 @@ void board_init(void)
 	sdram_init();
 
 #ifdef USE_SERIAL
-	__gpio_as_uart2();
+	/* UART2 pins */
+	__gpio_as_func_mask(GPIOC, 0x50000000, 0);
+
 	__cpm_start_uart2();
+
 	serial_init();
 #endif
-	__gpio_as_msc0_boot();
+
+	/* MSC0 pins */
+	__gpio_as_func_mask(GPIOA, 0x00ec0000, 1);
+	__gpio_as_func_mask(GPIOA, 0x00100000, 0);
+
+	/* Set pins for input buttons as input GPIOs */
+	__gpio_as_input_mask(GPIOE, 0x38000000);
+
+	/* Set pin for backlight as output GPIO */
+	__gpio_clear_pin(GPIOE, 1);
+	__gpio_as_output(GPIOE, 1);
+
 	__cpm_start_msc0();
 	__cpm_select_msc_clk(0, 1);
 
@@ -331,27 +346,24 @@ void board_init(void)
 void light(int i)
 {
 	if (i)
-		__gpio_as_output1(PIN_BKLIGHT);
+		__gpio_set_pin(GPIOE, 1);
 	else
-		__gpio_as_output0(PIN_BKLIGHT);
+		__gpio_clear_pin(GPIOE, 1);
 }
 
 int alt_key_pressed(void)
 {
-	__gpio_as_input(PIN_X);
-	return !__gpio_get_pin(PIN_X);
+	return !__gpio_get_pin(4, 28);	/* Port 4 pin 28: X button */
 }
 
 int alt2_key_pressed(void)
 {
-	__gpio_as_input(PIN_Y);
-	return !__gpio_get_pin(PIN_Y);
+	return !__gpio_get_pin(4, 27); /* Port 4 pin 27: Y button */
 }
 
 int alt3_key_pressed(void)
 {
-	__gpio_as_input(PIN_A);
-	return !__gpio_get_pin(PIN_A);
+	return !__gpio_get_pin(4, 29); /* Port 4 pin 29: A button */
 }
 
 unsigned int get_memory_size(void)

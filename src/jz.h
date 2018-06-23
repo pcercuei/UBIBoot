@@ -109,8 +109,4 @@ static inline u32 jz_readl(u32 address)
 
 #define BIT(x) (1 << (x))
 
-#if JZ_VERSION == 4770
-#	include "jz4770.h"
-#endif
-
 #endif /*__JZ47XX_H__ */
