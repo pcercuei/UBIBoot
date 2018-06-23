@@ -15,6 +15,9 @@
 #include "errorcodes.h"
 #include "jz.h"
 
+#include "jz4740-emc.h"
+#include "jz4740-gpio.h"
+
 /*
  * NAND flash definitions
  */
@@ -36,8 +39,8 @@
 static inline void __nand_dev_ready(void)
 {
 	unsigned int timeout = 10000;
-	while ((REG_GPIO_PXPIN(2) & 0x40000000) && timeout--);
-	while (!(REG_GPIO_PXPIN(2) & 0x40000000));
+	while (__gpio_get_pin(2, 30) && timeout--);
+	while (!__gpio_get_pin(2, 30));
 }
 
 #define __nand_cmd(n)		(REG8(NAND_COMMPORT) = (n))

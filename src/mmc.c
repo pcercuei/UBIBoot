@@ -19,6 +19,7 @@
 #include "board.h"
 #include "utils.h"
 #include "jz.h"
+#include "jz4740-mmc.h"
 
 #define CMD_GO_IDLE_STATE	0
 #define CMD_ALL_SEND_CID	2

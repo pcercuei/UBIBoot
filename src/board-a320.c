@@ -16,10 +16,9 @@
 #include "utils.h"
 #include "jz.h"
 
-#define PIN_X (32*3 + 19)		/* Port 3 pin 19: X button */
-#define PIN_Y (32*3 + 2)		/* Port 3 pin 2:  Y button */
-#define PIN_A (32*3 + 0)		/* Port 3 pin 0: A button */
-#define PIN_BKLIGHT	(32*3+31)	/* Port 3 pin 31: Backlight PWM  */
+#include "jz4740-cpm.h"
+#include "jz4740-emc.h"
+#include "jz4740-gpio.h"
 
 #define CDIV 1
 #define HDIV 3
@@ -183,26 +182,26 @@ static void sdram_init(void)
 
 int alt_key_pressed(void)
 {
-	return !__gpio_get_pin(PIN_X);
+	return !__gpio_get_pin(GPIOC, 19);	/* Port 3 pin 19: X button */
 }
 
 int alt2_key_pressed(void)
 {
-	return !__gpio_get_pin(PIN_Y);
+	return !__gpio_get_pin(GPIOC, 2);	/* Port 3 pin 2:  Y button */
 }
 
 int alt3_key_pressed(void)
 {
-	return !__gpio_get_pin(PIN_A);
+	return !__gpio_get_pin(GPIOC, 0);	/* Port 3 pin 0: A button */
 }
 
 #ifdef BKLIGHT_ON
 void light(int set)
 {
 	if (set)
-		__gpio_set_pin(PIN_BKLIGHT);
+		__gpio_set_pin(GPIOC, 31);
 	else
-		__gpio_clear_pin(PIN_BKLIGHT);
+		__gpio_clear_pin(GPIOC, 31);
 }
 #endif
 
@@ -215,12 +214,30 @@ unsigned int get_memory_size(void)
 void board_init(void)
 {
 #ifdef USE_NAND
-	__gpio_as_nand();
+	/* NAND pins */
+	__gpio_as_func_mask(GPIOB, 0x02418000, 0);
+	__gpio_as_func_mask(GPIOC, 0x30000000, 0);
+	__gpio_as_input(GPIOC, 30);
+
+	__gpio_disable_pull_mask(GPIOB, 0x02018000);
+	__gpio_disable_pull_mask(GPIOC, 0x70000000);
 #endif
-	__gpio_as_sdram_32bit();
-	__gpio_as_msc();
+
+	/* SDRAM pins */
+	__gpio_as_func_mask(GPIOA, 0xffffffff, 0);
+	__gpio_as_func_mask(GPIOB, 0x81f9ffff, 0);
+	__gpio_as_func_mask(GPIOC, 0x07000000, 0);
+
+	__gpio_disable_pull_mask(GPIOA, 0xffffffff);
+	__gpio_disable_pull_mask(GPIOB, 0x81f9ffff);
+	__gpio_disable_pull_mask(GPIOC, 0x07000000);
+
+	/* MMC pins */
+	__gpio_as_func_mask(GPIOC, 0x00003f00, 0);
+	__gpio_disable_pull_mask(GPIOC, 0x00003f00);
+
 #ifdef USE_SERIAL
-	__gpio_as_uart0();
+	__gpio_as_func_mask(GPIOC, 0x06000000, 1);
 	serial_init();
 #endif
 
@@ -228,10 +245,10 @@ void board_init(void)
 	sdram_init();
 
 #ifdef BKLIGHT_ON
-	__gpio_clear_pin(PIN_BKLIGHT);
-	__gpio_as_output(PIN_BKLIGHT);
+	__gpio_clear_pin(GPIOC, 31);	/* Port 3 pin 31: Backlight PWM  */
+	__gpio_as_output(GPIOC, 31);
 #endif
 
-	__gpio_as_input(PIN_X);
-	__gpio_as_input(PIN_Y);
+	/* X/A/Y buttons */
+	__gpio_as_input_mask(GPIOC, 0x00080005);
 }
