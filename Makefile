@@ -53,6 +53,10 @@ ifdef USE_UBI
 	OBJS += ubi.o
 endif
 
+ifdef STAGE1_ONLY
+	CPPFLAGS += -DSTAGE1_ONLY
+endif
+
 .PHONY: all clean map
 
 BINFILES := $(foreach VARIANT,$(VARIANTS),$(OUTDIR)/ubiboot-$(VARIANT).bin)

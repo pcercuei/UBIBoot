@@ -197,6 +197,10 @@ void c_main(void)
 	light(1);
 #endif
 
+#ifdef STAGE1_ONLY
+	return;
+#endif
+
 	/* Tests on JZ4770 show that the data cache lines that contain the boot
 	 * loader are not marked as dirty initially. Therefore, if those cache
 	 * lines are evicted, the data is lost. To avoid that, we load to the

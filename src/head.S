@@ -58,12 +58,16 @@ _start:
 
 	/* Load the stack and branch to c_main() */
 	la	sp, __stack
+#ifdef STAGE1_ONLY
+	j	c_main
+#else
 	jal	c_main
 	nop
 
 _end:
 	wait
 	b _end
+#endif
 	nop
 
 	.set reorder
