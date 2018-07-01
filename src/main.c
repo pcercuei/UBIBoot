@@ -218,7 +218,7 @@ void c_main(void)
 		if (exec_addr) {
 #if PASS_ROOTFS_PARAMS
 			kernel_params[PARAM_ROOTDEV] =
-					"root=/dev/mmcblk" STRINGIFY_IND(MMC_ID) "p1";
+					"root=/dev/mmcblk0p1";
 			kernel_params[PARAM_ROOTTYPE] = "rootfstype=vfat";
 #endif
 		}
