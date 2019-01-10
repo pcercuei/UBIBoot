@@ -29,7 +29,30 @@ _start:
 	// The JZ4770 won't load the program
 	// if the first word is not 'MSPL'
 	.word 0x4d53504c
+#elif !defined(STAGE1_ONLY) && (JZ_VERSION >= 4750)
+#if BUS_WIDTH == 8
+	.word 0x555555ff
 #else
+	.word 0x55555500
+#endif
+	.word 0x55555555
+#if ROW_CYCLE == 3
+	.byte 0xff
+#else
+	.byte 0x00
+#endif
+#if PAGE_SIZE == 512
+	.byte 0x00
+	.byte 0x00
+#elif PAGE_SIZE == 2048
+	.byte 0xff
+	.byte 0xff
+#else
+	.byte 0xff
+	.byte 0x00
+#endif
+	.byte 0x00
+#else /* JZ4740 */
 #if BUS_WIDTH == 8
 #if ROW_CYCLE == 3
 	addiu zero, zero, 0xffff
