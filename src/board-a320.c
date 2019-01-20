@@ -252,3 +252,19 @@ void board_init(void)
 	/* X/A/Y buttons */
 	__gpio_as_input_mask(GPIOC, 0x00080005);
 }
+
+#ifdef USE_NAND
+void nand_wait_ready(void)
+{
+	unsigned int timeout = 10000;
+
+	while (__gpio_get_pin(GPIOC, 30) && timeout--);
+	while (!__gpio_get_pin(GPIOC, 30));
+}
+
+void nand_init(void)
+{
+	/* Optimize the timing of nand */
+	REG_EMC_SMCR1 = 0x094c4400;
+}
+#endif

@@ -9,6 +9,7 @@
  * published by the Free Software Foundation.
  */
 
+#include "board.h"
 #include "serial.h"
 #include "nand.h"
 #include "config.h"
@@ -16,7 +17,6 @@
 #include "jz.h"
 
 #include "jz4740-emc.h"
-#include "jz4740-gpio.h"
 
 /*
  * NAND flash definitions
@@ -35,13 +35,6 @@
 #define __nand_ecc_disable()	(REG_EMC_NFECR &= ~EMC_NFECR_ECCE)
 #define __nand_ecc_encode_sync() while (!(REG_EMC_NFINTS & EMC_NFINTS_ENCF))
 #define __nand_ecc_decode_sync() while (!(REG_EMC_NFINTS & EMC_NFINTS_DECF))
-
-static inline void __nand_dev_ready(void)
-{
-	unsigned int timeout = 10000;
-	while (__gpio_get_pin(2, 30) && timeout--);
-	while (!__gpio_get_pin(2, 30));
-}
 
 #define __nand_cmd(n)		(REG8(NAND_COMMPORT) = (n))
 #define __nand_addr(n)		(REG8(NAND_ADDRPORT) = (n))
@@ -96,7 +89,7 @@ static void nand_read_oob(uint32_t page_addr, uint8_t *buf, size_t size)
 
 #if (PAGE_SIZE == 512)
 	col_addr = 0;
-	__nand_dev_ready();
+	nand_wait_ready();
 
 	/* Send READOOB command */
 	__nand_cmd(NAND_CMD_READOOB);
@@ -128,13 +121,13 @@ static void nand_read_oob(uint32_t page_addr, uint8_t *buf, size_t size)
 #endif
 
 	/* Wait for device ready */
-	__nand_dev_ready();
+	nand_wait_ready();
 
 	/* Read oob data */
 	nand_read_buf(buf, size);
 
 #if (PAGE_SIZE == 512)
-	__nand_dev_ready();
+	nand_wait_ready();
 #endif
 }
 
@@ -167,7 +160,7 @@ static void __nand_read_page(uint32_t page_addr, uint8_t *dst, uint8_t *oobbuf)
 #endif
 
 	/* Wait for device ready */
-	__nand_dev_ready();
+	nand_wait_ready();
 
 	for (i = 0; i < PAGE_SIZE / ECC_BLOCK; i++) {
 		volatile unsigned char *paraddr = (volatile unsigned char *)EMC_NFPAR0;
@@ -264,11 +257,3 @@ void nand_load(uint32_t page_start, size_t nb, uint8_t *dst)
 	}
 	__nand_disable();
 }
-
-void nand_init(void)
-{
-
- 	/* Optimize the timing of nand */
-	REG_EMC_SMCR1 = 0x094c4400;
-}
-

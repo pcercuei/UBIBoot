@@ -9,5 +9,8 @@ int alt2_key_pressed(void);
 int alt3_key_pressed(void);
 unsigned int get_memory_size(void);
 
+void nand_init(void);
+void nand_wait_ready(void);
+
 #endif
 
