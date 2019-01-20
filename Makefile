@@ -45,7 +45,7 @@ endif
 
 ifdef USE_NAND
 	CPPFLAGS += -DUSE_NAND
-	OBJS += nand.o
+	OBJS += nand.o bch-jz4740.o
 endif
 
 ifdef USE_UBI
