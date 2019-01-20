@@ -215,10 +215,9 @@ unsigned int get_memory_size(void)
 void board_init(void)
 {
 #ifdef USE_NAND
-	__gpio_as_func_mask(1, 0x02418000, 0);
-	__gpio_as_func_mask(2, 0x30000000, 0);
-	__gpio_as_input(2, 30);
-	__gpio_disable_pull(2, 30);
+	__gpio_as_func_mask(GPIOC, 0x36300300, 0);
+	__gpio_as_input(GPIOC, 27);
+	__gpio_disable_pull(GPIOC, 27);
 #endif
 
 	/* SDRAM pins */
@@ -262,3 +261,17 @@ void board_init(void)
 	__gpio_as_output(GPIOD, 31);
 #endif
 }
+
+#ifdef USE_NAND
+void nand_wait_ready(void)
+{
+	unsigned int timeout = 10000;
+
+	while (__gpio_get_pin(GPIOC, 27) && timeout--);
+	while (!__gpio_get_pin(GPIOC, 27));
+}
+
+void nand_init(void)
+{
+}
+#endif

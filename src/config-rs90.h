@@ -21,3 +21,16 @@
 #define PAGE_SIZE 2048 /* 512, 2048 or 4096 */
 #define BUS_WIDTH 8 /* 8 or 16 */
 #define ROW_CYCLE 3 /* 3 or 2 */
+#define ECC_BLOCK	512
+#define PAGE_PER_BLOCK	64
+#define ECC_POS		3
+#define PAR_SIZE	13
+#define PAR_SIZE2	13
+
+/* UBI parameters */
+#define UBI_MTD_EB_START	1
+#define UBI_MTD_NB_EB		2045
+#define UBI_NB_VOLUMES		8
+#define UBI_KERNEL_VOLUME	"kernel"
+#define UBI_ROOTFS_MTDNAME	"system"
+#define UBI_ROOTFS_VOLUME	"rootfs"
