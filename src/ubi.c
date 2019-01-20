@@ -16,6 +16,8 @@
 #include "config.h"
 #include "utils.h"
 
+#define BLOCK_SIZE (PAGE_PER_BLOCK * PAGE_SIZE)
+
 static int load_kernel(uint32_t eb_start, uint32_t count,
 			unsigned char *ld_addr)
 {

@@ -18,9 +18,7 @@
 #define ROW_CYCLE	3 /* 3 or 2 */
 #define PAGE_SIZE_OFFT	12
 #define PAGE_SIZE	(1 << (PAGE_SIZE_OFFT))
-#define OOB_SIZE 	(PAGE_SIZE/32)
 #define PAGE_PER_BLOCK	128
-#define BLOCK_SIZE 		(PAGE_PER_BLOCK * PAGE_SIZE)
 #define BAD_BLOCK_POS	((PAGE_SIZE==512) ? 5 : 0)
 #define BAD_BLOCK_PAGE	(PAGE_PER_BLOCK -1)
 #define ECC_BLOCK	512

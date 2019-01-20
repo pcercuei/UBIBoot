@@ -35,6 +35,8 @@
 #define __nand_data8()		REG8(NAND_DATAPORT)
 #define __nand_data16()		REG16(NAND_DATAPORT)
 
+#define OOB_SIZE 	(PAGE_SIZE / 32)
+
 /*
  * NAND flash routines
  */
