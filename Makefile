@@ -45,7 +45,12 @@ endif
 
 ifdef USE_NAND
 	CPPFLAGS += -DUSE_NAND
-	OBJS += nand.o bch-jz4740.o
+	OBJS += nand.o
+ifeq ($(JZ_VERSION),4740)
+	OBJS += bch-jz4740.o
+else
+	OBJS += bch-jz4750.o
+endif
 endif
 
 ifdef USE_UBI
