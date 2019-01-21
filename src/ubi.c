@@ -90,7 +90,9 @@ static int load_kernel(uint32_t eb_start, uint32_t count,
 
 		eb->data_addr = i*BLOCK_SIZE + data_offset;
 		eb->lnum = swap_be32(vid_hdr->lnum);
-		eb->data_size = swap_be32(vid_hdr->data_size);
+		eb->data_size = vid_hdr->data_size ?
+				swap_be32(vid_hdr->data_size) :
+				(BLOCK_SIZE - data_offset);
 
 		SLIST_INSERT_HEAD(&eb_list, eb, next);
 	}
