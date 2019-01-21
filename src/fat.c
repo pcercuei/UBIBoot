@@ -107,41 +107,6 @@ static int cluster_span(
 	}
 }
 
-static int check_uimage(struct uimage_header *header)
-{
-	if (swap_be32(header->magic) != UIMAGE_MAGIC)
-		return -1;
-
-	if (header->os != UIMAGE_OS_LINUX)
-		return -1;
-
-	if (header->arch != UIMAGE_ARCH_MIPS)
-		return -1;
-
-	if (header->type != UIMAGE_TYPE_KERNEL)
-		return -1;
-
-	if (header->comp != UIMAGE_COMP_NONE)
-		return -1;
-
-	return 0;
-}
-
-static void *process_uimage_header(
-		struct uimage_header *header, void **exec_addr)
-{
-	if (check_uimage(header)) {
-		return NULL;
-	} else {
-		void *ld_addr = (void *) KSEG1ADDR(swap_be32(header->load));
-		void *body = (void *) header + sizeof(struct uimage_header);
-		size_t move_size = MMC_SECTOR_SIZE - sizeof(struct uimage_header);
-		*exec_addr = (void *) swap_be32(header->ep);
-		memmove(ld_addr, body, move_size);
-		return ld_addr + move_size;
-	}
-}
-
 /*
  * Loads data from the cluster chain starting at the given cluster number.
  * When 'exec_addr' is not NULL, it indicates that an uImage is being loaded
@@ -174,7 +139,7 @@ static void *load_cluster_chain(unsigned int id, uint32_t cluster,
 				break;
 			}
 			if (exec_addr) {
-				ld_addr = process_uimage_header(ld_addr, exec_addr);
+				ld_addr = process_uimage_header(ld_addr, exec_addr, MMC_SECTOR_SIZE);
 				if (!ld_addr) {
 					err = ERR_FAT_BAD_IMAGE;
 					break;
