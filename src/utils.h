@@ -26,4 +26,9 @@ void udelay(unsigned int us);
 
 bool ram_works(void);
 
+inline unsigned int div_round_up(unsigned int nb, unsigned int div)
+{
+	return (nb / div) + !!(nb % div);
+}
+
 #endif /* __UTILS_H__ */
