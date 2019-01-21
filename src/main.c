@@ -239,11 +239,10 @@ void c_main(void)
 	if (!exec_addr) {
 		nand_init();
 #ifdef USE_UBI
-		if (ubi_load_kernel((void *) (KSEG1 + LD_ADDR))) {
+		if (ubi_load_kernel((void *) (KSEG1 + LD_ADDR), &exec_addr)) {
 			SERIAL_PUTS("Unable to boot from NAND.\n");
 			return;
 		} else {
-			exec_addr = (void *) (KSEG0 + LD_ADDR);
 #ifdef UBI_ROOTFS_MTDNAME
 			kernel_params[PARAM_UBIMTD] = "ubi.mtd=" UBI_ROOTFS_MTDNAME;
 #endif

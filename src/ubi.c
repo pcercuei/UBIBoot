@@ -15,11 +15,12 @@
 #include "serial.h"
 #include "config.h"
 #include "utils.h"
+#include "uimage.h"
 
 #define BLOCK_SIZE (PAGE_PER_BLOCK * PAGE_SIZE)
 
 static int load_kernel(uint32_t eb_start, uint32_t count,
-			unsigned char *ld_addr)
+		       unsigned char *ld_addr, void **exec_addr)
 {
 	struct ubi_ec_hdr *ec_hdr;
 	struct ubi_vid_hdr *vid_hdr;
@@ -110,7 +111,17 @@ static int load_kernel(uint32_t eb_start, uint32_t count,
 
 			nb_pages = div_round_up(eb->data_size, PAGE_SIZE);
 			nand_load(eb->data_addr / PAGE_SIZE, nb_pages, ld_addr);
-			ld_addr += eb->data_size;
+			if (exec_addr) {
+				ld_addr = process_uimage_header((void *)ld_addr,
+						exec_addr, eb->data_size);
+				if (!ld_addr) {
+					SERIAL_ERR(ERR_FAT_BAD_IMAGE);
+					break;
+				}
+				exec_addr = NULL;
+			} else {
+				ld_addr += eb->data_size;
+			}
 
 			break;
 		}
@@ -122,7 +133,7 @@ static int load_kernel(uint32_t eb_start, uint32_t count,
 	return 0;
 }
 
-int ubi_load_kernel(unsigned char *ld_addr)
+int ubi_load_kernel(unsigned char *ld_addr, void **exec_addr)
 {
-	return load_kernel(UBI_MTD_EB_START, UBI_MTD_NB_EB, ld_addr);
+	return load_kernel(UBI_MTD_EB_START, UBI_MTD_NB_EB, ld_addr, exec_addr);
 }
