@@ -3,7 +3,8 @@ ENTRY(_start)
 
 MEMORY
 {
-	ram	: ORIGIN = 0x80000000 , LENGTH = 0x2000
+	low8k	: ORIGIN = 0x80000000 , LENGTH = 0x2000
+	high8k	: ORIGIN = 0x80002000 , LENGTH = 0x2000
 }
 
 SECTIONS
@@ -11,12 +12,12 @@ SECTIONS
 	.text : {
 		*(.text.1)
 		*(.text.0)
-	} > ram
+	} > low8k
 
 	.data : {
 		. = ALIGN(4);
 		*(.rodata*) *(.data*) *(.scommon*) *(.reginfo*)
-	} > ram
+	} > low8k
 
 	.bss : {
 		. = ALIGN(4);
@@ -24,7 +25,7 @@ SECTIONS
 		*(.sbss*) *(.bss*)
 		. = ALIGN(4);
 		_bss_end = ABSOLUTE(.);
-	} > ram
+	} > high8k
 
 	__stack = 0x80004000;
 }
