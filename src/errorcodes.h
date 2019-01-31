@@ -21,5 +21,7 @@
 
 #define ERR_UBI_NO_PART		0x30		/* Partition is not a UBI drive. */
 #define ERR_UBI_NO_KERNEL	0x31		/* Unable to locate kernel partition. */
+#define ERR_UBI_NO_FASTMAP	0x32		/* UBI has no FastMap structures */
+#define ERR_UBI_IO		0x33		/* UBI structure parsing failed */
 
 #endif
