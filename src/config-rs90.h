@@ -25,7 +25,6 @@
 #define PAGE_PER_BLOCK	64
 #define ECC_POS		3
 #define PAR_SIZE	13
-#define PAR_SIZE2	13
 
 /* UBI parameters */
 #define UBI_MTD_EB_START	1

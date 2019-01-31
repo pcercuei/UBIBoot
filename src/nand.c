@@ -145,7 +145,7 @@ static void __nand_read_page(uint32_t page_addr, uint8_t *dst, uint8_t *oobbuf)
 		nand_read_buf(dst, ECC_BLOCK);
 
 		/* Correct data */
-		bch_correct_block(dst, oobbuf + ECC_POS + i * PAR_SIZE2);
+		bch_correct_block(dst, oobbuf + ECC_POS + i * PAR_SIZE);
 
 		dst += ECC_BLOCK;
 	}

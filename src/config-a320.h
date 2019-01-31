@@ -22,9 +22,8 @@
 #define BAD_BLOCK_POS	((PAGE_SIZE==512) ? 5 : 0)
 #define BAD_BLOCK_PAGE	(PAGE_PER_BLOCK -1)
 #define ECC_BLOCK	512
-#define ECC_POS		4
+#define ECC_POS		6
 #define PAR_SIZE	9
-#define PAR_SIZE2	12
 
 /* UBI parameters */
 #define UBI_MTD_EB_START	5
