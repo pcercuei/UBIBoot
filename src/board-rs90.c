@@ -273,5 +273,10 @@ void nand_wait_ready(void)
 
 void nand_init(void)
 {
+	REG32(EMC_SMCR1) = (EMC_TAS << EMC_SMCR_TAS_BIT) |
+			   (EMC_TAH << EMC_SMCR_TAH_BIT) |
+			   (EMC_TBP << EMC_SMCR_TBP_BIT) |
+			   (EMC_TAW << EMC_SMCR_TAW_BIT) |
+			   (EMC_STRV << EMC_SMCR_STRV_BIT);
 }
 #endif

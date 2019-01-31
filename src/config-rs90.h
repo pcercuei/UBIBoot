@@ -26,6 +26,12 @@
 #define ECC_POS		3
 #define PAR_SIZE	13
 
+#define EMC_TAS		2
+#define EMC_TAH		1
+#define EMC_TBP		2
+#define EMC_TAW		2
+#define EMC_STRV	13
+
 /* UBI parameters */
 #define UBI_MTD_EB_START	1
 #define UBI_MTD_NB_EB		2045
