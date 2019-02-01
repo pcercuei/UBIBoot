@@ -30,18 +30,19 @@ static inline void *get_ptr(uint32_t eb_start, uint8_t *eb_copy, uint32_t page)
 	return (void *)eb_copy;
 }
 
-static uint32_t get_kernel_vol_id(uint32_t eb, uint32_t data_page)
+static uint32_t get_kernel_vol_id(uint32_t eb, uint32_t data_page,
+				  uint32_t nb_volumes)
 {
 	unsigned long page = eb * PAGE_PER_BLOCK + data_page;
 	struct ubi_vol_tbl_record *records;
-	unsigned int nb = div_round_up(UBI_NB_VOLUMES * sizeof(*records),
+	unsigned int nb = div_round_up(nb_volumes * sizeof(*records),
 				       PAGE_SIZE);
 	unsigned int i;
 
 	records = alloca(PAGE_SIZE * nb);
 	nand_load(page, nb, (uint8_t *)records);
 
-	for (i = 0; i < UBI_NB_VOLUMES; i++) {
+	for (i = 0; i < nb_volumes; i++) {
 		if (!records[i].name[0])
 			continue;
 
@@ -189,7 +190,7 @@ static int load_kernel(uint32_t eb_start, uint8_t *ld_addr, void **exec_addr)
 	}
 
 	kernel_vol_id = get_kernel_vol_id(eb_start + swap_be32(fm_eba->pnum[0]),
-					  data_page);
+					  data_page, vol_count);
 
 	if (kernel_vol_id >= UBI_VOL_TABLE_ID) {
 		SERIAL_ERR(ERR_UBI_NO_KERNEL);
