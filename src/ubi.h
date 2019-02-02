@@ -133,9 +133,9 @@ struct ubi_fm_eba {
 } __attribute__ ((packed));
 
 struct EraseBlock {
-	uint32_t data_addr;
-	uint32_t lnum;
-	uint32_t data_size;
+	uint32_t peb;
+	uint32_t leb;
+	uint64_t sqnum;
 	SLIST_ENTRY(EraseBlock) next;
 };
 

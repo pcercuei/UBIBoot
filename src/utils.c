@@ -50,6 +50,18 @@ uint32_t swap_be32(uint32_t val)
 	     | ((val & 0x000000FF) << 24);
 }
 
+uint64_t swap_be64(uint64_t val)
+{
+	return ((val & 0xFF00000000000000ull) >> 56)
+	     | ((val & 0x00FF000000000000ull) >> 40)
+	     | ((val & 0x0000FF0000000000ull) >> 24)
+	     | ((val & 0x000000FF00000000ull) >> 8)
+	     | ((val & 0x00000000FF000000ull) << 8)
+	     | ((val & 0x0000000000FF0000ull) << 24)
+	     | ((val & 0x000000000000FF00ull) << 40)
+	     | ((val & 0x00000000000000FFull) << 56);
+}
+
 void write_hex_digits(unsigned int value, char *last_digit)
 {
 	unsigned char *ptr = (unsigned char *) last_digit;
