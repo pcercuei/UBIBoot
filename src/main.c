@@ -172,7 +172,7 @@ typedef void (*kernel_main)(int, char**, char**, int*) __attribute__((noreturn))
 void c_main(void)
 {
 	void *exec_addr = NULL;
-	int mmc_inited;
+	int mmc_inited, alt_kernel;
 	extern unsigned int _bss_start, _bss_end;
 	unsigned int *ptr;
 
@@ -201,6 +201,8 @@ void c_main(void)
 	return;
 #endif
 
+	alt_kernel = alt_key_pressed();
+
 	/* Tests on JZ4770 show that the data cache lines that contain the boot
 	 * loader are not marked as dirty initially. Therefore, if those cache
 	 * lines are evicted, the data is lost. To avoid that, we load to the
@@ -211,7 +213,7 @@ void c_main(void)
 	mmc_inited = !mmc_init(MMC_ID);
 	if (mmc_inited) {
 		if (mmc_load_kernel(
-				MMC_ID, (void *) (KSEG1 + LD_ADDR), alt_key_pressed(),
+				MMC_ID, (void *) (KSEG1 + LD_ADDR), alt_kernel,
 				&exec_addr) == 1)
 			set_alt_param();
 
@@ -239,7 +241,8 @@ void c_main(void)
 	if (!exec_addr) {
 		nand_init();
 #ifdef USE_UBI
-		if (ubi_load_kernel((void *) (KSEG1 + LD_ADDR), &exec_addr, 0)) {
+		if (ubi_load_kernel((void *) (KSEG1 + LD_ADDR),
+				    &exec_addr, alt_kernel)) {
 			SERIAL_PUTS("Unable to boot from NAND.\n");
 			return;
 		} else {
