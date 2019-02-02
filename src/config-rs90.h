@@ -35,6 +35,5 @@
 /* UBI parameters */
 #define UBI_MTD_EB_START	1
 #define UBI_MTD_NB_EB		2045
-#define UBI_KERNEL_VOLUME	"kernel"
 #define UBI_ROOTFS_MTDNAME	"system"
 #define UBI_ROOTFS_VOLUME	"rootfs"

@@ -30,32 +30,6 @@ static inline void *get_ptr(uint32_t eb_start, uint8_t *eb_copy, uint32_t page)
 	return (void *)eb_copy;
 }
 
-static uint32_t get_kernel_vol_id(uint32_t eb, uint32_t data_page,
-				  uint32_t nb_volumes)
-{
-	unsigned long page = eb * PAGE_PER_BLOCK + data_page;
-	struct ubi_vol_tbl_record *records;
-	unsigned int nb = div_round_up(nb_volumes * sizeof(*records),
-				       PAGE_SIZE);
-	unsigned int i;
-
-	records = alloca(PAGE_SIZE * nb);
-	nand_load(page, nb, (uint8_t *)records);
-
-	for (i = 0; i < nb_volumes; i++) {
-		if (!records[i].name[0])
-			continue;
-
-		if (!strncmp((const char *)records[i].name,
-			     UBI_KERNEL_VOLUME,
-			     sizeof(UBI_KERNEL_VOLUME))) {
-			return i;
-		}
-	}
-
-	return (uint32_t)-1;
-}
-
 static struct ubi_fm_volhdr *find_volume(struct ubi_fm_volhdr *vol_hdr_ptr,
 		       unsigned int nb_volumes, unsigned int vol_id)
 {
@@ -83,10 +57,10 @@ static struct ubi_fm_volhdr *find_volume(struct ubi_fm_volhdr *vol_hdr_ptr,
 	return NULL;
 }
 
-static int load_kernel(uint32_t eb_start, uint8_t *ld_addr, void **exec_addr)
+static int load_kernel(uint32_t eb_start, uint8_t *ld_addr,
+		       void **exec_addr, uint32_t kernel_vol_id)
 {
-	uint32_t i, kernel_vol_id = 0xffffffff,
-		 fm_nb_pebs, fm_sb_eb, vol_count, leb_count,
+	uint32_t i, fm_nb_pebs, fm_sb_eb, vol_count, leb_count,
 		 data_page, vid_hdr_page;
 	static uint8_t eb_copy[PAGE_SIZE];
 	struct ubi_ec_hdr *ec_hdr;
@@ -189,17 +163,9 @@ static int load_kernel(uint32_t eb_start, uint8_t *ld_addr, void **exec_addr)
 		return -1;
 	}
 
-	kernel_vol_id = get_kernel_vol_id(eb_start + swap_be32(fm_eba->pnum[0]),
-					  data_page, vol_count);
-
-	if (kernel_vol_id >= UBI_VOL_TABLE_ID) {
-		SERIAL_ERR(ERR_UBI_NO_KERNEL);
-		return -1;
-	}
-
 	kernel_vol_hdr = find_volume(vol_hdr_ptr, vol_count, kernel_vol_id);
 	if (!kernel_vol_hdr) {
-		SERIAL_ERR(ERR_UBI_IO);
+		SERIAL_ERR(ERR_UBI_NO_KERNEL);
 		return -1;
 	}
 
@@ -250,7 +216,7 @@ static int load_kernel(uint32_t eb_start, uint8_t *ld_addr, void **exec_addr)
 	return 0;
 }
 
-int ubi_load_kernel(unsigned char *ld_addr, void **exec_addr)
+int ubi_load_kernel(unsigned char *ld_addr, void **exec_addr, uint32_t vol_id)
 {
-	return load_kernel(UBI_MTD_EB_START, ld_addr, exec_addr);
+	return load_kernel(UBI_MTD_EB_START, ld_addr, exec_addr, vol_id);
 }

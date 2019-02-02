@@ -239,7 +239,7 @@ void c_main(void)
 	if (!exec_addr) {
 		nand_init();
 #ifdef USE_UBI
-		if (ubi_load_kernel((void *) (KSEG1 + LD_ADDR), &exec_addr)) {
+		if (ubi_load_kernel((void *) (KSEG1 + LD_ADDR), &exec_addr, 0)) {
 			SERIAL_PUTS("Unable to boot from NAND.\n");
 			return;
 		} else {
