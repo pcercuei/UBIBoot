@@ -183,7 +183,7 @@ static void sdram_init(void)
 
 int alt_key_pressed(void)
 {
-	return 0; /* TODO */
+	return !__gpio_get_pin(GPIOD, 17); /* START button */
 }
 
 int alt2_key_pressed(void)
