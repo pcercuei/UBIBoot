@@ -61,6 +61,7 @@ struct EraseBlock {
 	uint32_t peb;
 	uint32_t leb;
 	uint64_t sqnum;
+	uint32_t vol_id;
 	SLIST_ENTRY(EraseBlock) next;
 };
 
