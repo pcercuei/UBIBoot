@@ -28,6 +28,8 @@
 /* UBI parameters */
 #define UBI_MTD_EB_START	5
 #define UBI_MTD_NB_EB		127
+#define UBI_KERNEL_VOLUME	"kernel"
+#define UBI_KERNEL_BAK_VOLUME	"kernel_bak"
 #define UBI_ROOTFS_MTDNAME	"rootfs"
 #define UBI_ROOTFS_VOLUME	"rootfs"
 
