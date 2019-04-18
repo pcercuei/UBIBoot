@@ -20,8 +20,6 @@
 #include "jz.h"
 #include "utils.h"
 
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
-
 /* Time how long UBIBoot takes to do its job.
  * Uses the JZ4770 OST, so won't work on JZ4740.
  */
