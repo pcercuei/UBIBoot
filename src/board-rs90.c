@@ -89,9 +89,9 @@ static void pll_init(void)
 #define SDRAM_BANK40	0
 #define SDRAM_BANK4		1
 #define SDRAM_ROW0		11
-#define SDRAM_ROW		CFG_SDRAM_ROW
+#define SDRAM_ROW		13
 #define SDRAM_COL0		9
-#define SDRAM_COL		CFG_SDRAM_COL
+#define SDRAM_COL		9
 
 static void sdram_init(void)
 {
