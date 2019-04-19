@@ -188,7 +188,7 @@ int alt_key_pressed(void)
 
 int alt2_key_pressed(void)
 {
-	return 0; /* TODO */
+	return !__gpio_get_pin(GPIOC, 12); /* Right shoulder button */
 }
 
 int alt3_key_pressed(void)
