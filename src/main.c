@@ -244,6 +244,8 @@ void c_main(void)
 			SERIAL_PUTS("Unable to boot from NAND.\n");
 			return;
 		} else {
+			if (alt_kernel)
+				set_alt_param();
 #ifdef UBI_ROOTFS_MTDNAME
 			kernel_params[PARAM_UBIMTD] = "ubi.mtd=" UBI_ROOTFS_MTDNAME;
 #endif
