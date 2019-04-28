@@ -8,6 +8,8 @@
 #include "uimage.h"
 #include "utils.h"
 
+#include <endian.h>
+
 #define UIMAGE_MAGIC	0x27051956	/* Image magic number */
 
 #define UIMAGE_OS_LINUX			5	/* Linux */
@@ -36,7 +38,7 @@ struct uimage_header {
 
 static int check_uimage(struct uimage_header *header)
 {
-	if (swap_be32(header->magic) != UIMAGE_MAGIC)
+	if (be32toh(header->magic) != UIMAGE_MAGIC)
 		return -1;
 
 	if (header->os != UIMAGE_OS_LINUX)
@@ -60,10 +62,10 @@ void *process_uimage_header(struct uimage_header *header,
 	if (check_uimage(header)) {
 		return NULL;
 	} else {
-		void *ld_addr = (void *) KSEG1ADDR(swap_be32(header->load));
+		void *ld_addr = (void *) KSEG1ADDR(be32toh(header->load));
 		void *body = (void *) header + sizeof(struct uimage_header);
 		size_t move_size = data_size - sizeof(struct uimage_header);
-		*exec_addr = (void *) swap_be32(header->ep);
+		*exec_addr = (void *) be32toh(header->ep);
 		memmove(ld_addr, body, move_size);
 		return ld_addr + move_size;
 	}

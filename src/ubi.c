@@ -6,6 +6,7 @@
  * published by the Free Software Foundation.
  */
 
+#include <endian.h>
 #include <string.h>
 #include <alloca.h>
 
@@ -97,8 +98,8 @@ static int load_kernel(uint32_t eb_start, uint32_t nb_ebs, uint8_t *ld_addr,
 
 	SERIAL_PUTS("UBI partition detected.\n");
 
-	vid_hdr_page = swap_be32(ec_hdr->vid_hdr_offset) / PAGE_SIZE;
-	data_page = swap_be32(ec_hdr->data_offset) / PAGE_SIZE;
+	vid_hdr_page = be32toh(ec_hdr->vid_hdr_offset) / PAGE_SIZE;
+	data_page = be32toh(ec_hdr->data_offset) / PAGE_SIZE;
 
 	for (i = eb_start; i < (eb_start + nb_ebs); i++) {
 		uint32_t vol_id;
@@ -111,7 +112,7 @@ static int load_kernel(uint32_t eb_start, uint32_t nb_ebs, uint8_t *ld_addr,
 		if (vid_hdr->magic != UBI_VID_HDR_MAGIC)
 			continue;
 
-		vol_id = swap_be32(vid_hdr->vol_id);
+		vol_id = be32toh(vid_hdr->vol_id);
 		switch(vol_id) {
 		case 0:
 		case 1:
@@ -123,8 +124,8 @@ static int load_kernel(uint32_t eb_start, uint32_t nb_ebs, uint8_t *ld_addr,
 			continue;
 		}
 
-		leb = swap_be32(vid_hdr->lnum);
-		sqnum = swap_be64(vid_hdr->sqnum);
+		leb = be32toh(vid_hdr->lnum);
+		sqnum = be64toh(vid_hdr->sqnum);
 
 		eb = get_eb(&eb_list[vol_id], leb);
 		if (eb) {

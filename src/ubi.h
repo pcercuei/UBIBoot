@@ -2,12 +2,13 @@
 #ifndef UBI_H
 #define UBI_H
 
+#include <endian.h>
 #include <stdint.h>
 #include <sys/queue.h>
 #include <arpa/inet.h>
 
-#define UBI_EC_HDR_MAGIC	ntohl(0x55424923)
-#define UBI_VID_HDR_MAGIC	ntohl(0x55424921)
+#define UBI_EC_HDR_MAGIC	be32toh(0x55424923)
+#define UBI_VID_HDR_MAGIC	be32toh(0x55424921)
 
 #define UBI_VOL_TABLE_ID	0x7fffefff
 
