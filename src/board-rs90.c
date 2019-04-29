@@ -254,7 +254,7 @@ void board_init(void)
 	REG_CPM_CLKGR &= ~(1 << 16);
 
 	/* Set divider for the MSC clock */
-	__cpm_set_mscdiv((__cpm_get_pllout() / 24000000) - 1);
+	__cpm_set_mscdiv((__cpm_get_pllout2() / 24000000) - 1);
 
 #ifdef BKLIGHT_ON
 	__gpio_clear_pin(GPIOD, 31);
