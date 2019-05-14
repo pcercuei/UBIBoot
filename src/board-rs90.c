@@ -79,14 +79,22 @@ static void pll_init(void)
  *   TPC  18
  *
  */
-#define SDRAM_CASL		3		/* CAS latency: 2 or 3 */
-#define SDRAM_TRAS		42		/* RAS# Active Time (ns) */
-#define SDRAM_RCD		18		/* RAS# to CAS# Delay (ns) */
-#define SDRAM_TPC		18		/* RAS# Precharge Time (ns) */
-#define SDRAM_TRWL		7		/* Write Latency Time (ns) */
-#define SDRAM_TREF		15625	/* Refresh period (ns): 4096 refresh cycles/64ms */
+
+#define SDRAM_CASL		3	/* CAS latency: 2 or 3 */
+#ifdef RS90_V30
+#	define SDRAM_TRAS	50	/* RAS# Active Time (ns) */
+#	define SDRAM_RCD	25	/* RAS# to CAS# Delay (ns) */
+#	define SDRAM_TPC	25	/* RAS# Precharge Time (ns) */
+#	define SDRAM_TREF	7812	/* Refresh period (ns) */
+#else /* RS90_V21 */
+#	define SDRAM_TRAS	42	/* RAS# Active Time (ns) */
+#	define SDRAM_RCD	18	/* RAS# to CAS# Delay (ns) */
+#	define SDRAM_TPC	18	/* RAS# Precharge Time (ns) */
+#	define SDRAM_TREF	15625	/* Refresh period (ns) */
+#endif
+#define SDRAM_TRWL		7	/* Write Latency Time (ns) */
 #define SDRAM_BW16		1
-#define SDRAM_BANK40	0
+#define SDRAM_BANK40		0
 #define SDRAM_BANK4		1
 #define SDRAM_ROW0		11
 #define SDRAM_ROW		13
