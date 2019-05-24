@@ -25,11 +25,12 @@ _start:
 	// setup stack, jump to C code
 	//----------------------------------------------------
 
+#ifndef STAGE1_ONLY
 #if JZ_VERSION >= 4770
 	// The JZ4770 won't load the program
 	// if the first word is not 'MSPL'
 	.word 0x4d53504c
-#elif !defined(STAGE1_ONLY) && (JZ_VERSION >= 4750)
+#elif JZ_VERSION >= 4750
 #if BUS_WIDTH == 8
 	.word 0x555555ff
 #else
@@ -64,6 +65,7 @@ _start:
 	addiu zero, zero, 0x0f0f
 #else
 	addiu zero, zero, 0x0000
+#endif
 #endif
 #endif
 #endif

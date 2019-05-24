@@ -25,6 +25,10 @@ CFLAGS	+= $(CFLAGS_all)
 CPPFLAGS := -DBOARD_$(BOARD) -DJZ_VERSION=$(JZ_VERSION)
 LDFLAGS	:= -nostdlib -EL -T target-$(BOARD).ld
 
+ifeq ($(JZ_VERSION)$(STAGE1_ONLY),4770)
+	LDFLAGS += -Wl,--defsym=LOAD_OFFSET=0x200
+endif
+
 OUTDIR	:= output/$(CONFIG)
 
 OBJS	:= utils.o mmc.o fat.o head.o uimage.o
