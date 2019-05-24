@@ -1,36 +1,31 @@
 OUTPUT_ARCH(mips)
 ENTRY(_start)
+
 MEMORY
 {
-	ram	: ORIGIN = 0x80000000 , LENGTH = 0x2000
+	low8k	: ORIGIN = 0x80000000 , LENGTH = 0x2000
+	high8k	: ORIGIN = 0x80002000 , LENGTH = 0x2000
 }
 
 SECTIONS
 {
-	. = ALIGN(4);
-	.text.1 : { output/a320/head.o(.text*) } > ram
-	.text.0 : { *(EXCLUDE_FILE (output/a320/head.o) .text*) } > ram
+	.text : {
+		*(.text.1)
+		*(.text.0)
+	} > low8k
 
-	. = ALIGN(4);
-	.rodata : { *(.rodata*) } > ram
+	.data : {
+		. = ALIGN(4);
+		*(.rodata*) *(.data*) *(.scommon*) *(.reginfo*)
+	} > low8k
 
-	. = ALIGN(4);
-	.sdata : { *(.sdata*) } > ram
-
-	. = ALIGN(4);
-	.data : { *(.data*) *(.scommon*) *(.reginfo*) } > ram
-
-	_gp = ABSOLUTE(.); /* Base of small data */
-
-	.got : { *(.got*) } > ram
-
-	. = ALIGN(4);
-	_bss_start = ABSOLUTE(.);
-	.sbss : { *(.sbss*) } > ram
-	.bss : { *(.bss*) } > ram
-	. = ALIGN (4);
-	_bss_end = ABSOLUTE(.);
+	.bss : {
+		. = ALIGN(4);
+		_bss_start = ABSOLUTE(.);
+		*(.sbss*) *(.bss*)
+		. = ALIGN(4);
+		_bss_end = ABSOLUTE(.);
+	} > high8k
 
 	__stack = 0x80004000;
 }
-
