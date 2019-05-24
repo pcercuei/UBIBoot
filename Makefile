@@ -23,7 +23,7 @@ NM = $(CROSS_COMPILE)nm
 CFLAGS	:= -Wall -Os -fno-pic -mno-abicalls -mno-check-zero-division -ffreestanding -flto
 CFLAGS	+= $(CFLAGS_all)
 CPPFLAGS := -DBOARD_$(BOARD) -DJZ_VERSION=$(JZ_VERSION)
-LDFLAGS	:= -nostdlib -EL -T target-$(BOARD).ld
+LDFLAGS	:= -nostdlib -EL -T ldscripts/target-jz$(JZ_VERSION).ld
 
 ifeq ($(JZ_VERSION)$(STAGE1_ONLY),4770)
 	LDFLAGS += -Wl,--defsym=LOAD_OFFSET=0x200
