@@ -10,6 +10,8 @@ enum gpio_port {
 	GPIOB,
 	GPIOC,
 	GPIOD,
+	GPIOE,
+	GPIOF,
 };
 
 #define GPIO_PXPIN(n)	(GPIO_BASE + (0x00 + (n)*0x100)) /* PIN Level Register */
@@ -54,7 +56,11 @@ do {						\
 #define __gpio_as_func_mask(p, m, f)		\
 do {						\
 	REG32(GPIO_PXFUNS(p)) = m;		\
-	if (f)					\
+	if (f & 2)				\
+		REG32(GPIO_PXTRGS(p)) = m;	\
+	else					\
+		REG32(GPIO_PXTRGC(p)) = m;	\
+	if (f & 1)				\
 		REG32(GPIO_PXSELS(p)) = m;	\
 	else					\
 		REG32(GPIO_PXSELC(p)) = m;	\
