@@ -199,9 +199,9 @@ int alt3_key_pressed(void)
 void light(int set)
 {
 	if (set)
-		__gpio_set_pin(GPIOC, 31);
+		__gpio_set_pin(GPIOD, 31);
 	else
-		__gpio_clear_pin(GPIOC, 31);
+		__gpio_clear_pin(GPIOD, 31);
 }
 #endif
 
@@ -233,11 +233,11 @@ void board_init(void)
 	__gpio_disable_pull_mask(GPIOC, 0x07000000);
 
 	/* MMC pins */
-	__gpio_as_func_mask(GPIOC, 0x00003f00, 0);
-	__gpio_disable_pull_mask(GPIOC, 0x00003f00);
+	__gpio_as_func_mask(GPIOD, 0x00003f00, 0);
+	__gpio_disable_pull_mask(GPIOD, 0x00003f00);
 
 #ifdef USE_SERIAL
-	__gpio_as_func_mask(GPIOC, 0x06000000, 1);
+	__gpio_as_func_mask(GPIOD, 0x06000000, 1);
 	serial_init();
 #endif
 
@@ -245,8 +245,8 @@ void board_init(void)
 	sdram_init();
 
 #ifdef BKLIGHT_ON
-	__gpio_clear_pin(GPIOC, 31);	/* Port 3 pin 31: Backlight PWM  */
-	__gpio_as_output(GPIOC, 31);
+	__gpio_clear_pin(GPIOD, 31);	/* D31: Backlight PWM  */
+	__gpio_as_output(GPIOD, 31);
 #endif
 
 	/* X/A/Y buttons */
