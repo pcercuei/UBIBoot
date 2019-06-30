@@ -242,7 +242,18 @@ void board_init(void)
 #endif
 
 	pll_init();
+	SERIAL_PUTS_ARGI("PLL running at ", __cpm_get_pllout() / 1000000, " MHz.\n");
+
 	sdram_init();
+	if (ram_works()) {
+		SERIAL_PUTS_ARGI("SDRAM running at ", __cpm_get_mclk() / 1000000, " MHz.\n");
+		SERIAL_PUTS_ARGI("SDRAM size is ", get_memory_size() / 1048576, " MiB.\n");
+	} else {
+		SERIAL_PUTS("SDRAM does not work!\n");
+		while (1) {
+			asm volatile("wait\n");
+		}; /* Wait here */
+	}
 
 #ifdef BKLIGHT_ON
 	__gpio_clear_pin(GPIOD, 31);	/* D31: Backlight PWM  */
