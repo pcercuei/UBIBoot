@@ -144,7 +144,7 @@ static void set_alt2_param(void)
 
 static void set_logo_param(int show_logo)
 {
-	kernel_params[PARAM_LOGO] = show_logo ? "fbcon=bind:0" : "logo.nologo";
+	kernel_params[PARAM_LOGO] = show_logo ? "splash" : "logo.nologo";
 }
 
 static void set_mem_param(void)
