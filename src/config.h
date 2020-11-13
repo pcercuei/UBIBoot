@@ -22,6 +22,8 @@
 #include "config-a320.h"
 #elif defined(BOARD_rs90)
 #include "config-rs90.h"
+#elif defined(BOARD_rs97)
+#include "config-rs97.h"
 #else
 #error "No config for your board"
 #endif
