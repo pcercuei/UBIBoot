@@ -37,7 +37,7 @@
 #define	REG_MSC_RXFIFO(x)	REG32(MSC_RXFIFO(x))
 #define	REG_MSC_TXFIFO(x)	REG32(MSC_TXFIFO(x))
 
-#if JZ_VERSION >= 4770
+#if JZ_VERSION >= 4760
 #define	MSC_LPM(x)		(MSC_BASE(x) + 0x040)
 #define REG_MSC_LPM(x)		REG32(MSC_LPM(x))
 #endif
@@ -57,7 +57,7 @@
 
 /* MSC Status Register (MSC_STAT) */
 
-#if JZ_VERSION >= 4770
+#if JZ_VERSION >= 4760
 #define MSC_STAT_AUTO_CMD_DONE		(1 << 31)
 #endif
 #define MSC_STAT_IS_RESETTING		(1 << 15)
