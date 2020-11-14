@@ -27,8 +27,8 @@ _start:
 	//----------------------------------------------------
 
 #ifndef STAGE1_ONLY
-#if JZ_VERSION >= 4770
-	// The JZ4770 won't load the program
+#if JZ_VERSION >= 4760
+	// The JZ4760 and JZ4770 won't load the program
 	// if the first word is not 'MSPL'
 	.word 0x4d53504c
 #elif JZ_VERSION >= 4750
@@ -88,6 +88,8 @@ _start:
 	/* Bypass the boot ROM's USB reset after stage1 */
 #if JZ_VERSION == 4770
 	li ra,0xbfc0130c
+#elif JZ_VERSION == 4760
+	li ra,0xbfc012e0
 #endif
 	j	c_main
 #else

@@ -1,0 +1,12 @@
+GC_FUNCTIONS = True
+USE_SERIAL = True
+# BKLIGHT_ON = True
+# USE_NAND = True
+# USE_UBI = True
+
+BOARD := lepus
+
+VARIANTS := lepus
+JZ_VERSION = 4760
+
+CFLAGS_all := -mips32 -DSDRAM_H5PS1G63EFR_S6C=1 -DDDR_DW32=0
