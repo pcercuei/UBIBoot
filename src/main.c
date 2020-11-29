@@ -190,6 +190,11 @@ void c_main(void)
 
 	board_init();
 
+	if (!ram_works()) {
+		SERIAL_PUTS("SDRAM does not work!\n");
+		return;
+	}
+
 	SERIAL_PUTS("UBIBoot by Paul Cercueil <paul@crapouillou.net>\n");
 #ifdef BKLIGHT_ON
 	light(1);

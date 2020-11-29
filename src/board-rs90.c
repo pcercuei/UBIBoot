@@ -248,15 +248,8 @@ void board_init(void)
 	SERIAL_PUTS_ARGI("PLL running at ", __cpm_get_pllout() / 1000000, " MHz.\n");
 
 	sdram_init();
-	if (ram_works()) {
-		SERIAL_PUTS_ARGI("SDRAM running at ", __cpm_get_mclk() / 1000000, " MHz.\n");
-		SERIAL_PUTS_ARGI("SDRAM size is ", get_memory_size() / 1048576, " MiB.\n");
-	} else {
-		SERIAL_PUTS("SDRAM does not work!\n");
-		while (1) {
-			asm volatile("wait\n");
-		}; /* Wait here */
-	}
+	SERIAL_PUTS_ARGI("SDRAM running at ", __cpm_get_mclk() / 1000000, " MHz.\n");
+	SERIAL_PUTS_ARGI("SDRAM size is ", get_memory_size() / 1048576, " MiB.\n");
 
 	/* Ungate MSC1 clock */
 	REG_CPM_CLKGR &= ~(1 << 16);
