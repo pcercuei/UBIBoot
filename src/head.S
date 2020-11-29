@@ -85,6 +85,10 @@ _start:
 	/* Load the stack and branch to c_main() */
 	la	sp, __stack
 #ifdef STAGE1_ONLY
+#if JZ_VERSION == 4760
+	/* On JZ4760, jump to 0xbfc012e0 to allow booting stage2 */
+	li ra, 0xbfc012e0
+#endif
 	j	c_main
 #else
 	jal	c_main
