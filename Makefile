@@ -23,10 +23,17 @@ NM = $(CROSS_COMPILE)nm
 CFLAGS	:= -Wall -Os -fno-pic -mno-abicalls -mno-check-zero-division -ffreestanding -flto
 CFLAGS	+= $(CFLAGS_all)
 CPPFLAGS := -DBOARD_$(BOARD) -DJZ_VERSION=$(JZ_VERSION)
-LDFLAGS	:= -nostdlib -EL -T ldscripts/target-jz$(JZ_VERSION).ld
+LDFLAGS := -nostdlib -EL
 
-ifeq ($(JZ_VERSION)$(STAGE1_ONLY),4770)
-	LDFLAGS += -Wl,--defsym=LOAD_OFFSET=0x200
+ifneq ($(findstring $(JZ_VERSION),JZ4740 JZ4750),)
+LDFLAGS += -T ldscripts/target-jz4740.ld
+endif
+
+ifneq ($(findstring $(JZ_VERSION),JZ4760 JZ4770),)
+LDFLAGS += -T ldscripts/target-jz4760.ld
+ifeq ($(STAGE1_ONLY),)
+LDFLAGS += -Wl,--defsym=LOAD_OFFSET=0x200
+endif
 endif
 
 OUTDIR	:= output/$(CONFIG)
