@@ -12,7 +12,8 @@
 #include "asm/regdef.h"
 #include "config.h"
 
-	.text 1
+	.text
+	.section .text.1
 
 	.extern c_main
 

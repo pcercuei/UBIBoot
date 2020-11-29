@@ -10,7 +10,7 @@ MEMORY
 SECTIONS
 {
 	. = ALIGN(4);
-	.text.1 : { output/gcw0/head.o(.text*) } > ram
+	.text.1 : { KEEP(*(.text.1*)) } > ram
 
 	. = ALIGN(4);
 	.rodata : { *(.rodata*) } > ram
@@ -37,7 +37,7 @@ SECTIONS
 	 * space, since instruction and data cache are independent.
 	 */
 	. = ALIGN(4);
-	.text.0 : { *(EXCLUDE_FILE (output/gcw0/head.o) .text*) } > ram
+	.text.0 : { *(.text*) } > ram
 
 	__stack = 0x80002000;
 }
