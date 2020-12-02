@@ -29,7 +29,7 @@ struct mbr {
 	uint16_t	reserved;
 	struct partition partitions[4];
 	uint16_t	signature;
-} __attribute__((packed));
+} __attribute__((packed,aligned(4)));
 
 struct boot_sector {
 	uint8_t		ignored[3];		/* Bootstrap code */
