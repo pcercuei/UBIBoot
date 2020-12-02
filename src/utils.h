@@ -12,6 +12,9 @@ int strncmp(const char *s1, const char *s2, size_t n);
 void *memcpy(void *dest, const void *src, size_t n);
 void *memmove(void *dest, const void *src, size_t n);
 
+uint32_t __bswap32(uint32_t x);
+uint64_t __bswap64(uint64_t x);
+
 /*
  * Writes the given value to a string as a hexadecimal number.
  * The string is given as a pointer to the last (least significant) digit

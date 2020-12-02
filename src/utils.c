@@ -79,3 +79,31 @@ bool ram_works(void)
 
 	return true;
 }
+
+uint32_t __bswap32(uint32_t val)
+{
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+	return ((val & 0xFF000000) >> 24)
+		| ((val & 0x00FF0000) >> 8)
+		| ((val & 0x0000FF00) << 8)
+		| ((val & 0x000000FF) << 24);
+#else
+	return val;
+#endif
+};
+
+uint64_t __bswap64(uint64_t val)
+{
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+	return ((val & 0xFF00000000000000ull) >> 56)
+		| ((val & 0x00FF000000000000ull) >> 40)
+		| ((val & 0x0000FF0000000000ull) >> 24)
+		| ((val & 0x000000FF00000000ull) >> 8)
+		| ((val & 0x00000000FF000000ull) << 8)
+		| ((val & 0x0000000000FF0000ull) << 24)
+		| ((val & 0x000000000000FF00ull) << 40)
+		| ((val & 0x00000000000000FFull) << 56);
+#else
+	return val;
+#endif
+}
