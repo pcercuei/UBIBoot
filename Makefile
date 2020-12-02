@@ -20,10 +20,10 @@ OBJCOPY = $(CROSS_COMPILE)objcopy
 OBJDUMP = $(CROSS_COMPILE)objdump
 NM = $(CROSS_COMPILE)nm
 
-CFLAGS	:= -Wall -Os -fno-pic -mno-shared -mno-check-zero-division -ffreestanding -flto
+CFLAGS	:= -Wall -Os -fno-pic -mno-abicalls -mno-check-zero-division -ffreestanding -flto
 CFLAGS	+= $(CFLAGS_all)
 CPPFLAGS := -DBOARD_$(BOARD) -DJZ_VERSION=$(JZ_VERSION)
-LDFLAGS := -static -EL
+LDFLAGS := -nostdlib -EL
 
 ifneq ($(findstring $(JZ_VERSION),JZ4740 JZ4750),)
 LDFLAGS += -T ldscripts/target-jz4740.ld
