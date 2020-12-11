@@ -301,7 +301,11 @@ void board_init(void)
 	/* Set pins for input buttons as input GPIOs */
 	__gpio_as_input_mask(GPIOE, 0x38000000);
 
+	/* MSC2 pins */
+	__gpio_as_func_mask(GPIOE, 0x30f00000, 2);
+
 	__cpm_start_msc0();
+	__cpm_start_msc2();
 	__cpm_select_msc_clk(0, 1);
 }
 
