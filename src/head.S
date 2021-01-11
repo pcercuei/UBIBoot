@@ -85,6 +85,10 @@ _start:
 	/* Load the stack and branch to c_main() */
 	la	sp, __stack
 #ifdef STAGE1_ONLY
+	/* Bypass the boot ROM's USB reset after stage1 */
+#if JZ_VERSION == 4770
+	li ra,0xbfc0130c
+#endif
 	j	c_main
 #else
 	jal	c_main
