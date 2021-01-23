@@ -75,7 +75,7 @@ endif
 
 .PHONY: all clean map
 
-BINFILES := $(foreach VARIANT,$(VARIANTS),$(OUTDIR)/ubiboot-$(VARIANT).bin)
+BINFILES := $(foreach VARIANT,$(VARIANTS),$(OUTDIR)/ubiboot$(if $(STAGE1_ONLY),-stage1)-$(VARIANT).bin)
 ELFFILES := $(foreach VARIANT,$(VARIANTS),$(OUTDIR)/ubiboot-$(VARIANT).elf)
 OBJFILES := $(addprefix $(OUTDIR)/,$(OBJS))
 
@@ -87,7 +87,7 @@ $(ELFFILES): $(OUTDIR)/ubiboot-%.elf: \
 	$(SUM) "  LD      $@"
 	$(CMD)$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
 
-$(BINFILES): $(OUTDIR)/%.bin: $(OUTDIR)/%.elf
+$(BINFILES): $(OUTDIR)/ubiboot$(if $(STAGE1_ONLY),-stage1)-%.bin: $(OUTDIR)/ubiboot-%.elf
 	@mkdir -p $(@D)
 	$(SUM) "  BIN     $@"
 	$(CMD)$(OBJCOPY) -O binary $< $@
