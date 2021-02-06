@@ -651,19 +651,13 @@ static __inline__ unsigned int __cpm_get_rtcclk(void)
 }
 
 /*
- * Output 24MHz for SD and 16MHz for MMC.
+ * Output 48MHz for SD and 16MHz for MMC.
  */
 static inline void __cpm_select_msc_clk(int n, int sd)
 {
-	unsigned int pllout2 = __cpm_get_pllout2();
-	unsigned int div = 0;
-
-	if (sd) {
-		div = pllout2 / 24000000;
-	}
-	else {
-		div = pllout2 / 16000000;
-	}
+	unsigned int pllout2 = __cpm_get_pllout2(),
+		     freq = sd ? 48000000 : 16000000,
+		     div = (pllout2 + freq - 1) / freq;
 
 	REG_CPM_MSCCDR = CPM_MSCCDR_MCS | (div - 1);
 	REG_CPM_CPCCR |= CPM_CPCCR_CE;
