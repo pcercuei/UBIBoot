@@ -16,7 +16,11 @@
 #define PIN_BKLIGHT (32*4+1)	/* Port 4 pin 1: Backlight PWM */
 
 #define CDIV  1
+#ifdef STAGE1_ONLY
 #define HDIV  4
+#else
+#define HDIV  2
+#endif
 #define H2DIV 4
 #define PDIV  4
 #define MDIV  4

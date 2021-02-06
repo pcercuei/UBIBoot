@@ -4,7 +4,7 @@
 #error Include "config.h" instead
 #endif
 
-#define CFG_CPU_SPEED		528000000
+#define CFG_CPU_SPEED		600000000
 #define CFG_EXTAL		12000000
 
 #define SYSPART_INIT		"/mininit-syspart"
