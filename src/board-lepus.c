@@ -15,12 +15,12 @@
 
 #define PIN_BKLIGHT (32*4+1)	/* Port 4 pin 1: Backlight PWM */
 
-#define CDIV  1
-#define HDIV  4
-#define H2DIV 4
-#define PDIV  4
-#define MDIV  4
-#define SDIV  4
+#define CDIV  2
+#define HDIV  6
+#define H2DIV 6
+#define PDIV  6
+#define MDIV  6
+#define SDIV  6
 
 #define FVCO_MIN  500*1000*1000		/* 500 MHz */
 #define FVCO_MAX  1500*1000*1000	/* 1.5 GHz */
