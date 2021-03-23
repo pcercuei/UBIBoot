@@ -1,6 +1,8 @@
 #ifndef __JZ4770_DDRC_H__
 #define __JZ4770_DDRC_H__
 
+#include "jz.h"
+
 #define	DDRC_BASE	0xB3020000
 
 #define DDR_MEM_PHY_BASE	0x20000000

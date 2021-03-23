@@ -1,6 +1,8 @@
 #ifndef __JZ4740_EMC_H__
 #define __JZ4740_EMC_H__
 
+#include "jz.h"
+
 #define	EMC_BASE	0xB3010000
 
 #define EMC_BCR		(EMC_BASE + 0x0)  /* BCR */

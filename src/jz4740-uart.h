@@ -1,6 +1,8 @@
 #ifndef __JZ4740_UART_H__
 #define __JZ4740_UART_H__
 
+#include "jz.h"
+
 #define	UART0_BASE	0xB0030000
 #define UART_OFF	0x1000
 #define UART_BASE(n)	(UART0_BASE + (n) * UART_OFF)

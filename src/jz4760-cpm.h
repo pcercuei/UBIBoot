@@ -2,6 +2,7 @@
 #define __JZ4760_CPM_H__
 
 #include "config.h"
+#include "jz.h"
 
 #define	CPM_BASE	0xB0000000
 

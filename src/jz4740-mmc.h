@@ -1,6 +1,8 @@
 #ifndef __JZ4740_MMC_H__
 #define __JZ4740_MMC_H__
 
+#include "jz.h"
+
 #define	MSC_BASE(x)	(0xB0021000 + (x) * 0x1000)
 
 #define	MSC_STRPCL(x)	(MSC_BASE(x) + 0x000)
