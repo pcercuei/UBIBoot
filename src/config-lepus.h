@@ -4,7 +4,11 @@
 #error Include "config.h" instead
 #endif
 
-#define CFG_CPU_SPEED		1200000000
+#ifndef __ASSEMBLER__
+#include "jz4760-cpm.h"
+#define CFG_CPU_SPEED		((REG_CPM_CLKGR0 & BIT(31)) ? 1200000000 : 1056000000)
+#endif
+
 #define CFG_EXTAL		12000000
 
 #define SYSPART_INIT		"/mininit-syspart"
