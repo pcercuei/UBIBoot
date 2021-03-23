@@ -12,7 +12,7 @@ typedef unsigned int u32;
 
 typedef unsigned long ulong;
 
-#ifndef __ASSEMBLY__
+#ifndef __ASSEMBLER__
 
 #include "asm/cacheops.h"
 #include "asm/addrspace.h"
@@ -105,7 +105,7 @@ static inline u32 jz_readl(u32 address)
 #define REG16(addr)	(addr)
 #define REG32(addr)	(addr)
 
-#endif /* !ASSEMBLY */
+#endif /* !ASSEMBLER */
 
 #define BIT(x) (1 << (x))
 

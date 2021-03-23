@@ -25,7 +25,7 @@
 /*
  * Returns the kernel segment base of a given address
  */
-#ifndef __ASSEMBLY__
+#ifndef __ASSEMBLER__
 #define KSEGX(a)		(((unsigned long)(a)) & 0xe0000000)
 #else
 #define KSEGX(a)		((a) & 0xe0000000)
@@ -34,7 +34,7 @@
 /*
  * Returns the physical address of a KSEG0/KSEG1 address
  */
-#ifndef __ASSEMBLY__
+#ifndef __ASSEMBLER__
 #define PHYSADDR(a)		(((unsigned long)(a)) & 0x1fffffff)
 #else
 #define PHYSADDR(a)		((a) & 0x1fffffff)
@@ -43,7 +43,7 @@
 /*
  * Returns the uncached address of a sdram address
  */
-#ifndef __ASSEMBLY__
+#ifndef __ASSEMBLER__
 #if defined(CONFIG_AU1X00) || defined(CONFIG_TB0229) || defined(CONFIG_JzRISC)
 /* We use a 36 bit physical address map here and
    cannot access physical memory directly from core */
@@ -51,11 +51,11 @@
 #else	/* !CONFIG_AU1X00 */
 #define UNCACHED_SDRAM(a) PHYSADDR(a)
 #endif	/* CONFIG_AU1X00 */
-#endif	/* __ASSEMBLY__ */
+#endif	/* __ASSEMBLER__ */
 /*
  * Map an address to a certain kernel segment
  */
-#ifndef __ASSEMBLY__
+#ifndef __ASSEMBLER__
 #define KSEG0ADDR(a)		((__typeof__(a))(((unsigned long)(a) & 0x1fffffff) | KSEG0))
 #define KSEG1ADDR(a)		((__typeof__(a))(((unsigned long)(a) & 0x1fffffff) | KSEG1))
 #define KSEG2ADDR(a)		((__typeof__(a))(((unsigned long)(a) & 0x1fffffff) | KSEG2))
