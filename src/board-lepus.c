@@ -53,7 +53,7 @@ static void pll_init(void)
 	for (i = 0; i < 8; i++)
 		REG_DDRC_CTRL = 0;
 
-	REG_CPM_CPCCR = ((CDIV - 1) << CPM_CPCCR_CDIV_BIT) |
+	REG_CPM_CPCCR = ((unsigned int) n2FR[CDIV] << CPM_CPCCR_CDIV_BIT) |
 		((unsigned int) n2FR[HDIV]  << CPM_CPCCR_HDIV_BIT)  |
 		((unsigned int) n2FR[H2DIV] << CPM_CPCCR_H2DIV_BIT) |
 		((unsigned int) n2FR[PDIV]  << CPM_CPCCR_PDIV_BIT)  |
