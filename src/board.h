@@ -12,5 +12,7 @@ unsigned int get_memory_size(void);
 void nand_init(void);
 void nand_wait_ready(void);
 
+void blink_code(unsigned int code);
+
 #endif
 

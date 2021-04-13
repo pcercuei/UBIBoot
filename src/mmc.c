@@ -91,8 +91,10 @@ static int mmc_cmd(unsigned int id, uint16_t cmd, uint32_t arg,
 
 	while (--timeout && __msc_stat_not_end_cmd_res(id));
 
-	if (!timeout || __msc_stat_resto_err(id))
+	if (!timeout || __msc_stat_resto_err(id)) {
+		blink_code(ERR_MMC_TIMEOUT);
 		return ERR_MMC_TIMEOUT;
+	}
 
 	__msc_ireg_clear_end_cmd_res(id);
 
@@ -133,18 +135,24 @@ int mmc_receive_block(unsigned int id, uint32_t *dst)
 	while (--timeout) {
 		uint32_t stat = __msc_get_stat(id);
 
-		if (stat & MSC_STAT_TIME_OUT_READ)
+		if (stat & MSC_STAT_TIME_OUT_READ) {
+			blink_code(ERR_MMC_TIMEOUT);
 			return ERR_MMC_TIMEOUT;
-		if (stat & MSC_STAT_CRC_READ_ERROR)
+		}
+		if (stat & MSC_STAT_CRC_READ_ERROR) {
+			blink_code(ERR_MMC_IO);
 			return ERR_MMC_IO;
+		}
 		if (!(stat & MSC_STAT_DATA_FIFO_EMPTY))
 			break; /* Ready to read data */
 
 		udelay(1);
 	}
 
-	if (!timeout)
+	if (!timeout) {
+		blink_code(ERR_MMC_TIMEOUT);
 		return ERR_MMC_TIMEOUT;
+	}
 
 	/* Read data from RXFIFO. It could be FULL or PARTIAL FULL */
 	while (cnt--) {
@@ -199,8 +207,10 @@ int mmc_init(unsigned int id)
 		return ret;
 	}
 
-	if (resp[0] != 0x1aa)
+	if (resp[0] != 0x1aa) {
+		blink_code(ERR_MMC_INIT);
 		return ERR_MMC_INIT;
+	}
 
 	for (retries = 1000; retries; retries--) {
 		mmc_cmd(id, CMD_APP_CMD, 0, 0x0, MSC_RESPONSE_R1, resp);
@@ -217,6 +227,7 @@ int mmc_init(unsigned int id)
 	}
 
 	if (!retries) {
+		blink_code(ERR_MMC_INIT);
 		SERIAL_ERR(ERR_MMC_INIT);
 		return -1;
 	}

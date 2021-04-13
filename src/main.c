@@ -167,6 +167,20 @@ static void set_mem_param(void)
 
 typedef void (*kernel_main)(int, char**, char**, int*) __attribute__((noreturn));
 
+void blink_code(unsigned int code)
+{
+	unsigned int i;
+
+	for (;;) {
+		for (i = 1 << 31; i; i >>= 1) {
+			light(!!(code & i));
+			udelay(100000);
+			light(0);
+			udelay(100000);
+		}
+	}
+}
+
 void c_main(void)
 {
 	void *exec_addr = NULL;
