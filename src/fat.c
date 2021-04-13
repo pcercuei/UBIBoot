@@ -18,7 +18,7 @@ uint8_t cluster_size;		/* sectors per cluster */
 
 static int get_first_partition(unsigned int id, uint32_t *lba)
 {
-#ifdef MBR_PRELOAD_ADDR
+#if defined(MBR_PRELOAD_ADDR) && !defined(STAGE1_ONLY)
 	struct mbr *mbr = (struct mbr *) MBR_PRELOAD_ADDR;
 #else
 	uint8_t mbr_data[MMC_SECTOR_SIZE];
