@@ -54,7 +54,7 @@ void write_hex_digits(unsigned int value, char *last_digit)
 
 void udelay(unsigned int us)
 {
-	unsigned int tmp = (CFG_CPU_SPEED / 1000000 / 2) * us;
+	unsigned int tmp = (CFG_CPU_SPEED / 1000000 / 5) * us;
 	asm volatile (
 		".set noreorder\n\t"
 		"0:\n\t"
