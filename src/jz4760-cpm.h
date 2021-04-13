@@ -529,11 +529,10 @@ static __inline__ unsigned int __cpm_get_pllout(void)
 {
 	unsigned long m, n, no, pllout;
 	unsigned long cppcr = REG_CPM_CPPCR;
-	const unsigned long od[4] = {1, 2, 4, 8};
 	if ((cppcr & CPM_CPPCR_PLLEN) && (!(cppcr & CPM_CPPCR_PLLBP))) {
 		m = __cpm_get_pllm() * 2;
 		n = __cpm_get_plln();
-		no = od[__cpm_get_pllod()];
+		no = 1 << __cpm_get_pllod();
 		pllout = ((JZ_EXTAL) * m / (n * no));
 	} else
 		pllout = JZ_EXTAL;
