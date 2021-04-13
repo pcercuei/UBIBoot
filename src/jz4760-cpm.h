@@ -660,7 +660,6 @@ static inline void __cpm_select_msc_clk(int n, int sd)
 		     div = (pllout2 + freq - 1) / freq;
 
 	REG_CPM_MSCCDR = CPM_MSCCDR_MCS | (div - 1);
-	REG_CPM_CPCCR |= CPM_CPCCR_CE;
 }
 
 #endif /* __JZ4760_CPM_H__ */
