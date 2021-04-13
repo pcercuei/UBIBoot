@@ -195,7 +195,6 @@ int alt3_key_pressed(void)
 	return !__gpio_get_pin(GPIOC, 0);	/* Port 3 pin 0: A button */
 }
 
-#ifdef BKLIGHT_ON
 void light(int set)
 {
 	if (set)
@@ -203,7 +202,6 @@ void light(int set)
 	else
 		__gpio_clear_pin(GPIOD, 31);
 }
-#endif
 
 unsigned int get_memory_size(void)
 {
@@ -248,10 +246,8 @@ void board_init(void)
 	SERIAL_PUTS_ARGI("SDRAM running at ", __cpm_get_mclk() / 1000000, " MHz.\n");
 	SERIAL_PUTS_ARGI("SDRAM size is ", get_memory_size() / 1048576, " MiB.\n");
 
-#ifdef BKLIGHT_ON
 	__gpio_clear_pin(GPIOD, 31);	/* D31: Backlight PWM  */
 	__gpio_as_output(GPIOD, 31);
-#endif
 
 	/* X/A/Y buttons */
 	__gpio_as_input_mask(GPIOC, 0x00080005);

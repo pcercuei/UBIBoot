@@ -204,7 +204,6 @@ int alt3_key_pressed(void)
 	return 0; /* TODO */
 }
 
-#ifdef BKLIGHT_ON
 void light(int set)
 {
 	if (set)
@@ -212,7 +211,6 @@ void light(int set)
 	else
 		__gpio_clear_pin(GPIOD, 31);
 }
-#endif
 
 unsigned int get_memory_size(void)
 {
@@ -257,10 +255,9 @@ void board_init(void)
 	/* Set divider for the MSC clock */
 	__cpm_set_mscdiv((__cpm_get_pllout2() / 24000000) - 1);
 
-#ifdef BKLIGHT_ON
+	/* Backlight PWM pin */
 	__gpio_clear_pin(GPIOD, 31);
 	__gpio_as_output(GPIOD, 31);
-#endif
 }
 
 #ifdef USE_NAND

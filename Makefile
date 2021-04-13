@@ -50,10 +50,6 @@ ifdef USE_SERIAL
 	OBJS += serial.o
 endif
 
-ifdef BKLIGHT_ON
-	CPPFLAGS += -DBKLIGHT_ON
-endif
-
 ifdef USE_NAND
 	CPPFLAGS += -DUSE_NAND
 	OBJS += nand.o
