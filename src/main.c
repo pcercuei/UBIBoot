@@ -196,9 +196,6 @@ void c_main(void)
 	}
 
 	SERIAL_PUTS("UBIBoot by Paul Cercueil <paul@crapouillou.net>\n");
-#ifdef BKLIGHT_ON
-	light(1);
-#endif
 
 #ifdef STAGE1_ONLY
 	return;
