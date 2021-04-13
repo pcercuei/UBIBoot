@@ -31,16 +31,16 @@
 	(((ext / 10000000) <= 2) ? 2 : (ext / 10000000)) /* INDIV must be >= 2 according to the manual */
 
 #define OUTDIV(f) \
-	(((f) >= FVCO_MIN) ? 1 : \
-	 ((f) >= (FVCO_MIN / 2)) ? 2 : \
-	 ((f) >= (FVCO_MIN / 4)) ? 4 : 8)
+	(((f) >= FVCO_MIN) ? 0 : \
+	 ((f) >= (FVCO_MIN / 2)) ? 1 : \
+	 ((f) >= (FVCO_MIN / 4)) ? 2 : 3)
 
 #define RATE(f) \
 	((f) < (FVCO_MIN / 8) ? FVCO_MIN : \
 	 (((f) > FVCO_MAX) ? FVCO_MAX : (f)))
 
 #define FEEDBACK(f, ext) \
-	((((RATE(f) * OUTDIV(f)) / 1000) * INDIV(ext)) / (ext / 1000))
+	((((RATE(f) << OUTDIV(f)) / 1000) * INDIV(ext)) / (ext / 1000))
 
 static void pll_init(void)
 {
@@ -63,7 +63,7 @@ static void pll_init(void)
 
 	REG_CPM_CPPCR = ((FEEDBACK(CFG_CPU_SPEED, CFG_EXTAL) >> 1) << CPM_CPPCR_PLLM_BIT) |
 		((INDIV(CFG_EXTAL)) << CPM_CPPCR_PLLN_BIT) |
-		((OUTDIV(CFG_CPU_SPEED) - 1) << CPM_CPPCR_PLLOD_BIT) |
+		(OUTDIV(CFG_CPU_SPEED) << CPM_CPPCR_PLLOD_BIT) |
 		CPM_CPPCR_PLLEN;
 
 	/* Wait for a stable output */
