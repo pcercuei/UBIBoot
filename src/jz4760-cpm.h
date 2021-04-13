@@ -650,13 +650,11 @@ static __inline__ unsigned int __cpm_get_rtcclk(void)
 	return JZ_EXTAL2;
 }
 
-/*
- * Output 48MHz for SD and 16MHz for MMC.
- */
-static inline void __cpm_select_msc_clk(int n, int sd)
+/* Output 25 MHz base clock for SD cards. */
+static inline void __cpm_select_msc_clk(void)
 {
 	unsigned int pllout2 = __cpm_get_pllout2(),
-		     freq = sd ? 48000000 : 16000000,
+		     freq = 25000000,
 		     div = (pllout2 + freq - 1) / freq;
 
 	REG_CPM_MSCCDR = CPM_MSCCDR_MCS | (div - 1);

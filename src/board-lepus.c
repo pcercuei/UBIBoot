@@ -306,7 +306,7 @@ void board_init(void)
 
 	__cpm_start_msc0();
 	__cpm_start_msc2();
-	__cpm_select_msc_clk(0, 1);
+	__cpm_select_msc_clk();
 }
 
 
