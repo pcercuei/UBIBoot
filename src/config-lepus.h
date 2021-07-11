@@ -26,3 +26,4 @@
 
 /* MMC parameters */
 #define MMC_ID 0
+#define MMC_ID2 2
