@@ -9,6 +9,8 @@
 #include "MDDR_MT46H128M16LFCK-6.h"
 #elif defined(SDRAM_W972GG6KB_25I)
 #include "DDR2_W972GG6KB-25I.h"
+#elif defined(SDRAM_H2A35121656BB6C)
+#include "DDR2_H2A35121656BB6C.h"
 
 #else
 #error SDRAM type not specified or unknown; check config-<device>.mk
