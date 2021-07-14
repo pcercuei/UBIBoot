@@ -22,8 +22,10 @@
 #include "jz4740-mmc.h"
 
 #define CMD_GO_IDLE_STATE	0
+#define CMD_SEND_OP_COND	1
 #define CMD_ALL_SEND_CID	2
 #define CMD_SEND_RCA		3
+#define CMD_SWITCH		6
 #define CMD_SELECT		7
 #define CMD_SEND_IF_COND	8
 #define CMD_SEND_CSD		9
@@ -42,6 +44,10 @@
 #define CMDAT_4BIT		0
 #define MMC_BUS_WIDTH		0x0
 #endif
+
+#define MMC_OCR_HCS      (0x2 << 29)
+#define MMC_OCR_HCS_MASK (0x3 << 29)
+#define MMC_OCR_BUSY     BIT(31)
 
 enum response {
 	MSC_NO_RESPONSE,
@@ -112,7 +118,7 @@ void mmc_start_block(unsigned int id, uint32_t src, uint32_t num_blocks)
 	__msc_set_nob(id, num_blocks);
 	__msc_set_blklen(id, MMC_SECTOR_SIZE);
 
-	if (is_sdhc) 
+	if (is_sdhc)
 		mmc_cmd(id, CMD_READ_MULTIPLE, src, CMDAT_4BIT | CMDAT_DATA_EN, MSC_RESPONSE_R1, resp);
 	else
 		mmc_cmd(id, CMD_READ_MULTIPLE, src * MMC_SECTOR_SIZE, CMDAT_4BIT | CMDAT_DATA_EN, MSC_RESPONSE_R1, resp);
@@ -182,6 +188,8 @@ int mmc_init(unsigned int id)
 	int ret;
 
 
+	SERIAL_PUTS_ARGI("Starting init of MSC id ", id, "\n");
+
 	__msc_set_rdto(id, 0xffff);
 
 	__msc_reset(id);
@@ -193,21 +201,18 @@ int mmc_init(unsigned int id)
 
 	/* 0x100 -> VHS in 2.7-3.6V
 	 * 0x0aa -> pattern to read back */
-	ret = mmc_cmd(id, CMD_SEND_IF_COND, 0x1aa, 0x0, MSC_RESPONSE_R7, resp);
-	if (ret) {
-		SERIAL_ERR(ret);
-		return ret;
-	}
-
-	if (resp[0] != 0x1aa)
-		return ERR_MMC_INIT;
+	mmc_cmd(id, CMD_SEND_IF_COND, 0x1aa, 0x0, MSC_RESPONSE_R7, resp);
 
 	for (retries = 1000; retries; retries--) {
-		mmc_cmd(id, CMD_APP_CMD, 0, 0x0, MSC_RESPONSE_R1, resp);
+		ret = mmc_cmd(id, CMD_APP_CMD, 0, 0x0, MSC_RESPONSE_R1, resp);
+		if (ret)
+			break;
 
 		/* 0x3000 OCR: Operating range 3.2-3.4V */
 		/* BIT(30): Host supports SDHC/SDXC */
-		mmc_cmd(id, ACMD_SD_SEND_OP_COND, 0x40300000, 0x0, MSC_RESPONSE_R3, resp);
+		ret = mmc_cmd(id, ACMD_SD_SEND_OP_COND, 0x40300000, 0x0, MSC_RESPONSE_R3, resp);
+		if (ret)
+			break;
 
 		/* Poll until the SD card sets the 'ready' bit */
 		if (resp[2] & BIT(7))
@@ -217,36 +222,126 @@ int mmc_init(unsigned int id)
 	}
 
 	if (!retries) {
-		SERIAL_ERR(ERR_MMC_INIT);
+		SERIAL_ERR(ERR_MMC_SEND_OP_COND);
 		return -1;
 	}
 
+	bool is_sd = 1;
+
+	if (ret) {
+		if (ret == ERR_MMC_TIMEOUT) {
+			SERIAL_PUTS("trying mmc\n");
+
+			uint32_t ocr;
+			uint32_t arg = 0;
+			for (retries = 1000; retries; retries--)
+			{
+				ret = mmc_cmd(id, CMD_SEND_OP_COND, arg, 0x0, MSC_RESPONSE_R3, resp);
+				if (ret)
+					break;
+
+				ocr = (resp[0] >> 8) | (resp[1] << 8) | (resp[2] << 24);
+
+				if (ocr & MMC_OCR_BUSY)
+					break;
+
+				arg = ocr | MMC_OCR_HCS;
+
+				udelay(1000);
+			}
+
+			if (!retries || ret) {
+				int err;
+				if (!retries)
+					err = ERR_MMC_SEND_OP_COND_TOUT;
+				else
+					err = ERR_MMC_SEND_OP_COND_ERR;
+
+				SERIAL_ERR(err);
+
+				return -1;
+			}
+
+			is_sd = false;
+		}
+		else
+		{
+			SERIAL_ERR(ERR_MMC_NTOUT);
+			return -1;
+		}
+	}
+
 	/* try to get card id */
-	mmc_cmd(id, CMD_ALL_SEND_CID, 0, 0x0, MSC_RESPONSE_R2, resp);
-	mmc_cmd(id, CMD_SEND_RCA, 0, 0x0, MSC_RESPONSE_R6, resp);
+	ret = mmc_cmd(id, CMD_ALL_SEND_CID, 0, 0x0, MSC_RESPONSE_R2, resp);
+	if (ret) {
+		SERIAL_ERR(ERR_MMC_CID);
+		return -1;
+	}
 
-	rca = ((resp[2] & 0x00FF) << 24) | ((resp[1] & 0xFF00) << 8);
+	// set address
+	rca = 1;
 
-	mmc_cmd(id, CMD_SEND_CSD, rca, 0x0, MSC_RESPONSE_R2, resp);
+	ret = mmc_cmd(id, CMD_SEND_RCA, rca << 16, 0x0, MSC_RESPONSE_R6, resp);
+	if (ret) {
+		SERIAL_ERR(ERR_MMC_RCA);
+		return -1;
+	}
+
+	if (is_sd)
+		rca = ((resp[2] & 0x00FF) << 8) | ((resp[1] & 0xFF00) >> 8);
+
+	ret = mmc_cmd(id, CMD_SEND_CSD, rca << 16, 0x0, MSC_RESPONSE_R2, resp);
+	if (ret) {
+		SERIAL_ERR(ERR_MMC_CSD);
+		return -1;
+	}
+
 	is_sdhc = resp[7] & 0xc0;
 
 #ifdef USE_SERIAL
-	if (is_sdhc) {
-		unsigned int size = (resp[2] >> 8) | (((resp[3] & 0x3fff) << 8) + 1) / 2;
+	if (is_sd) {
+		if (is_sdhc) {
+			unsigned int size = (resp[2] >> 8) | (((resp[3] & 0x3fff) << 8) + 1) / 2;
 
-		SERIAL_PUTS_ARGI("Detected a SDHC card of ", size, " MiB.\n");
-	} else {
-		/* TODO: calculate size */
-		SERIAL_PUTS("SD card detected.\n");
+			SERIAL_PUTS_ARGI("Detected a SDHC card of ", size, " MiB.\n");
+		} else {
+			/* TODO: calculate size */
+			SERIAL_PUTS("SD card detected.\n");
+		}
 	}
 #endif
 
 	__msc_set_clkrt(id, 0);
-	mmc_cmd(id, CMD_SELECT, rca, CMDAT_BUSY, MSC_RESPONSE_R1, resp);
+	ret = mmc_cmd(id, CMD_SELECT, rca << 16, 0, MSC_RESPONSE_R1, resp);
+	if (ret) {
+		SERIAL_ERR(ERR_MMC_SELECT);
+		return -1;
+	}
 
 	/* Switch to 4-bit mode */
-	mmc_cmd(id, CMD_APP_CMD, rca, 0x0, MSC_RESPONSE_R1, resp);
-	mmc_cmd(id, ACMD_SET_BUS_WIDTH, MMC_BUS_WIDTH, CMDAT_4BIT, MSC_RESPONSE_R1, resp);
+	if (is_sd) {
+		ret = mmc_cmd(id, CMD_APP_CMD, rca << 16, 0x0, MSC_RESPONSE_R1, resp);
+		if (ret) {
+			SERIAL_ERR(ERR_SD_CMD);
+			return -1;
+		}
+
+		ret = mmc_cmd(id, ACMD_SET_BUS_WIDTH, MMC_BUS_WIDTH, CMDAT_4BIT, MSC_RESPONSE_R1, resp);
+		if (ret) {
+			SERIAL_ERR(ERR_SD_BW);
+			return -1;
+		}
+	} else {
+		/* 0x03 -> set register command
+		 * 0xb7 -> register address
+		 * 0x01 -> register value
+		 * this sets 4-bit bus width */
+		ret = mmc_cmd(id, CMD_SWITCH, 0x3b70100, CMDAT_4BIT | CMDAT_BUSY, MSC_RESPONSE_R1, resp);
+		if (ret) {
+			SERIAL_ERR(ERR_MMC_SWITCH);
+			return -1;
+		}
+	}
 
 	return 0;
 }

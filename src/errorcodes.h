@@ -12,9 +12,21 @@
 #define ERR_FAT_IO_BOOT		0x08		/* Unable to read bootsector. */
 #define ERR_FAT_BAD_IMAGE	0x09		/* uImage header rejected. */
 
-#define ERR_MMC_INIT		0x10		/* Initialization failed. */
-#define ERR_MMC_TIMEOUT		0x11		/* Time out. */
-#define ERR_MMC_IO			0x12		/* Read error. */
+#define ERR_MMC_INIT		0x0a		/* Initialization failed. */
+#define ERR_MMC_TIMEOUT		0x0b		/* Time out. */
+#define ERR_MMC_IO			0x0c		/* Read error. */
+#define ERR_MMC_SEND_IF_COND 0x0e
+#define ERR_MMC_SEND_OP_COND 0x0f
+#define ERR_MMC_SEND_OP_COND_TOUT 0x10
+#define ERR_MMC_SEND_OP_COND_ERR 0x11
+#define ERR_MMC_NTOUT       0x12
+#define ERR_MMC_CID         0x13
+#define ERR_MMC_RCA         0x14
+#define ERR_MMC_CSD         0x15
+#define ERR_MMC_SELECT      0x16
+#define ERR_SD_CMD          0x17
+#define ERR_SD_BW           0x18
+#define ERR_MMC_SWITCH      0x19
 
 #define ERR_NAND_IO_UNC		0x20		/* Uncorrectable read error. */
 #define ERR_NAND_IO			0x21		/* Read error. */
