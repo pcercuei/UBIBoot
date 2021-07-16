@@ -213,17 +213,27 @@ void c_main(void)
 	 * miss and therefore cause no evictions.
 	 */
 
+	int id = MMC_ID;
 	mmc_inited = !mmc_init(MMC_ID);
+	char *rootfs_dev = "root=/dev/mmcblk0p1";
+
+#ifdef MMC_ID2
+	if (!mmc_inited) {
+		rootfs_dev = "root=/dev/mmcblk1p1";
+		id = MMC_ID2;
+		mmc_inited = !mmc_init(MMC_ID2);
+	}
+#endif
+
 	if (mmc_inited) {
 		if (mmc_load_kernel(
-				MMC_ID, (void *) (KSEG1 + LD_ADDR), alt_kernel,
+				id, (void *) (KSEG1 + LD_ADDR), alt_kernel,
 				&exec_addr) == 1)
 			set_alt_param();
 
 		if (exec_addr) {
 #if PASS_ROOTFS_PARAMS
-			kernel_params[PARAM_ROOTDEV] =
-					"root=/dev/mmcblk0p1";
+			kernel_params[PARAM_ROOTDEV] = rootfs_dev;
 			kernel_params[PARAM_ROOTTYPE] = "rootfstype=vfat";
 #endif
 		}
@@ -293,4 +303,3 @@ void c_main(void)
 	((kernel_main) exec_addr) (
 			ARRAY_SIZE(kernel_params), kernel_params, NULL, NULL );
 }
-
