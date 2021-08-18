@@ -188,8 +188,6 @@ int mmc_init(unsigned int id)
 	int ret;
 
 
-	SERIAL_PUTS_ARGI("Starting init of MSC id ", id, "\n");
-
 	__msc_set_rdto(id, 0xffff);
 
 	__msc_reset(id);
@@ -230,8 +228,6 @@ int mmc_init(unsigned int id)
 
 	if (ret) {
 		if (ret == ERR_MMC_TIMEOUT) {
-			SERIAL_PUTS("trying mmc\n");
-
 			uint32_t ocr;
 			uint32_t arg = 0;
 			for (retries = 1000; retries; retries--)
