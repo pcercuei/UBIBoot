@@ -201,7 +201,7 @@ int alt2_key_pressed(void)
 
 int alt3_key_pressed(void)
 {
-	return 0; /* TODO */
+	return !__gpio_get_pin(GPIOD, 24); /* A button on the RG99 */
 }
 
 #ifdef BKLIGHT_ON
