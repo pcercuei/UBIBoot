@@ -37,10 +37,6 @@
 enum {
 	/* Arguments for the kernel itself. */
 	PARAM_EXEC = 0,
-	PARAM_LOWMEM,
-#ifdef USES_HIGHMEM
-	PARAM_HIGHMEM,
-#endif
 #if defined(USE_UBI) && defined(UBI_ROOTFS_MTDNAME)
 	PARAM_UBIMTD,
 #endif
@@ -80,10 +76,6 @@ enum {
 
 static char *kernel_params[] = {
 	[PARAM_EXEC] = "linux",
-	[PARAM_LOWMEM] = "mem=0x0000M",
-#ifdef USES_HIGHMEM
-	[PARAM_HIGHMEM] = "mem=0x0000M@0x30000000",
-#endif
 #if defined(USE_UBI) && defined(UBI_ROOTFS_MTDNAME)
 	[PARAM_UBIMTD] = "",
 #endif
@@ -131,24 +123,6 @@ static void set_alt2_param(void)
 static void set_logo_param(int show_logo)
 {
 	kernel_params[PARAM_LOGO] = show_logo ? "splash" : "logo.nologo";
-}
-
-static void set_mem_param(void)
-{
-	unsigned int mem_size = get_memory_size() >> 20;
-	unsigned int low_mem_size = mem_size > 256 ? 256 : mem_size;
-
-	write_hex_digits(low_mem_size, &kernel_params[PARAM_LOWMEM][9]);
-
-#ifdef USES_HIGHMEM
-	unsigned int high_mem_size = mem_size > 256 ? mem_size - 256 : 0;
-	if (high_mem_size) {
-		write_hex_digits(high_mem_size,
-				&kernel_params[PARAM_HIGHMEM][9]);
-	} else {
-		kernel_params[PARAM_HIGHMEM][0] = '\0';
-	}
-#endif
 }
 
 typedef void (*kernel_main)(int, char**, char**, int*) __attribute__((noreturn));
@@ -275,7 +249,6 @@ void c_main(void)
 		set_alt2_param();
 
 	set_logo_param(!alt3_key_pressed());
-	set_mem_param();
 
 	/* Since we load to kseg1, there is no data we want to keep in the cache,
 	 * so no need to flush it to RAM.
