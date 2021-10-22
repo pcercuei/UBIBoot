@@ -45,18 +45,12 @@ enum {
 	PARAM_UBIMTD,
 #endif
 #if PASS_ROOTFS_PARAMS
-#ifdef MININIT1_COMPAT
-	PARAM_ROOTCOMPAT,
-#endif
 	PARAM_ROOTDEV,
 	PARAM_ROOTTYPE,
 	PARAM_ROOTWAIT,
 #endif
 #ifdef SYSPART_INIT
 	PARAM_READONLY,
-#ifdef MININIT1_COMPAT
-	PARAM_INITCOMPAT,
-#endif
 	PARAM_INIT,
 #endif
 #ifdef USE_SERIAL
@@ -94,20 +88,12 @@ static char *kernel_params[] = {
 	[PARAM_UBIMTD] = "",
 #endif
 #if PASS_ROOTFS_PARAMS
-#ifdef MININIT1_COMPAT
-	/* mininit 1.x will pick up the first root=, the kernel the second */
-	[PARAM_ROOTCOMPAT] = "root=/dev/loop0",
-#endif
 	[PARAM_ROOTDEV] = "",
 	[PARAM_ROOTTYPE] = "",
 	[PARAM_ROOTWAIT] = "rootwait",
 #endif
 #ifdef SYSPART_INIT
 	[PARAM_READONLY] = "ro",
-#ifdef MININIT1_COMPAT
-	/* mininit 1.x will pick up the first init=, the kernel the second */
-	[PARAM_INITCOMPAT] = "init=/sbin/init",
-#endif
 	[PARAM_INIT] = "init=" SYSPART_INIT,
 #endif
 #ifdef USE_SERIAL
