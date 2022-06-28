@@ -119,7 +119,7 @@ void serial_puti(unsigned int value)
 		}
 	} else {
 		message[0] = 0;
-		i++;
+		i = 1;
 	}
 
 	for (; i; i--)
