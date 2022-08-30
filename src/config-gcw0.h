@@ -23,4 +23,5 @@
 #define LOG_BAUDRATE		57600
 
 /* MMC parameters */
-#define MMC_ID 0
+#define MMC_IDS { 0 }
+#define MMC_BLKIDS { 0 }

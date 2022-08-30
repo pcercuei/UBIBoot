@@ -132,6 +132,11 @@ static char *kernel_params[] = {
 #endif
 };
 
+static const int mmc_ids[] = MMC_IDS;
+#define MMCS_COUNT (sizeof(mmc_ids) / sizeof(mmc_ids[0]))
+
+static const int blkids[MMCS_COUNT] = MMC_BLKIDS;
+
 static void set_alt_param(void)
 {
 	kernel_params[PARAM_KERNEL_BAK] = "kernel_bak";
@@ -170,9 +175,10 @@ typedef void (*kernel_main)(int, char**, char**, int*) __attribute__((noreturn))
 void c_main(void)
 {
 	void *exec_addr = NULL;
-	int mmc_inited, alt_kernel;
+	int alt_kernel;
 	extern unsigned int _bss_start, _bss_end;
 	unsigned int *ptr;
+	int mmc_inited[MMCS_COUNT] = { 0 };
 
 	/* Clear the BSS section */
 	for (ptr = &_bss_start; ptr < &_bss_end; ptr++)
@@ -196,6 +202,7 @@ void c_main(void)
 	}
 
 	SERIAL_PUTS("UBIBoot by Paul Cercueil <paul@crapouillou.net>\n");
+
 #ifdef BKLIGHT_ON
 	light(1);
 #endif
@@ -213,33 +220,30 @@ void c_main(void)
 	 * miss and therefore cause no evictions.
 	 */
 
-	int id = MMC_ID;
-	mmc_inited = !mmc_init(MMC_ID);
-	char *rootfs_dev = "root=/dev/mmcblk0p1";
+	for (unsigned i = 0; i < MMCS_COUNT; i++) {
+		int ret;
 
-#ifdef MMC_ID2
-	if (!mmc_inited) {
-		rootfs_dev = "root=/dev/mmcblk1p1";
-		id = MMC_ID2;
-		mmc_inited = !mmc_init(MMC_ID2);
-	}
-#endif
+		mmc_inited[i] = !mmc_init(mmc_ids[i]);
+		if (!mmc_inited[i])
+			continue;
 
-	if (mmc_inited) {
-		if (mmc_load_kernel(
-				id, (void *) (KSEG1 + LD_ADDR), alt_kernel,
-				&exec_addr) == 1)
-			set_alt_param();
-
+		ret = mmc_load_kernel(mmc_ids[i], (void*)(KSEG1 + LD_ADDR),
+				      alt_kernel, &exec_addr);
 		if (exec_addr) {
 #if PASS_ROOTFS_PARAMS
+			char *rootfs_dev = "root=/dev/mmcblk_p1";
+
+			rootfs_dev[16] = '0' + blkids[i];
 			kernel_params[PARAM_ROOTDEV] = rootfs_dev;
 			kernel_params[PARAM_ROOTTYPE] = "rootfstype=vfat";
 #endif
+			if (ret == 1)
+				set_alt_param();
+			break;
 		}
 	}
 
-	if (!mmc_inited || !exec_addr) {
+	if (!exec_addr) {
 		SERIAL_PUTS("Unable to boot from SD."
 #ifdef USE_NAND
 					" Falling back to NAND."

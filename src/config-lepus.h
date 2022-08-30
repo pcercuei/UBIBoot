@@ -27,5 +27,5 @@
 #define LOG_BAUDRATE		57600
 
 /* MMC parameters */
-#define MMC_ID 0
-#define MMC_ID2 2
+#define MMC_IDS { 0, 2 }	/* try internal MSC0 first, MSC2 is the second */
+#define MMC_BLKIDS { 0, 1 }	/* /dev/mmcblkN */
