@@ -20,6 +20,8 @@
 
 //#define USES_HIGHMEM
 
+#define UBIBOOT_DESTINATION	DESTINATION_MMC
+
 /* serial parameters */
 #define LOG_UART		1
 #define LOG_BAUDRATE		57600

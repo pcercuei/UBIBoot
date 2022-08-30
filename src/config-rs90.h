@@ -13,6 +13,8 @@
 #define LOG_UART			0
 #define LOG_BAUDRATE		57600
 
+#define UBIBOOT_DESTINATION	DESTINATION_NAND
+
 /* MMC parameters */
 #define MMC_ID 1
 #define MMC_1BIT 1

@@ -25,7 +25,7 @@ CFLAGS	+= $(CFLAGS_all)
 CPPFLAGS := -DBOARD_$(BOARD) -DJZ_VERSION=$(JZ_VERSION)
 LDFLAGS := -nostdlib -EL
 
-ifneq ($(findstring $(JZ_VERSION),JZ4740 JZ4750),)
+ifneq ($(findstring $(JZ_VERSION),JZ4740 JZ4750 JZ4725 JZ4755),)
 LDFLAGS += -T ldscripts/target-jz4740.ld
 endif
 
@@ -38,7 +38,7 @@ endif
 
 OUTDIR	:= output/$(CONFIG)
 
-OBJS	:= utils.o mmc.o fat.o head.o uimage.o
+OBJS	:= utils.o mmc.o fat.o uimage.o
 
 ifdef GC_FUNCTIONS
 	CFLAGS += -ffunction-sections
@@ -82,7 +82,10 @@ OBJFILES := $(addprefix $(OUTDIR)/,$(OBJS))
 all: $(BINFILES)
 
 $(ELFFILES): $(OUTDIR)/ubiboot-%.elf: \
-		$(OUTDIR)/main_%.o $(OUTDIR)/board-$(BOARD)_%.o $(OBJFILES)
+		$(OUTDIR)/main_%.o \
+		$(OUTDIR)/board-$(BOARD)_%.o \
+		$(OUTDIR)/head_%.o \
+		$(OBJFILES)
 	@mkdir -p $(@D)
 	$(SUM) "  LD      $@"
 	$(CMD)$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
@@ -103,6 +106,13 @@ $(OUTDIR)/%.o: src/%.S
 	$(CMD)$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 CFLAGS_FOR_VARIANT=$(CFLAGS) -DVARIANT="\"$(1)\"" $(CFLAGS_$(1))
+
+$(OUTDIR)/head_%.o: src/head.S
+	@mkdir -p $(@D)
+	$(SUM) "  CC      $@"
+	$(CMD)$(CC) $(CFLAGS) $(CPPFLAGS) \
+		$(call CFLAGS_FOR_VARIANT,$(@:$(OUTDIR)/head_%.o=%)) \
+		-c $< -o $@
 
 $(OUTDIR)/board-$(BOARD)_%.o: src/board-$(BOARD).c
 	@mkdir -p $(@D)

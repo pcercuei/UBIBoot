@@ -36,7 +36,7 @@
 #define EMC_RTCNT	(EMC_BASE + 0x88)  /* Refresh Timer Counter */
 #define EMC_RTCOR	(EMC_BASE + 0x8c)  /* Refresh Time Constant Register */
 #define EMC_DMAR0	(EMC_BASE + 0x90)  /* SDRAM Bank 0 Addr Config Register */
-#if JZ_VERSION == 4750
+#if (JZ_VERSION == 4750) ||  (JZ_VERSION == 4755) || (JZ_VERSION == 4725)
 #define EMC_SDMR0	(EMC_BASE + 0x8000) /* Mode Register of SDRAM bank 0 */
 #else
 #define EMC_SDMR0	(EMC_BASE + 0xa000) /* Mode Register of SDRAM bank 0 */

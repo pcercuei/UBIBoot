@@ -1,6 +1,10 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
+/* UBIBoot destination storages */
+#define DESTINATION_NAND	(1)
+#define DESTINATION_MMC		(2)
+
 /* FAT parameters */
 /* File names must be 8+3 characters, with spaces at unused positions. */
 #define FAT_BOOTFILE_NAME		"VMLINUZ BIN"
