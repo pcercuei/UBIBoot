@@ -79,6 +79,10 @@ static char *kernel_params[] = {
 #endif
 };
 
+static char *rootfs_dev = "root=/dev/mmcblk0p1";
+
+#define MMCS_COUNT (sizeof(MMC_IDS) / sizeof(MMC_IDS[0]))
+
 static void set_alt_param(void)
 {
 	kernel_params[PARAM_KERNEL_BAK] = "kernel_bak";
@@ -99,7 +103,7 @@ typedef void (*kernel_main)(int, char**, char**, int*) __attribute__((noreturn))
 void c_main(void)
 {
 	void *exec_addr = NULL;
-	int mmc_inited, alt_kernel;
+	int ret, alt_kernel, mmc_inited = !MMCS_COUNT;
 	extern unsigned int _bss_start, _bss_end;
 	unsigned int *ptr;
 
@@ -142,27 +146,20 @@ void c_main(void)
 	 * miss and therefore cause no evictions.
 	 */
 
-	int id = MMC_ID;
-	mmc_inited = !mmc_init(MMC_ID);
-	char *rootfs_dev = "root=/dev/mmcblk0p1";
+	for (unsigned i = 0; i < MMCS_COUNT; i++) {
+		mmc_inited = !mmc_init(MMC_IDS[i]);
+		if (!mmc_inited)
+			continue;
 
-#ifdef MMC_ID2
-	if (!mmc_inited) {
-		rootfs_dev = "root=/dev/mmcblk1p1";
-		id = MMC_ID2;
-		mmc_inited = !mmc_init(MMC_ID2);
-	}
-#endif
-
-	if (mmc_inited) {
-		if (mmc_load_kernel(
-				id, (void *) (KSEG1 + LD_ADDR), alt_kernel,
-				&exec_addr) == 1)
-			set_alt_param();
-
+		ret = mmc_load_kernel(MMC_IDS[i], (void*)(KSEG1 + LD_ADDR),
+				      alt_kernel, &exec_addr);
 		if (exec_addr) {
+			rootfs_dev[16] += i;
 			kernel_params[PARAM_ROOTDEV] = rootfs_dev;
 			kernel_params[PARAM_ROOTTYPE] = "rootfstype=vfat";
+			if (ret == 1)
+				set_alt_param();
+			break;
 		}
 	}
 

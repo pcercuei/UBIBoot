@@ -32,4 +32,4 @@
 #define UBI_ROOTFS_VOLUME	"rootfs"
 
 /* MMC parameters */
-#define MMC_ID 0
+#define MMC_IDS ((unsigned char []){ 0 })

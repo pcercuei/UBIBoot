@@ -12,7 +12,7 @@
 #define LOG_BAUDRATE		57600
 
 /* MMC parameters */
-#define MMC_ID 1
+#define MMC_IDS ((unsigned char []){ 1 })
 #define MMC_1BIT 1
 
 /* NAND parameters */
