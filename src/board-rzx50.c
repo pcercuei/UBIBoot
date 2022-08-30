@@ -324,3 +324,40 @@ void nand_init(void)
 			   (EMC_STRV << EMC_SMCR_STRV_BIT);
 }
 #endif
+
+#define	USB_BASE	0xB3040000
+
+#define REG_USB_FADDR	REG8(USB_BASE + 0x00) /* Function Address 8-bit */
+#define REG_USB_POWER	REG8(USB_BASE + 0x01) /* Power Managemetn 8-bit */
+
+void original_firmware_load(void)
+{
+	// internal MSC0 shall be initialized first
+	// original u-boot is at 16kiB offset on SD card.
+	// shall be loaded at 0x00100000 offset in RAM
+	// loading up to 1MiB is sufficient
+
+	const uint32_t load_addr = 0x00100000;
+	const uint32_t entry_offset = 0x200;
+
+	SERIAL_PUTS("Trying original RZX-50 firmware from internal SD.\n");
+
+	if (!mmc_block_read(0, (void *) (KSEG1 + load_addr), 32, 2048-32)) {
+		uint32_t cmd_1st = *(uint32_t*)(KSEG1 + load_addr + entry_offset);
+
+		//  first uboot command is always `bal 1f` => 0x04110002 in hex
+		if (cmd_1st != 0x04110002) {
+			SERIAL_PUTS("Unexpected content, booting might fail.\n");
+		}
+
+		/* reset USB to defaults, otherwise it won't work in original kernel.
+		 * starting UBIBoot over USB case */
+		REG_USB_POWER = 0x20;
+		REG_USB_FADDR = 0x80;
+
+		void (*entry)(void) = (void (*)(void))(KSEG1 + load_addr + entry_offset);
+		entry();
+		while (1);
+	}
+	SERIAL_PUTS("Can't read firmware from SD.\n");
+}

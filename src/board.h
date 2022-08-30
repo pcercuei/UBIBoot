@@ -12,5 +12,9 @@ unsigned int get_memory_size(void);
 void nand_init(void);
 void nand_wait_ready(void);
 
+#ifdef TRY_ORIGINAL_FIRMWARE
+void original_firmware_load(void);
+#endif
+
 #endif
 

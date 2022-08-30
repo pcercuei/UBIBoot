@@ -272,3 +272,28 @@ void nand_init(void)
 			   (EMC_STRV << EMC_SMCR_STRV_BIT);
 }
 #endif
+
+void original_firmware_load(void)
+{
+	// internal MSC0 shall be initialized first
+	// original firmware is at 256kiB offset on SD card.
+	// shall be loaded at 0x00800000 offset in RAM
+
+	const uint32_t load_addr = 0x00800000;
+	// load 1MiB bytes into RAM from 512 blocks (256kiB) offset on SD card.
+	if (!mmc_block_read(0, (void *) (KSEG1 + load_addr), 512, 2048)) {
+
+		SERIAL_PUTS("Trying original RZX-27 firmware from internal SD.\n");
+
+		// TODO check that loaded data not a crap
+		// reset the LCD controller for proper reintialization
+		__gpio_clear_pin(GPIOD, 21);
+		udelay(1000);
+		__gpio_set_pin(GPIOD, 21);
+
+		// jump into firmware
+		void (*entry)(void) = (void (*)(void))(KSEG1 + load_addr);
+		entry();
+		while (1);
+	}
+}

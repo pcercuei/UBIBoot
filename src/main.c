@@ -243,6 +243,15 @@ void c_main(void)
 		}
 	}
 
+#ifdef TRY_ORIGINAL_FIRMWARE
+	if (!exec_addr) {
+		for (unsigned i = 0; i < MMCS_COUNT; i++) {
+			/* MMC0 is internal usually on dual-MMC devices */
+			if (mmc_ids[i] == 0 && mmc_inited[i])
+				original_firmware_load();
+		}
+	}
+#endif
 	if (!exec_addr) {
 		SERIAL_PUTS("Unable to boot from SD."
 #ifdef USE_NAND
