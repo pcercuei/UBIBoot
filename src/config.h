@@ -28,6 +28,8 @@
 #include "config-rs90.h"
 #elif defined(BOARD_lepus)
 #include "config-lepus.h"
+#elif defined(BOARD_rzx27)
+#include "config-rzx27.h"
 #else
 #error "No config for your board"
 #endif
