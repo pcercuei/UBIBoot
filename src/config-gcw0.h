@@ -15,9 +15,12 @@
 
 #define USES_HIGHMEM
 
+#define UBIBOOT_DESTINATION	DESTINATION_MMC
+
 /* serial parameters */
 #define LOG_UART			2
 #define LOG_BAUDRATE		57600
 
 /* MMC parameters */
-#define MMC_ID 0
+#define MMC_IDS { 0 }
+#define MMC_BLKIDS { 0 }

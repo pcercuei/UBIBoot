@@ -24,6 +24,7 @@
 #define ECC_BLOCK	512
 #define ECC_POS		6
 #define PAR_SIZE	9
+#define UBIBOOT_DESTINATION	DESTINATION_NAND
 
 /* UBI parameters */
 #define UBI_MTD_EB_START	5
@@ -34,4 +35,5 @@
 #define UBI_ROOTFS_VOLUME	"rootfs"
 
 /* MMC parameters */
-#define MMC_ID 0
+#define MMC_IDS { 0 }
+#define MMC_BLKIDS { 0 }

@@ -1,6 +1,10 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
+/* UBIBoot destination storages */
+#define DESTINATION_NAND	(1)
+#define DESTINATION_MMC		(2)
+
 /* FAT parameters */
 /* File names must be 8+3 characters, with spaces at unused positions. */
 #define FAT_BOOTFILE_NAME		"VMLINUZ BIN"
@@ -24,6 +28,10 @@
 #include "config-rs90.h"
 #elif defined(BOARD_lepus)
 #include "config-lepus.h"
+#elif defined(BOARD_rzx27)
+#include "config-rzx27.h"
+#elif defined(BOARD_rzx50)
+#include "config-rzx50.h"
 #else
 #error "No config for your board"
 #endif

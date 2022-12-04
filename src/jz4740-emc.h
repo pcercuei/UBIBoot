@@ -36,8 +36,10 @@
 #define EMC_RTCNT	(EMC_BASE + 0x88)  /* Refresh Timer Counter */
 #define EMC_RTCOR	(EMC_BASE + 0x8c)  /* Refresh Time Constant Register */
 #define EMC_DMAR0	(EMC_BASE + 0x90)  /* SDRAM Bank 0 Addr Config Register */
-#if JZ_VERSION == 4750
+#if (JZ_VERSION == 4750) ||  (JZ_VERSION == 4755) || (JZ_VERSION == 4725)
 #define EMC_SDMR0	(EMC_BASE + 0x8000) /* Mode Register of SDRAM bank 0 */
+#define EMC_DMAR1	(EMC_BASE + 0x94)  /* SDRAM Bank 1 Addr Config Register */
+#define EMC_BCR_BRE            (1 << 1)
 #else
 #define EMC_SDMR0	(EMC_BASE + 0xa000) /* Mode Register of SDRAM bank 0 */
 #endif
@@ -73,6 +75,9 @@
 #define REG_EMC_RTCNT	REG16(EMC_RTCNT)
 #define REG_EMC_RTCOR	REG16(EMC_RTCOR)
 #define REG_EMC_DMAR0	REG32(EMC_DMAR0)
+#if (JZ_VERSION == 4750) ||  (JZ_VERSION == 4755) || (JZ_VERSION == 4725)
+#define REG_EMC_DMAR1	REG32(EMC_DMAR1)
+#endif
 
 /* Static Memory Control Register */
 #define EMC_SMCR_STRV_BIT	24
@@ -177,6 +182,10 @@
 #define EMC_DMCR_BA		(1 << EMC_DMCR_BA_BIT)
 #define EMC_DMCR_PDM		(1 << 18)
 #define EMC_DMCR_EPIN		(1 << 17)
+#if (JZ_VERSION == 4750) ||  (JZ_VERSION == 4755) || (JZ_VERSION == 4725)
+#define EMC_DMCR_MBSEL_BIT     16
+#define EMC_DMCR_MBSEL         (1 << EMC_DMCR_MBSEL_BIT)
+#endif
 #define EMC_DMCR_TRAS_BIT	13
 #define EMC_DMCR_TRAS_MASK	(0x07 << EMC_DMCR_TRAS_BIT)
 #define EMC_DMCR_RCD_BIT	11
@@ -238,5 +247,23 @@
   (EMC_SDMR_CAS_3 | EMC_SDMR_BT_SEQ | EMC_SDMR_BL_2)
 #define EMC_SDMR_CAS3_32BIT \
   (EMC_SDMR_CAS_3 | EMC_SDMR_BT_SEQ | EMC_SDMR_BL_4)
+
+  /* Extended Mode Register of Mobile SDRAM*/
+#define EMC_SDMR_SET_BA1		(1 << 14)	/*BA1*/
+#define EMC_SDMR_SET_BA0		(1 << 13)	/*BA0*/
+
+#define EMC_SDMR_DS_BIT		5	/* Driver strength */
+#define EMC_SDMR_DS_MASK	(3 << EMC_SDMR_DS_BIT)
+  #define EMC_SDMR_DS_FULL	(0 << EMC_SDMR_DS_BIT)	/*Full*/
+  #define EMC_SDMR_DS_HALF	(1 << EMC_SDMR_DS_BIT)	/*1/2 Strength*/
+  #define EMC_SDMR_DS_QUTR	(2 << EMC_SDMR_DS_BIT)	/*1/4 Strength*/
+
+#define EMC_SDMR_PRSR_BIT	0	/* Partial Array Self Refresh */
+#define EMC_SDMR_PRSR_MASK	(7 << EMC_SDMR_PRSR_BIT)
+  #define EMC_SDMR_PRSR_ALL	(0 << EMC_SDMR_PRSR_BIT) /*All Banks*/
+  #define EMC_SDMR_PRSR_HALF_TL	(1 << EMC_SDMR_PRSR_BIT) /*Half of Total Bank*/
+  #define EMC_SDMR_PRSR_QUTR_TL	(2 << EMC_SDMR_PRSR_BIT) /*Quarter of Total Bank*/
+  #define EMC_SDMR_PRSR_HALF_B0	(5 << EMC_SDMR_PRSR_BIT) /*Half of Bank0*/
+  #define EMC_SDMR_PRSR_QUTR_B0	(6 << EMC_SDMR_PRSR_BIT) /*Quarter of Bank0*/
 
 #endif /* __JZ4740_EMC_H__ */
