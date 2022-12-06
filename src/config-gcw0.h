@@ -9,8 +9,6 @@
 
 #define MBR_PRELOAD_ADDR	0x80000000
 
-#define RFKILL_STATE		0
-
 #define USES_HIGHMEM
 
 /* serial parameters */

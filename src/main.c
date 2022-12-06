@@ -42,12 +42,6 @@ enum {
 #endif
 	PARAM_CONSOLE_LOCAL,
 	PARAM_LOGO,
-#ifdef JZ_SLCD_PANEL
-	PARAM_SLCD_PANEL,
-#endif
-#ifdef RFKILL_STATE
-	PARAM_RFKILL_STATE,
-#endif
 	/* Arguments for user space (init and later). */
 	PARAM_SEPARATOR,
 	PARAM_HWVARIANT,
@@ -76,12 +70,6 @@ static char *kernel_params[] = {
 #endif
 	[PARAM_CONSOLE_LOCAL] = "console=tty0",
 	[PARAM_LOGO] = "",
-#ifdef JZ_SLCD_PANEL
-	[PARAM_SLCD_PANEL] = "jz4740_slcd_panels.panel=" JZ_SLCD_PANEL,
-#endif
-#ifdef RFKILL_STATE
-	[PARAM_RFKILL_STATE] = "rfkill.default_state=" STRINGIFY_IND(RFKILL_STATE),
-#endif
 	[PARAM_SEPARATOR] = "--",
 	[PARAM_HWVARIANT] = "hwvariant=" VARIANT,
 	[PARAM_KERNEL_BAK] = "",
