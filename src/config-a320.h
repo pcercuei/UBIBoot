@@ -7,8 +7,6 @@
 #define CFG_CPU_SPEED		336000000
 #define CFG_EXTAL			12000000
 
-#define SYSPART_INIT		"/mininit-syspart"
-
 /* serial parameters */
 #define LOG_UART			0
 #define LOG_BAUDRATE		57600
