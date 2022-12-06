@@ -36,11 +36,6 @@ enum {
 	PARAM_ROOTDEV,
 	PARAM_ROOTTYPE,
 	PARAM_ROOTWAIT,
-#ifdef USE_SERIAL
-	PARAM_CONSOLE_SERIAL,
-	PARAM_CONSOLE_SERIAL_EARLYCON,
-#endif
-	PARAM_CONSOLE_LOCAL,
 	PARAM_LOGO,
 	/* Arguments for user space (init and later). */
 	PARAM_SEPARATOR,
@@ -63,12 +58,6 @@ static char *kernel_params[] = {
 	[PARAM_ROOTDEV] = "",
 	[PARAM_ROOTTYPE] = "",
 	[PARAM_ROOTWAIT] = "rootwait",
-#ifdef USE_SERIAL
-	[PARAM_CONSOLE_SERIAL] = "console=ttyS" STRINGIFY_IND(LOG_UART)
-			"," STRINGIFY_IND(LOG_BAUDRATE),
-	[PARAM_CONSOLE_SERIAL_EARLYCON] = "earlycon",
-#endif
-	[PARAM_CONSOLE_LOCAL] = "console=tty0",
 	[PARAM_LOGO] = "",
 	[PARAM_SEPARATOR] = "--",
 	[PARAM_HWVARIANT] = "hwvariant=" VARIANT,
