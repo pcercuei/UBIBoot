@@ -18,9 +18,6 @@ uint8_t cluster_size;		/* sectors per cluster */
 
 static int get_first_partition(unsigned int id, uint32_t *lba)
 {
-#if defined(MBR_PRELOAD_ADDR) && !defined(STAGE1_ONLY)
-	struct mbr *mbr = (struct mbr *) MBR_PRELOAD_ADDR;
-#else
 	uint8_t mbr_data[MMC_SECTOR_SIZE];
 	struct mbr *mbr = (struct mbr *) &mbr_data;
 
@@ -28,7 +25,6 @@ static int get_first_partition(unsigned int id, uint32_t *lba)
 		SERIAL_ERR(ERR_FAT_IO_BOOT);
 		return -1;
 	}
-#endif
 
 	if (mbr->signature != 0xAA55) {
 		SERIAL_ERR(ERR_FAT_NO_MBR);
