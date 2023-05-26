@@ -5,9 +5,9 @@
 #endif
 
 #define SDRAM_CAS_LATENCY    3 /* 2 and 3 are supported */
-#define SDRAM_TRAS          50 /* RAS# Active Time (ns) */
-#define SDRAM_TRCD          25 /* RAS# to CAS# Delay (ns) */
-#define SDRAM_TRP           25 /* RAS# Precharge Time (ns) */
+#define SDRAM_TRAS          45 /* RAS# Active Time (ns) */
+#define SDRAM_TRCD          20 /* RAS# to CAS# Delay (ns) */
+#define SDRAM_TRP           20 /* RAS# Precharge Time (ns) */
 #define SDRAM_TWR            2 /* Write Recovery Time (cycles) also called as tDPL, tRWL, tRDL  */
 #define SDRAM_REFRESH 64000000 /* Full chip refresh period (ns) */
 #define SDRAM_BANKS          4 /* Number of bank select signals per one chip select: 2 or 4 */

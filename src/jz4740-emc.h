@@ -1,6 +1,8 @@
 #ifndef __JZ4740_EMC_H__
 #define __JZ4740_EMC_H__
 
+#include <stdint.h>
+
 #include "jz.h"
 
 #define	EMC_BASE	0xB3010000
@@ -238,5 +240,29 @@
   (EMC_SDMR_CAS_3 | EMC_SDMR_BT_SEQ | EMC_SDMR_BL_2)
 #define EMC_SDMR_CAS3_32BIT \
   (EMC_SDMR_CAS_3 | EMC_SDMR_BT_SEQ | EMC_SDMR_BL_4)
+
+typedef struct {
+  uint32_t ckoFrequency;  /* DRAM clock frequency (Hz) */
+  uint32_t refreshPeriod; /* Refresh period (ns): typically 64000000 (64ms) */
+
+  uint8_t CL;             /* CAS latency: 2 or 3 */
+  uint8_t tRAS;           /* RAS# Active Time (cycles): 4-11 */
+  uint8_t tRCD;           /* RAS# to CAS# Delay (cycles): 1-4 */
+  uint8_t tRP;            /* RAS# Precharge Time (cycles): 1-8 */
+  uint8_t tWR;            /* Write Recovery Time (cycles): 1-4 */
+  uint8_t nRows;          /* Row Address Width: 11-13 */
+  uint8_t nCols;          /* Column Address Width: 8-12 */
+  uint8_t nBanks;         /* Number of bank select signals per one chip selet: 2 or 4 */
+  uint8_t busWidth;       /* 16 or 32 */
+} jz4740_sdram_config_t;
+
+void jz4740_sdram_init(const jz4740_sdram_config_t *cfg);
+
+static inline unsigned int
+jz4740_get_sdram_capacity(const jz4740_sdram_config_t *cfg)
+{
+	return (cfg->busWidth / 8) * (cfg->nBanks) *
+		(1 << cfg->nCols) * (1 << cfg->nRows);
+}
 
 #endif /* __JZ4740_EMC_H__ */

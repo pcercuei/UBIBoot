@@ -40,6 +40,10 @@ OUTDIR	:= output/$(CONFIG)
 
 OBJS	:= utils.o mmc.o fat.o head.o uimage.o
 
+ifneq ($(findstring $(JZ_VERSION),JZ4740 JZ4750),)
+	OBJS += jz4740-emc.o
+endif
+
 ifdef GC_FUNCTIONS
 	CFLAGS += -ffunction-sections
 	LDFLAGS += -Wl,--gc-sections
