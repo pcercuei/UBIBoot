@@ -13,6 +13,12 @@
 #include "DDR2_H2A35121656BB6C.h"
 #elif defined(SDRAM_H2A301G1656B)
 #include "DDR2_H2A301G1656B.h"
+#elif defined(SDRAM_WB9812G6IH_6)
+#include "SDR_WB9812G6IH-6.h"
+#elif defined(SDRAM_K4S561632H_UC75)
+#include "SDR_K4S561632H_UC75.h"
+#elif defined(SDRAM_HY57V281620FTP_6)
+#include "SDR_HY57V281620FTP_6.h"
 
 #else
 #error SDRAM type not specified or unknown; check config-<device>.mk

@@ -54,7 +54,7 @@ static uint32_t get_kernel_vol_id(uint32_t eb, uint32_t data_page,
 {
 	unsigned long page = eb * PAGE_PER_BLOCK + data_page;
 	struct ubi_vol_tbl_record *records;
-	unsigned int nb = div_round_up(nb_volumes * sizeof(*records),
+	unsigned int nb = DIV_ROUND_UP(nb_volumes * sizeof(*records),
 				       PAGE_SIZE);
 	unsigned int i;
 

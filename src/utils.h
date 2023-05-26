@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+#define DIV_ROUND_UP(nb, div) ((nb + div - 1) / div)
 
 int strncmp(const char *s1, const char *s2, size_t n);
 
@@ -28,10 +29,5 @@ void write_hex_digits(unsigned int value, char *last_digit);
 void udelay(unsigned int us);
 
 bool ram_works(void);
-
-inline unsigned int div_round_up(unsigned int nb, unsigned int div)
-{
-	return (nb / div) + !!(nb % div);
-}
 
 #endif /* __UTILS_H__ */

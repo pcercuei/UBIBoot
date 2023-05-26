@@ -10,6 +10,7 @@
 #include <stdint.h>
 
 #include "config.h"
+#include "sdram.h"
 
 #include "board.h"
 #include "serial.h"
@@ -67,117 +68,30 @@ static void pll_init(void)
 	__cpm_enable_pll_change();
 }
 
-/*
- * Failsafe SDRAM configuration values
- *
- * If you want to live on the edge, the Dingoo Hynix HY57V281620FTP-6
- * chips should work with these accoring to the datasheet:
- *
- *   TRAS 42
- *   RCD  18
- *   TPC  18
- *
- */
-#define SDRAM_CASL		3		/* CAS latency: 2 or 3 */
-#define SDRAM_TRAS		42		/* RAS# Active Time (ns) */
-#define SDRAM_RCD		18		/* RAS# to CAS# Delay (ns) */
-#define SDRAM_TPC		18		/* RAS# Precharge Time (ns) */
-#define SDRAM_TRWL		7		/* Write Latency Time (ns) */
-#define SDRAM_TREF		15625	/* Refresh period (ns): 4096 refresh cycles/64ms */
-#define SDRAM_BW16		0
-#define SDRAM_BANK40	0
-#define SDRAM_BANK4		1
-#define SDRAM_ROW0		11
-#define SDRAM_ROW		12
-#define SDRAM_COL0		8
-#define SDRAM_COL		9
+#define SDRAM_SPEED (CFG_CPU_SPEED * CDIV / MDIV)
+#define SDRAM_CLK_PERIOD_PS (1000000000000ULL / SDRAM_SPEED)
+static const jz4740_sdram_config_t sdram_cfg = {
+	.ckoFrequency = SDRAM_SPEED,
+	.refreshPeriod = SDRAM_REFRESH,
+	.CL    = SDRAM_CAS_LATENCY,
+	.tRAS  = DIV_ROUND_UP(SDRAM_TRAS * 1000, SDRAM_CLK_PERIOD_PS),
+	.tRCD  = DIV_ROUND_UP(SDRAM_TRCD * 1000, SDRAM_CLK_PERIOD_PS),
+	.tRP   = DIV_ROUND_UP(SDRAM_TRP * 1000, SDRAM_CLK_PERIOD_PS),
+	.tWR   = SDRAM_TWR,
+	.nRows = SDRAM_ROW,
+	.nCols = SDRAM_COL,
+	.nBanks = SDRAM_BANKS,
+	.busWidth = SDRAM_BUS_WIDTH,
+};
 
-static void sdram_init(void)
+void sdram_init(void)
 {
-	unsigned int dmcr0, dmcr, sdmode, tmp;
+	jz4740_sdram_init(&sdram_cfg);
+}
 
-	static const unsigned int cas_latency_sdmr[2] = {
-		EMC_SDMR_CAS_2,
-		EMC_SDMR_CAS_3,
-	};
-
-	static const unsigned int cas_latency_dmcr[2] = {
-		1 << EMC_DMCR_TCL_BIT,	/* CAS latency is 2 */
-		2 << EMC_DMCR_TCL_BIT	/* CAS latency is 3 */
-	};
-
-	REG_EMC_BCR = 0;	/* Disable bus release */
-	REG_EMC_RTCSR = 0;	/* Disable clock for counting */
-
-	/* Fault DMCR value for mode register setting*/
-	dmcr0 = ((SDRAM_ROW0-11)<<EMC_DMCR_RA_BIT) |
-		((SDRAM_COL0-8)<<EMC_DMCR_CA_BIT) |
-		(SDRAM_BANK40<<EMC_DMCR_BA_BIT) |
-		(SDRAM_BW16<<EMC_DMCR_BW_BIT) |
-		EMC_DMCR_EPIN |
-		cas_latency_dmcr[((SDRAM_CASL == 3) ? 1 : 0)];
-
-	/* Basic DMCR value */
-	dmcr = ((SDRAM_ROW-11)<<EMC_DMCR_RA_BIT) |
-		((SDRAM_COL-8)<<EMC_DMCR_CA_BIT) |
-		(SDRAM_BANK4<<EMC_DMCR_BA_BIT) |
-		(SDRAM_BW16<<EMC_DMCR_BW_BIT) |
-		EMC_DMCR_EPIN |
-		cas_latency_dmcr[((SDRAM_CASL == 3) ? 1 : 0)];
-
-	/* SDRAM timimg */
-#define NS (1000000000 / (CFG_CPU_SPEED * CDIV / MDIV))
-	tmp = SDRAM_TRAS/NS;
-	if (tmp < 4) tmp = 4;
-	if (tmp > 11) tmp = 11;
-	dmcr |= ((tmp-4) << EMC_DMCR_TRAS_BIT);
-	tmp = SDRAM_RCD/NS;
-	if (tmp > 3) tmp = 3;
-	dmcr |= (tmp << EMC_DMCR_RCD_BIT);
-	tmp = SDRAM_TPC/NS;
-	if (tmp > 7) tmp = 7;
-	dmcr |= (tmp << EMC_DMCR_TPC_BIT);
-	tmp = SDRAM_TRWL/NS;
-	if (tmp > 3) tmp = 3;
-	dmcr |= (tmp << EMC_DMCR_TRWL_BIT);
-	tmp = (SDRAM_TRAS + SDRAM_TPC)/NS;
-	if (tmp > 14) tmp = 14;
-	dmcr |= (((tmp + 1) >> 1) << EMC_DMCR_TRC_BIT);
-
-	/* SDRAM mode value */
-	sdmode = EMC_SDMR_BT_SEQ | 
-		 EMC_SDMR_OM_NORMAL |
-		 EMC_SDMR_BL_4 | 
-		 cas_latency_sdmr[((SDRAM_CASL == 3) ? 1 : 0)];
-
-	/* Stage 1. Precharge all banks by writing SDMR with DMCR.MRSET=0 */
-	REG_EMC_DMCR = dmcr;
-	REG8(EMC_SDMR0|sdmode) = 0;
-
-	/* Wait for precharge, > 200us */
-	udelay(1000);
-
-	/* Stage 2. Enable auto-refresh */
-	REG_EMC_DMCR = dmcr | EMC_DMCR_RFSH;
-
-	tmp = SDRAM_TREF/NS;
-	tmp = tmp/64 + 1;
-	if (tmp > 0xff) tmp = 0xff;
-	REG_EMC_RTCOR = tmp;
-	REG_EMC_RTCNT = 0;
-	REG_EMC_RTCSR = EMC_RTCSR_CKS_64;	/* Divisor is 64, CKO/64 */
-
-	/* Wait for number of auto-refresh cycles */
-	udelay(1000);
-
-	/* Stage 3. Mode Register Set */
-	REG_EMC_DMCR = dmcr0 | EMC_DMCR_RFSH | EMC_DMCR_MRSET;
-	REG8(EMC_SDMR0|sdmode) = 0;
-
-	/* Set back to basic DMCR value */
-	REG_EMC_DMCR = dmcr | EMC_DMCR_RFSH | EMC_DMCR_MRSET;
-
-	/* everything is ok now */
+unsigned int get_memory_size(void)
+{
+	return jz4740_get_sdram_capacity(&sdram_cfg);
 }
 
 int alt_key_pressed(void)
@@ -204,12 +118,6 @@ void light(int set)
 		__gpio_clear_pin(GPIOD, 31);
 }
 #endif
-
-unsigned int get_memory_size(void)
-{
-	return 1 << (SDRAM_ROW + SDRAM_COL + (2 - SDRAM_BW16) +
-				(2 - SDRAM_BANK4) + 1);
-}
 
 void board_init(void)
 {
