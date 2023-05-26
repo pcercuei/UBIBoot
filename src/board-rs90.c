@@ -10,6 +10,7 @@
 #include <stdint.h>
 
 #include "config.h"
+#include "sdram.h"
 
 #include "board.h"
 #include "serial.h"
@@ -68,38 +69,9 @@ static void pll_init(void)
 	while (!__cpm_pll_is_on());
 }
 
-/*
- * Failsafe SDRAM configuration values
- *
- * If you want to live on the edge, the Dingoo Hynix HY57V281620FTP-6
- * chips should work with these accoring to the datasheet:
- *
- *   TRAS 42
- *   RCD  18
- *   TPC  18
- *
- */
-
-#define SDRAM_CASL		3	/* CAS latency: 2 or 3 */
-#ifdef RS90_V30
-#	define SDRAM_TRAS	50	/* RAS# Active Time (ns) */
-#	define SDRAM_RCD	25	/* RAS# to CAS# Delay (ns) */
-#	define SDRAM_TPC	25	/* RAS# Precharge Time (ns) */
-#	define SDRAM_TREF	7812	/* Refresh period (ns) */
-#else /* RS90_V21 */
-#	define SDRAM_TRAS	42	/* RAS# Active Time (ns) */
-#	define SDRAM_RCD	18	/* RAS# to CAS# Delay (ns) */
-#	define SDRAM_TPC	18	/* RAS# Precharge Time (ns) */
-#	define SDRAM_TREF	15625	/* Refresh period (ns) */
-#endif
-#define SDRAM_TRWL		7	/* Write Latency Time (ns) */
-#define SDRAM_BW16		1
 #define SDRAM_BANK40		0
-#define SDRAM_BANK4		1
 #define SDRAM_ROW0		11
-#define SDRAM_ROW		13
 #define SDRAM_COL0		9
-#define SDRAM_COL		9
 
 static void sdram_init(void)
 {
@@ -122,17 +94,17 @@ static void sdram_init(void)
 	dmcr0 = ((SDRAM_ROW0-11)<<EMC_DMCR_RA_BIT) |
 		((SDRAM_COL0-8)<<EMC_DMCR_CA_BIT) |
 		(SDRAM_BANK40<<EMC_DMCR_BA_BIT) |
-		(SDRAM_BW16<<EMC_DMCR_BW_BIT) |
+		((SDRAM_BUS_WIDTH == 16 ? 1 : 0)<<EMC_DMCR_BW_BIT) |
 		EMC_DMCR_EPIN |
-		cas_latency_dmcr[((SDRAM_CASL == 3) ? 1 : 0)];
+		cas_latency_dmcr[((SDRAM_CAS_LATENCY == 3) ? 1 : 0)];
 
 	/* Basic DMCR value */
 	dmcr = ((SDRAM_ROW-11)<<EMC_DMCR_RA_BIT) |
 		((SDRAM_COL-8)<<EMC_DMCR_CA_BIT) |
-		(SDRAM_BANK4<<EMC_DMCR_BA_BIT) |
-		(SDRAM_BW16<<EMC_DMCR_BW_BIT) |
+		((SDRAM_BANKS == 4 ? 1 : 0)<<EMC_DMCR_BA_BIT) |
+		((SDRAM_BUS_WIDTH == 16 ? 1 : 0)<<EMC_DMCR_BW_BIT) |
 		EMC_DMCR_EPIN |
-		cas_latency_dmcr[((SDRAM_CASL == 3) ? 1 : 0)];
+		cas_latency_dmcr[((SDRAM_CAS_LATENCY == 3) ? 1 : 0)];
 
 	/* SDRAM timimg */
 #define NS (1000000000 / (CFG_CPU_SPEED * CDIV / MDIV))
@@ -140,16 +112,16 @@ static void sdram_init(void)
 	if (tmp < 4) tmp = 4;
 	if (tmp > 11) tmp = 11;
 	dmcr |= ((tmp-4) << EMC_DMCR_TRAS_BIT);
-	tmp = SDRAM_RCD/NS;
+	tmp = SDRAM_TRCD/NS;
 	if (tmp > 3) tmp = 3;
 	dmcr |= (tmp << EMC_DMCR_RCD_BIT);
-	tmp = SDRAM_TPC/NS;
+	tmp = SDRAM_TRP/NS;
 	if (tmp > 7) tmp = 7;
 	dmcr |= (tmp << EMC_DMCR_TPC_BIT);
-	tmp = SDRAM_TRWL/NS;
+	tmp = SDRAM_TWR - 1;
 	if (tmp > 3) tmp = 3;
 	dmcr |= (tmp << EMC_DMCR_TRWL_BIT);
-	tmp = (SDRAM_TRAS + SDRAM_TPC)/NS;
+	tmp = (SDRAM_TRAS + SDRAM_TRP)/NS;
 	if (tmp > 14) tmp = 14;
 	dmcr |= (((tmp + 1) >> 1) << EMC_DMCR_TRC_BIT);
 
@@ -157,7 +129,7 @@ static void sdram_init(void)
 	sdmode = EMC_SDMR_BT_SEQ | 
 		 EMC_SDMR_OM_NORMAL |
 		 EMC_SDMR_BL_4 | 
-		 cas_latency_sdmr[((SDRAM_CASL == 3) ? 1 : 0)];
+		 cas_latency_sdmr[((SDRAM_CAS_LATENCY == 3) ? 1 : 0)];
 
 	/* Stage 1. Precharge all banks by writing SDMR with DMCR.MRSET=0 */
 	REG_EMC_DMCR = dmcr;
@@ -169,7 +141,7 @@ static void sdram_init(void)
 	/* Stage 2. Enable auto-refresh */
 	REG_EMC_DMCR = dmcr | EMC_DMCR_RFSH;
 
-	tmp = SDRAM_TREF/NS;
+	tmp = SDRAM_REFRESH / (1 << SDRAM_ROW) / NS;
 	tmp = tmp/64 + 1;
 	if (tmp > 0xff) tmp = 0xff;
 	REG_EMC_RTCOR = tmp;
@@ -216,8 +188,8 @@ void light(int set)
 
 unsigned int get_memory_size(void)
 {
-	return 1 << (SDRAM_ROW + SDRAM_COL + (2 - SDRAM_BW16) +
-				(2 - SDRAM_BANK4) + 1);
+	return (SDRAM_BUS_WIDTH / 8) * (SDRAM_BANKS) *
+		(1 << (SDRAM_ROW + SDRAM_COL));
 }
 
 void board_init(void)
